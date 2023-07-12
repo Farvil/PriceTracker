@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">PriceTracker</string>
+    <string name="choose_store">Selectionner un magasin</string>
+</resources>
