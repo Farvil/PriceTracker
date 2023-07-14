@@ -16,7 +16,7 @@ import fr.villot.pricetracker.model.Product;
 public class ProductViewHolder extends RecyclerView.ViewHolder {
 
     private TextView productBarcodeTextView;
-    public CardView productCardView;
+    private CardView productCardView;
     private TextView productNameTextView;
     private TextView productBrandTextView;
     private TextView productQuantityTextView;
