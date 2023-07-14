@@ -2,6 +2,7 @@ package fr.villot.pricetracker.fragments;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +16,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
@@ -24,6 +27,9 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import fr.villot.pricetracker.MyApplication;
+import fr.villot.pricetracker.activities.PriceRecordActivity;
+import fr.villot.pricetracker.adapters.RecordSheetAdapter;
+import fr.villot.pricetracker.model.RecordSheet;
 import fr.villot.pricetracker.utils.DatabaseHelper;
 import fr.villot.pricetracker.R;
 import fr.villot.pricetracker.adapters.StoreAdapter;
@@ -32,13 +38,13 @@ import fr.villot.pricetracker.model.Store;
 public class StoresFragment extends Fragment {
 
     private DatabaseHelper databaseHelper;
-    private ListView storeListView;
-    private FloatingActionButton fabAdd;
-
+    private RecyclerView storeRecyclerView;
     private StoreAdapter storeAdapter;
     private List<Store> storeList;
+    private FloatingActionButton fabAdd;
 
-    private static final Logger logger = Logger.getLogger(StoresFragment.class.getName());
+
+//    private static final Logger logger = Logger.getLogger(StoresFragment.class.getName());
 
     public static StoresFragment newInstance() {
         return new StoresFragment();
@@ -49,10 +55,44 @@ public class StoresFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_stores, container, false);
 
-        storeListView = view.findViewById(R.id.storeListView);
+        storeRecyclerView = view.findViewById(R.id.storeRecyclerView);
 
         // Initialisation du DatabaseHelper
         databaseHelper = MyApplication.getDatabaseHelper();
+
+        storeRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        // Récupération des magasins dans la base de données
+        storeList = getStores();
+
+        // Adapter entre ListView et Produit.
+        storeAdapter = new StoreAdapter(getActivity(), storeList);
+        storeRecyclerView.setAdapter(storeAdapter);
+
+        storeAdapter.setOnItemClickListener(new StoreAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(Object item) {
+                if (item instanceof Store) {
+                    Store store = (Store) item;
+                    // TODO : Afficher la liste des relevés de prix pour ce magasin.
+                    Snackbar.make(storeRecyclerView, "TODO : Afficher la liste des relevés de prix pour ce magasin : "
+                                    + store.getName(),
+                            Snackbar.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onItemLongClick(Object item) {
+                if (item instanceof Store) {
+                    Store store = (Store) item;
+                    // TODO : Gérer le long click
+                    Snackbar.make(storeRecyclerView, "TODO : Gérer le click long pour ce magasin : "
+                                    + store.getName(),
+                            Snackbar.LENGTH_LONG).show();
+                }
+            }
+
+        });
 
         fabAdd = view.findViewById(R.id.fabAdd);
         fabAdd.setOnClickListener(new View.OnClickListener() {
@@ -63,25 +103,25 @@ public class StoresFragment extends Fragment {
         });
 
 
-        // Listener pour le click sur un item
-        storeListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // TODO : Afficher la liste des relevés de prix pour ce magasin.
-                Snackbar.make(view, "TODO : Afficher la liste des relevés de prix pour ce magasin.", Snackbar.LENGTH_SHORT).show();
-            }
-        });
-
-
-        // Initialisation de la liste et de son adapter
-        storeList = new ArrayList<>();
-        storeAdapter = new StoreAdapter(getActivity(), storeList);
-        storeListView.setAdapter(storeAdapter);
-
-        // Mise à jour de la liste des magasins depuis la base de données
-        updateStoreListViewFromDatabase(false);
-
         return view;
+    }
+
+    private List<Store> getStores() {
+        return databaseHelper.getAllStores();
+    }
+
+    private void updateStoreListViewFromDatabase(boolean lastItemDisplayed) {
+        // Obtenir la liste des produits à partir de la base de données
+        storeList = databaseHelper.getAllStores();
+
+        // Ajouter les produits à l'adaptateur
+        storeAdapter.setItemList(storeList);
+
+        if (lastItemDisplayed) {
+            // Positionnement de la ListView en dernier item pour voir le produit ajouté.
+            int dernierIndice = storeAdapter.getItemCount() - 1;
+            storeRecyclerView.smoothScrollToPosition(dernierIndice);
+        }
     }
 
     private void showAddStoreDialog(Context context) {
@@ -136,21 +176,5 @@ public class StoresFragment extends Fragment {
         });
 
         builder.show();
-    }
-
-    private void updateStoreListViewFromDatabase(boolean lastItemDisplayed) {
-
-        // Obtenir la liste des magasins à partir de la base de données
-        storeList = databaseHelper.getAllStores();
-
-        // Ajouter les produits à l'adaptateur
-        storeAdapter.clear();
-        storeAdapter.addAll(storeList);
-
-        if (lastItemDisplayed) {
-            // Positionnement de la ListView en dernier item pour voir le magasin ajouté.
-            int dernierIndice = storeAdapter.getCount() - 1;
-            storeListView.setSelection(dernierIndice);
-        }
     }
 }

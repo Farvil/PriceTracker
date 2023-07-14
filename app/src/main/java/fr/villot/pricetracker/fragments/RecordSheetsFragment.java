@@ -7,7 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.ListView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -19,23 +18,20 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import fr.villot.pricetracker.MyApplication;
 import fr.villot.pricetracker.R;
 import fr.villot.pricetracker.activities.PriceRecordActivity;
-import fr.villot.pricetracker.adapters.ProductAdapter;
 import fr.villot.pricetracker.adapters.RecordSheetAdapter;
-import fr.villot.pricetracker.model.Product;
 import fr.villot.pricetracker.model.RecordSheet;
 import fr.villot.pricetracker.utils.DatabaseHelper;
 
 public class RecordSheetsFragment extends Fragment {
 
     private DatabaseHelper databaseHelper;
-    private RecyclerView recordSheetListView;
+    private RecyclerView recordSheetRecyclerView;
     private RecordSheetAdapter recordSheetAdapter;
     private List<RecordSheet> recordSheetList;
     private FloatingActionButton fabAdd;
@@ -50,36 +46,45 @@ public class RecordSheetsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_record_sheet, container, false);
 
         // Recuperation des vues
-        recordSheetListView = view.findViewById(R.id.recordSheetRecyclerView);
+        recordSheetRecyclerView = view.findViewById(R.id.recordSheetRecyclerView);
         fabAdd = view.findViewById(R.id.fabAdd);
 
         // Initialisation du DatabaseHelper
         databaseHelper = MyApplication.getDatabaseHelper();
 
-        recordSheetListView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recordSheetRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         // Récupération des feuilles de relevés de prix dans la base de données.
         recordSheetList = getRecordSheets();
 
-        // Adapter entre ListView et Produit.
+        // Adapter entre RecyclerView et Produit.
         recordSheetAdapter = new RecordSheetAdapter(getActivity(), recordSheetList);
-        recordSheetListView.setAdapter(recordSheetAdapter);
+        recordSheetRecyclerView.setAdapter(recordSheetAdapter);
 
         recordSheetAdapter.setOnItemClickListener(new RecordSheetAdapter.OnItemClickListener() {
             @Override
-            public void onItemClick(RecordSheet recordSheet) {
-                Intent intent = new Intent(getActivity(), PriceRecordActivity.class);
-                intent.putExtra("record_sheet_name", recordSheet.getName());
-                intent.putExtra("record_sheet_id", recordSheet.getId());
-                startActivity(intent);
+            public void onItemClick(Object item) {
+                if (item instanceof RecordSheet) {
+                    RecordSheet recordSheet = (RecordSheet) item;
+                    Intent intent = new Intent(getActivity(), PriceRecordActivity.class);
+                    intent.putExtra("record_sheet_name", recordSheet.getName());
+                    intent.putExtra("record_sheet_id", recordSheet.getId());
+                    startActivity(intent);
+
+                }
             }
 
             @Override
-            public void onItemLongClick(RecordSheet recordSheet) {
-                Snackbar.make(recordSheetListView, "TODO : Afficher les options du relevé de prix : "
-                                + recordSheet.getName(),
-                        Snackbar.LENGTH_LONG).show();
+            public void onItemLongClick(Object item) {
+                if (item instanceof RecordSheet) {
+                    RecordSheet recordSheet = (RecordSheet) item;
+                    Snackbar.make(recordSheetRecyclerView, "TODO : Afficher les options du relevé de prix : "
+                                    + recordSheet.getName(),
+                            Snackbar.LENGTH_LONG).show();
+
+                }
             }
+
         });
 
         // Action du bouton flottant
@@ -103,12 +108,12 @@ public class RecordSheetsFragment extends Fragment {
         recordSheetList = databaseHelper.getAllRecordSheets();
 
         // Ajouter les produits à l'adaptateur
-        recordSheetAdapter.setRecordSheetList(recordSheetList);
+        recordSheetAdapter.setItemList(recordSheetList);
 
         if (lastItemDisplayed) {
             // Positionnement de la ListView en dernier item pour voir le produit ajouté.
             int dernierIndice = recordSheetAdapter.getItemCount() - 1;
-            recordSheetListView.smoothScrollToPosition(dernierIndice);
+            recordSheetRecyclerView.smoothScrollToPosition(dernierIndice);
         }
     }
 

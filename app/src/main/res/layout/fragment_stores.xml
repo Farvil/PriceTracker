@@ -7,10 +7,12 @@
     android:padding="16dp"
     android:orientation="vertical">
 
-    <ListView
-        android:id="@+id/storeListView"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/storeRecyclerView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteX="1dp" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAdd"

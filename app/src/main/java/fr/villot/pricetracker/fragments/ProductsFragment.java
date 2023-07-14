@@ -38,7 +38,7 @@ import fr.villot.pricetracker.model.Product;
 public class ProductsFragment extends Fragment {
 
     protected DatabaseHelper databaseHelper;
-    private RecyclerView productListView;
+    private RecyclerView productRecyclerView;
     private ProductAdapter productAdapter;
     private List<Product> productList;
 
@@ -67,37 +67,44 @@ public class ProductsFragment extends Fragment {
         // TODO: Gerer une progressbar
 
         // Recupération des vues
-        productListView = view.findViewById(R.id.productRecyclerView);
+        productRecyclerView = view.findViewById(R.id.productRecyclerView);
         fabAdd = view.findViewById(R.id.fabAdd);
 
         // Initialisation du DatabaseHelper
         databaseHelper = MyApplication.getDatabaseHelper();
 
-        productListView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        productRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         // Récupération des produits dans la base de données.
         productList = getProducts();
 
-        // Adapter entre ListView et Produit.
+        // Adapter entre RecyclerView et Produit.
         productAdapter = new ProductAdapter(getActivity(), productList);
-        productListView.setAdapter(productAdapter);
+        productRecyclerView.setAdapter(productAdapter);
 
         // Gestion du click sur un produit
         productAdapter.setOnItemClickListener(new ProductAdapter.OnItemClickListener() {
             @Override
-            public void onItemClick(Product product) {
-                Snackbar.make(productListView, "TODO : Afficher les listes des relevés de prix associées au produit : "
+            public void onItemClick(Object item) {
+                if (item instanceof Product) {
+                    Product product = (Product) item;
+                Snackbar.make(productRecyclerView, "TODO : Afficher les listes des relevés de prix associées au produit : "
                         + product.getBarcode(),
                         Snackbar.LENGTH_LONG).show();
+                }
             }
 
             @Override
-            public void onItemLongClick(Product product) {
-                Snackbar.make(productListView, "TODO : Gestion du long press pour : "
+            public void onItemLongClick(Object item) {
+                if (item instanceof Product) {
+                    Product product = (Product) item;
+                Snackbar.make(productRecyclerView, "TODO : Gestion du long press pour : "
                                 + product.getBarcode(),
                         Snackbar.LENGTH_LONG).show();
+                }
             }
         });
+
 
         // Action du bouton flottant
         fabAdd.setOnClickListener(new View.OnClickListener() {
@@ -126,12 +133,12 @@ public class ProductsFragment extends Fragment {
         productList = databaseHelper.getAllProducts();
 
         // Mise à jour de la liste
-        productAdapter.setProductList(productList);
+        productAdapter.setItemList(productList);
 
         if (lastItemDisplayed) {
             // Positionnement de la ListView en dernier item pour voir le produit ajouté.
             int dernierIndice = productAdapter.getItemCount() - 1;
-            productListView.smoothScrollToPosition(dernierIndice);
+            productRecyclerView.smoothScrollToPosition(dernierIndice);
         }
     }
 
