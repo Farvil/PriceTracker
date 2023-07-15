@@ -20,6 +20,8 @@ import fr.villot.pricetracker.R;
 import fr.villot.pricetracker.fragments.ProductsFragment;
 import fr.villot.pricetracker.fragments.RecordSheetProductsFragment;
 import fr.villot.pricetracker.model.Product;
+import fr.villot.pricetracker.model.RecordSheet;
+import fr.villot.pricetracker.model.Store;
 import fr.villot.pricetracker.utils.DatabaseHelper;
 
 
@@ -37,13 +39,21 @@ public class PriceRecordActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_price_record);
 
+        // Récuperation des vues
         storeNameTextView = findViewById(R.id.storeNameTextView);
         getStoreLocationTextView = findViewById(R.id.storeLocationTextView);
         Toolbar toolbar = findViewById(R.id.toolbar);
 
+        // Initialisation du DatabaseHelper
+        databaseHelper = MyApplication.getDatabaseHelper();
+
         // Récupération du nom de la fiche de relevé de prix en paramètre et mise à jour du titre.
-        String recordSheetName = getIntent().getStringExtra("record_sheet_name");
-        toolbar.setTitle(recordSheetName);
+        Long recordSheetId = getIntent().getLongExtra("record_sheet_id", -1);
+        RecordSheet recordSheet = databaseHelper.getRecordSheetById(recordSheetId);
+
+        // Titre de la toolbar = nom de la RecordSheet
+//        String recordSheetName = getIntent().getStringExtra("record_sheet_name");
+        toolbar.setTitle(recordSheet.getName());
         setSupportActionBar(toolbar);
 
         // Bouton de retour à l'activité principale
@@ -53,16 +63,15 @@ public class PriceRecordActivity extends AppCompatActivity {
         }
 
         // TODO: Récupérer le bon magasin.
-        storeNameTextView.setText("Mon Magasin");
-        getStoreLocationTextView.setText("Cherbourg");
-
-        // Initialisation du DatabaseHelper
-        databaseHelper = MyApplication.getDatabaseHelper();
+        Store store = databaseHelper.getStoreById(recordSheet.getStoreId());
+        if (store != null) {
+            storeNameTextView.setText(store.getName());
+            getStoreLocationTextView.setText(store.getLocation());
+        }
 
         // Récupération des produits dans la base de données.
         recordSheetId = getIntent().getLongExtra("record_sheet_id",-1);
         productList = databaseHelper.getProductsOnRecordSheet(recordSheetId);
-
 
         // Fragment qui gere la liste des produits.
         RecordSheetProductsFragment recordSheetProductsFragment = RecordSheetProductsFragment.newInstance(recordSheetId);

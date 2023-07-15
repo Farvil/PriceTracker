@@ -317,4 +317,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return recordSheet;
     }
 
+    @SuppressLint("Range")
+    public Store getStoreById(int storeId) {
+        Store store = null;
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String query = "SELECT * FROM " + TABLE_STORES + " WHERE " + KEY_STORE_ID + " = " + storeId;
+
+        Cursor cursor = db.rawQuery(query, null);
+
+        if (cursor.moveToFirst()) {
+            store = new Store();
+            store.setId(cursor.getInt(cursor.getColumnIndex(KEY_STORE_ID)));
+            store.setName(cursor.getString(cursor.getColumnIndex(KEY_STORE_NAME)));
+            store.setLocation(cursor.getString(cursor.getColumnIndex(KEY_STORE_LOCATION)));
+        }
+
+        cursor.close();
+        db.close();
+
+        return store;
+    }
 }
