@@ -4,6 +4,7 @@ import static android.app.ProgressDialog.show;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,12 +40,14 @@ public class ProductsFragment extends Fragment {
 
     protected DatabaseHelper databaseHelper;
     private RecyclerView productRecyclerView;
-    private ProductAdapter productAdapter;
-    private List<Product> productList;
+    protected ProductAdapter productAdapter;
+    protected List<Product> productList;
 
     private FloatingActionButton fabAdd;
 
     public static ProductsFragment newInstance() {
+        Log.w("ProductsFragment", "newInstance()");
+
         return new ProductsFragment();
     }
 
@@ -62,7 +65,16 @@ public class ProductsFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_products, container, false);
+        Log.w("ProductsFragment", "onCreateView()");
+
+        return inflater.inflate(R.layout.fragment_products, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        Log.w("ProductsFragment", "onViewCreated()");
+
+        super.onViewCreated(view, savedInstanceState);
 
         // TODO: Gerer une progressbar
 
@@ -121,25 +133,26 @@ public class ProductsFragment extends Fragment {
             }
         });
 
-        return view;
     }
 
     protected List<Product> getProducts() {
+        Log.w("ProductsFragment", "getProducts()");
         return databaseHelper.getAllProducts();
     }
 
-    private void updateProductListViewFromDatabase(boolean lastItemDisplayed) {
+    protected void updateProductListViewFromDatabase(boolean lastItemDisplayed) {
+        Log.w("ProductsFragment", "updateProductListViewFromDatabase()");
         // Obtenir la liste des produits à partir de la base de données
-        productList = databaseHelper.getAllProducts();
+        productList = getProducts();
 
         // Mise à jour de la liste
         productAdapter.setItemList(productList);
 
-        if (lastItemDisplayed) {
-            // Positionnement de la ListView en dernier item pour voir le produit ajouté.
-            int dernierIndice = productAdapter.getItemCount() - 1;
-            productRecyclerView.smoothScrollToPosition(dernierIndice);
-        }
+//        if (lastItemDisplayed) {
+//            // Positionnement de la ListView en dernier item pour voir le produit ajouté.
+//            int dernierIndice = productAdapter.getItemCount() - 1;
+//            productRecyclerView.smoothScrollToPosition(dernierIndice);
+//        }
     }
 
     private void handleBarcodeScanResult(String barcode) {
@@ -149,15 +162,13 @@ public class ProductsFragment extends Fragment {
             @Override
             public void onProductDataReceived(Product product) {
 
-                final Product finalProduct = product; // Déclarer une variable finale pour capturer la référence du produit
-
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         // Handle the received product data
-                        if (finalProduct != null) {
+                        if (product != null) {
 //                                progressBar.setVisibility(View.GONE);
-                            showUserQueryDialogBox(finalProduct);
+                            showUserQueryDialogBox(product);
                         }
                     }
                 });
@@ -191,7 +202,7 @@ public class ProductsFragment extends Fragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         // Ajouter le produit à la base de données et à la ListView
-                        databaseHelper.addOrUpdateProduct(product);
+                        addOrUpdateProduct(product);
 
                         // Afficher la nouvelle liste avec ce produit en fin de liste.
                         updateProductListViewFromDatabase(true);
@@ -221,6 +232,10 @@ public class ProductsFragment extends Fragment {
                 });
             }
         });
+    }
+
+    protected void addOrUpdateProduct(Product product) {
+        databaseHelper.addOrUpdateProduct(product);
     }
 
 }

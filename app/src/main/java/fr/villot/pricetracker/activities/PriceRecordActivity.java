@@ -69,9 +69,8 @@ public class PriceRecordActivity extends AppCompatActivity {
             getStoreLocationTextView.setText(store.getLocation());
         }
 
-        // Récupération des produits dans la base de données.
-        recordSheetId = getIntent().getLongExtra("record_sheet_id",-1);
-        productList = databaseHelper.getProductsOnRecordSheet(recordSheetId);
+//        // Récupération des produits dans la base de données.
+//        productList = databaseHelper.getProductsOnRecordSheet(recordSheetId);
 
         // Fragment qui gere la liste des produits.
         RecordSheetProductsFragment recordSheetProductsFragment = RecordSheetProductsFragment.newInstance(recordSheetId);

@@ -3,7 +3,7 @@ package fr.villot.pricetracker.model;
 public class PriceRecord {
     private int id;
     private double price;
-    private int recordSheetId;
+    private long recordSheetId;
     private int storeId;
     private String productBarcode;
 
@@ -49,11 +49,11 @@ public class PriceRecord {
         this.productBarcode = productBarcode;
     }
 
-    public int getRecordSheetId() {
+    public long getRecordSheetId() {
         return recordSheetId;
     }
 
-    public void setRecordSheetId(int recordSheetId) {
+    public void setRecordSheetId(long recordSheetId) {
         this.recordSheetId = recordSheetId;
     }
 }
