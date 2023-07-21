@@ -57,10 +57,29 @@ public class RecordSheetProductsFragment extends ProductsFragment {
     protected void addOrUpdateProduct(Product product) {
         super.addOrUpdateProduct(product);
 
+        // Ajout du produit dans la RecordSheet
         PriceRecord priceRecord = new PriceRecord();
         priceRecord.setRecordSheetId(recordSheetId);
         priceRecord.setProductBarcode(product.getBarcode());
         databaseHelper.addPriceRecord(priceRecord);
+    }
+
+    protected void handleBarcodeScanResult(String barcode) {
+
+        // Si le produit existe on l'ajoute à la recordsheet
+        // Sinon on propose à l'utilisateur de créer le produit.
+        Product product = databaseHelper.getProductFromBarCode(barcode);
+        if (product != null) {
+            PriceRecord priceRecord = new PriceRecord();
+            priceRecord.setRecordSheetId(recordSheetId);
+            priceRecord.setProductBarcode(product.getBarcode());
+            databaseHelper.addPriceRecord(priceRecord);
+
+            super.updateProductListViewFromDatabase(true);
+        }
+        else {
+            super.getProductDataFromOpenFoodFacts(barcode);
+        }
     }
 
 }

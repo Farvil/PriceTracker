@@ -338,4 +338,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return store;
     }
+
+    @SuppressLint("Range")
+    public Product getProductFromBarCode(String barcode) {
+        Product product = null;
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String query = "SELECT * FROM " + TABLE_PRODUCTS + " WHERE " + KEY_PRODUCT_BARCODE + " = " + barcode;
+
+        Cursor cursor = db.rawQuery(query, null);
+
+        if (cursor.moveToFirst()) {
+            product = new Product();
+            product.setBarcode(barcode);
+            product.setName(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_NAME)));
+            product.setBrand(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_BRAND)));
+            product.setQuantity(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_QUANTITY)));
+            product.setImageUrl(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_IMAGE_URL)));
+        }
+
+        cursor.close();
+        db.close();
+
+        return product;
+    }
 }

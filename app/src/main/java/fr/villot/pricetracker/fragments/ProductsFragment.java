@@ -2,6 +2,7 @@ package fr.villot.pricetracker.fragments;
 
 import static android.app.ProgressDialog.show;
 
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
@@ -9,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,6 +44,8 @@ public class ProductsFragment extends Fragment {
     private RecyclerView productRecyclerView;
     protected ProductAdapter productAdapter;
     protected List<Product> productList;
+
+    private ProgressDialog progressDialog;
 
     private FloatingActionButton fabAdd;
 
@@ -155,9 +159,22 @@ public class ProductsFragment extends Fragment {
 //        }
     }
 
-    private void handleBarcodeScanResult(String barcode) {
-        // Appeler l'API OpenFoodFacts via OpenFoodFactsAPIManager dans un thread
-        // progressBar.setVisibility(View.VISIBLE);
+    protected void handleBarcodeScanResult(String barcode) {
+
+        // Si le produit existe on propose une mise à jour des données
+        // Sinon on propose à l'utilisateur de créer le produit.
+        Product product = databaseHelper.getProductFromBarCode(barcode);
+        if (product != null) {
+            showProductAlreadyExistDialogBox(product);
+        }
+        else {
+            getProductDataFromOpenFoodFacts(barcode);
+        }
+    }
+
+    protected void getProductDataFromOpenFoodFacts(String barcode) {
+
+        showProgressDialog("Merci de patienter...");
         OpenFoodFactsAPIManager.getAsyncProductData(barcode, new OpenFoodFactsAPIManager.OnProductDataReceivedListener() {
             @Override
             public void onProductDataReceived(Product product) {
@@ -167,53 +184,11 @@ public class ProductsFragment extends Fragment {
                     public void run() {
                         // Handle the received product data
                         if (product != null) {
-//                                progressBar.setVisibility(View.GONE);
+                            progressDialog.dismiss();
                             showUserQueryDialogBox(product);
                         }
                     }
                 });
-            }
-
-            private void showUserQueryDialogBox(Product product) {
-                LayoutInflater inflater = LayoutInflater.from(getActivity());
-                View dialogView = inflater.inflate(R.layout.item_product, null);
-
-                // Références des vues dans le layout de la boîte de dialogue
-                TextView productBarcodeTextView = dialogView.findViewById(R.id.productBarcodeTextView);
-                ImageView productImageView = dialogView.findViewById(R.id.productImageView);
-                TextView productNameTextView = dialogView.findViewById(R.id.productNameTextView);
-                TextView productBrandTextView = dialogView.findViewById(R.id.productBrandTextView);
-                TextView productQuantityTextView = dialogView.findViewById(R.id.productQuantityTextView);
-
-                // Afficher les détails du produit dans les vues
-                productBarcodeTextView.setText(product.getBarcode());
-                productNameTextView.setText(product.getName());
-                productBrandTextView.setText(product.getBrand());
-                productQuantityTextView.setText(product.getQuantity());
-
-                // Afficher l'image
-                Picasso.get().load(product.getImageUrl()).into(productImageView);
-
-                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                builder.setView(dialogView);
-                builder.setTitle("Ajouter ou mettre à jour le produit ?");
-
-                builder.setPositiveButton("Oui", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        // Ajouter le produit à la base de données et à la ListView
-                        addOrUpdateProduct(product);
-
-                        // Afficher la nouvelle liste avec ce produit en fin de liste.
-                        updateProductListViewFromDatabase(true);
-                    }
-                });
-
-                builder.setNegativeButton("Non", null);
-
-                AlertDialog dialog = builder.create();
-                dialog.show();
-
             }
 
             @Override
@@ -223,19 +198,96 @@ public class ProductsFragment extends Fragment {
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        progressDialog.dismiss();
+
                         // Handle the received product data
                         if (finalError != null) {
-//                                progressBar.setVisibility(View.GONE);
                             Toast.makeText(getActivity(), finalError, Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
             }
         });
+
+    }
+
+    View getProductViewForDialog(Product product) {
+        LayoutInflater inflater = LayoutInflater.from(getActivity());
+        View dialogView = inflater.inflate(R.layout.item_product, null);
+
+        // Références des vues dans le layout de la boîte de dialogue
+        TextView productBarcodeTextView = dialogView.findViewById(R.id.productBarcodeTextView);
+        ImageView productImageView = dialogView.findViewById(R.id.productImageView);
+        TextView productNameTextView = dialogView.findViewById(R.id.productNameTextView);
+        TextView productBrandTextView = dialogView.findViewById(R.id.productBrandTextView);
+        TextView productQuantityTextView = dialogView.findViewById(R.id.productQuantityTextView);
+
+        // Afficher les détails du produit dans les vues
+        productBarcodeTextView.setText(product.getBarcode());
+        productNameTextView.setText(product.getName());
+        productBrandTextView.setText(product.getBrand());
+        productQuantityTextView.setText(product.getQuantity());
+
+        // Afficher l'image
+        Picasso.get().load(product.getImageUrl()).into(productImageView);
+
+        return dialogView;
+    }
+
+    private void showUserQueryDialogBox(Product product) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setView(getProductViewForDialog(product));
+        builder.setTitle("Ajouter ou mettre à jour le produit ?");
+
+        builder.setPositiveButton("Oui", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // Ajouter le produit à la base de données et à la ListView
+                addOrUpdateProduct(product);
+
+                // Afficher la nouvelle liste avec ce produit en fin de liste.
+                updateProductListViewFromDatabase(true);
+            }
+        });
+
+        builder.setNegativeButton("Non", null);
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+    }
+
+    private void showProductAlreadyExistDialogBox(Product product) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setView(getProductViewForDialog(product));
+        builder.setTitle("Produit déjà existant");
+        builder.setMessage("Souhaitez-vous effectuer une mise à jour des données de ce produit ?");
+
+        builder.setPositiveButton("Oui", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                getProductDataFromOpenFoodFacts(product.getBarcode());
+            }
+        });
+
+        builder.setNegativeButton("Non", null);
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
     }
 
     protected void addOrUpdateProduct(Product product) {
         databaseHelper.addOrUpdateProduct(product);
+    }
+
+    private void showProgressDialog(String message) {
+        progressDialog = new ProgressDialog(getActivity());
+        progressDialog.setMessage(message);
+        progressDialog.setCancelable(false); // Empêche l'utilisateur de fermer la boîte de dialogue en cliquant en dehors
+        progressDialog.show();
     }
 
 }
