@@ -9,6 +9,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.cardview.widget.CardView;
 
 import com.google.android.material.snackbar.Snackbar;
 
@@ -17,7 +18,6 @@ import java.util.List;
 
 import fr.villot.pricetracker.MyApplication;
 import fr.villot.pricetracker.R;
-import fr.villot.pricetracker.fragments.ProductsFragment;
 import fr.villot.pricetracker.fragments.RecordSheetProductsFragment;
 import fr.villot.pricetracker.model.Product;
 import fr.villot.pricetracker.model.RecordSheet;
@@ -32,7 +32,8 @@ public class PriceRecordActivity extends AppCompatActivity {
     private long recordSheetId;
 
     private TextView storeNameTextView;
-    private TextView getStoreLocationTextView;
+    private TextView storeLocationTextView;
+    private CardView storeCardView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,8 +42,10 @@ public class PriceRecordActivity extends AppCompatActivity {
 
         // Récuperation des vues
         storeNameTextView = findViewById(R.id.storeNameTextView);
-        getStoreLocationTextView = findViewById(R.id.storeLocationTextView);
+        storeLocationTextView = findViewById(R.id.storeLocationTextView);
         Toolbar toolbar = findViewById(R.id.toolbar);
+        storeCardView = findViewById(R.id.storeCardView);
+        storeCardView.setRadius(0);
 
         // Initialisation du DatabaseHelper
         databaseHelper = MyApplication.getDatabaseHelper();
@@ -66,7 +69,7 @@ public class PriceRecordActivity extends AppCompatActivity {
         Store store = databaseHelper.getStoreById(recordSheet.getStoreId());
         if (store != null) {
             storeNameTextView.setText(store.getName());
-            getStoreLocationTextView.setText(store.getLocation());
+            storeLocationTextView.setText(store.getLocation());
         }
 
 //        // Récupération des produits dans la base de données.
