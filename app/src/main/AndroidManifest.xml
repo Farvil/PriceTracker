@@ -31,11 +31,9 @@
             android:name=".activities.BarCodeScannerActivity"
             android:screenOrientation="portrait"
             android:stateNotNeeded="true"
-            android:windowSoftInputMode="stateAlwaysHidden"
-            android:theme="@style/Theme.PriceTracker.NoActionBar"/>
+            android:windowSoftInputMode="stateAlwaysHidden" />
         <activity android:name=".activities.PriceRecordActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.PriceTracker.NoActionBar"/>
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>
