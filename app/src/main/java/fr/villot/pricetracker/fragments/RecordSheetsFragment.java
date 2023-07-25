@@ -6,7 +6,10 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Spinner;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -25,7 +28,9 @@ import fr.villot.pricetracker.MyApplication;
 import fr.villot.pricetracker.R;
 import fr.villot.pricetracker.activities.PriceRecordActivity;
 import fr.villot.pricetracker.adapters.RecordSheetAdapter;
+import fr.villot.pricetracker.adapters.SpinnerStoreAdapter;
 import fr.villot.pricetracker.model.RecordSheet;
+import fr.villot.pricetracker.model.Store;
 import fr.villot.pricetracker.utils.DatabaseHelper;
 
 public class RecordSheetsFragment extends Fragment {
@@ -96,7 +101,7 @@ public class RecordSheetsFragment extends Fragment {
         fabAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showAddRecordSheetDialog();
+                showCreateRecordSheetDialog();
             }
         });
 
@@ -120,6 +125,72 @@ public class RecordSheetsFragment extends Fragment {
             recordSheetRecyclerView.smoothScrollToPosition(dernierIndice);
         }
     }
+
+
+    public void showCreateRecordSheetDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        View dialogView = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_create_recordsheet, null);
+        builder.setView(dialogView);
+        builder.setTitle("Créer une nouvelle recordsheet");
+
+        Spinner storeSpinner = dialogView.findViewById(R.id.storeSpinner);
+        EditText recordsheetNameEditText = dialogView.findViewById(R.id.recordsheetNameEditText);
+
+        // Obtenez la liste des magasins à partir de votre base de données (par exemple, dans une liste storesList)
+
+        // Créez un ArrayAdapter pour afficher la liste des magasins dans le Spinner
+        List<Store> storeList = databaseHelper.getAllStores();
+        SpinnerStoreAdapter spinnerStoreAdapter = new SpinnerStoreAdapter(getContext(), storeList);
+        storeSpinner.setAdapter(spinnerStoreAdapter);
+
+//        storeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//            @Override
+//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+//                Store selectedStore = (Store) parent.getSelectedItem();
+//                // Vous pouvez maintenant accéder aux propriétés du magasin sélectionné, par exemple :
+//                String storeName = selectedStore.getName();
+//                String storeLocation = selectedStore.getLocation();
+//                // et ainsi de suite...
+//            }
+//
+//            @Override
+//            public void onNothingSelected(AdapterView<?> parent) {
+//                // Action à effectuer lorsqu'aucun élément n'est sélectionné
+//            }
+//        });
+
+        builder.setPositiveButton("Créer", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // Récupérez le nom de la recordsheet saisi par l'utilisateur
+                String recordSheetName = recordsheetNameEditText.getText().toString();
+
+                if (!recordSheetName.isEmpty()) {
+
+                    // Recuperation du magasin selectionné
+                    Store selectedStore = (Store) storeSpinner.getSelectedItem();
+                    if (selectedStore != null) {
+                        // Création d'un RecordSheet
+                        RecordSheet newRecordSheet = new RecordSheet(recordSheetName, new Date(),selectedStore.getId());
+
+                        // Ajoute la fiche d'enregistrements à la base de données
+                        databaseHelper.addRecordSheet(newRecordSheet);
+
+                        // Update the store list and refresh the spinner
+                        updateRecordSheetListViewFromDatabase(true);
+                    }
+
+                }
+
+            }
+        });
+
+        builder.setNegativeButton("Annuler", null);
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
 
     public void showAddRecordSheetDialog() {
         // Création d'une boîte de dialogue pour demander le nom du relevé de prix
