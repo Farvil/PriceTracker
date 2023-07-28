@@ -36,20 +36,13 @@ public class RecordSheetViewHolder extends RecyclerView.ViewHolder {
     }
 
 
-    public void setSelection(boolean isSelected) {
+    public void setSelected(boolean isSelected) {
 
         // Couleur de selection
         if (isSelected)
-            setColorItemPressed();
+            recordSheetCardView.setCardBackgroundColor(ContextCompat.getColor(recordSheetCardView.getContext(), R.color.item_product_pressed_background));
         else
-            setColorItemDefault();
-    }
-
-    public void setColorItemPressed() {
-        recordSheetCardView.setCardBackgroundColor(ContextCompat.getColor(recordSheetCardView.getContext(), R.color.item_product_pressed_background));
-    }
-    public void setColorItemDefault() {
-        recordSheetCardView.setCardBackgroundColor(ContextCompat.getColor(recordSheetCardView.getContext(), R.color.item_product_normal_background));
+            recordSheetCardView.setCardBackgroundColor(ContextCompat.getColor(recordSheetCardView.getContext(), R.color.item_product_normal_background));
     }
 
 }

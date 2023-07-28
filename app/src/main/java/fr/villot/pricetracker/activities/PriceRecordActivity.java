@@ -1,6 +1,7 @@
 package fr.villot.pricetracker.activities;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -97,11 +98,20 @@ public class PriceRecordActivity extends AppCompatActivity {
             onBackPressed(); // Retour à l'activité principale
             return true;
         }
+        else if (itemId == R.id.action_add_from_database) {
+            addProductsFromDatabase();
+            return true;
+        }
         else if (itemId == R.id.action_delete) {
             deleteSelectedProducts();
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void addProductsFromDatabase() {
+        Intent intent = new Intent(this, SelectProductsActivity.class);
+        startActivity(intent);
     }
 
     private void deleteSelectedProducts() {

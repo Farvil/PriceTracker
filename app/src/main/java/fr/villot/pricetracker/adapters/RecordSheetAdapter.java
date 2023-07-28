@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import java.util.List;
 
 import fr.villot.pricetracker.R;
+import fr.villot.pricetracker.model.Product;
 import fr.villot.pricetracker.model.RecordSheet;
 
 public class RecordSheetAdapter extends SelectableAdapter<RecordSheet, RecordSheetViewHolder> {
@@ -38,8 +39,13 @@ public class RecordSheetAdapter extends SelectableAdapter<RecordSheet, RecordShe
         holder.bind(recordSheet);
     }
 
-    @Override
-    protected void setItemSelection(RecordSheetViewHolder holder, RecordSheet recordSheet, boolean isSelected) {
-        holder.setSelection(isSelected);
+//    protected void setItemSelection(RecordSheetViewHolder holder, int position, boolean isSelected) {
+//        holder.setSelected(isSelected);
+//    }
+    protected void setItemSelection(SelectableAdapter<RecordSheet, RecordSheetViewHolder> adapter, int position, boolean isSelected) {
+        RecordSheetViewHolder holder = adapter.getViewHolderAtPosition(position);
+        if (holder != null) {
+            holder.setSelected(isSelected);
+        }
     }
 }

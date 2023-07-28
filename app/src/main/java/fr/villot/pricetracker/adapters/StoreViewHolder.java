@@ -31,21 +31,13 @@ public class StoreViewHolder extends RecyclerView.ViewHolder {
     }
 
 
-    public void setSelection(boolean isSelected) {
+    public void setSelected(boolean isSelected) {
 
         // Couleur de selection
         if (isSelected)
-            setColorItemPressed();
+            storeCardView.setCardBackgroundColor(ContextCompat.getColor(storeCardView.getContext(), R.color.item_product_pressed_background));
         else
-            setColorItemDefault();
-    }
-
-
-    public void setColorItemPressed() {
-        storeCardView.setCardBackgroundColor(ContextCompat.getColor(storeCardView.getContext(), R.color.item_product_pressed_background));
-    }
-    public void setColorItemDefault() {
-        storeCardView.setCardBackgroundColor(ContextCompat.getColor(storeCardView.getContext(), R.color.item_product_normal_background));
+            storeCardView.setCardBackgroundColor(ContextCompat.getColor(storeCardView.getContext(), R.color.item_product_normal_background));
     }
 
 }

@@ -1,6 +1,7 @@
 package fr.villot.pricetracker.adapters;
 
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -22,8 +23,11 @@ public class ProductViewHolder extends RecyclerView.ViewHolder {
     private TextView productQuantityTextView;
     private TextView productPriceTextView;
     private ImageView productImageView;
+    public CheckBox productCheckBox;
 
-//    private boolean isSelected = false;
+    public interface CheckBoxListener {
+        void onCheckBoxClick(int position, boolean isChecked);
+    }
 
     public ProductViewHolder(View itemView) {
         super(itemView);
@@ -36,6 +40,7 @@ public class ProductViewHolder extends RecyclerView.ViewHolder {
         productQuantityTextView = itemView.findViewById(R.id.productQuantityTextView);
         productPriceTextView = itemView.findViewById(R.id.productPriceTextView);
         productImageView = itemView.findViewById(R.id.productImageView);
+        productCheckBox = itemView.findViewById(R.id.productCheckBox);
     }
 
     public void bind(Product product) {
@@ -51,20 +56,35 @@ public class ProductViewHolder extends RecyclerView.ViewHolder {
         Picasso.get().load(product.getImageUrl()).into(productImageView);
     }
 
-    public void setSelection(boolean isSelected) {
-
+    public void setSelected(boolean isSelected) {
+        productCheckBox.setVisibility(View.VISIBLE);
+        productCheckBox.setChecked(isSelected);
         // Couleur de selection
-        if (isSelected)
-            setColorItemPressed();
-        else
-            setColorItemDefault();
+//        if (isSelected)
+//            productCardView.setCardBackgroundColor(ContextCompat.getColor(productCardView.getContext(), R.color.item_product_pressed_background));
+//        else
+//            productCardView.setCardBackgroundColor(ContextCompat.getColor(productCardView.getContext(), R.color.item_product_normal_background));
     }
 
-    public void setColorItemPressed() {
-        productCardView.setCardBackgroundColor(ContextCompat.getColor(productCardView.getContext(), R.color.item_product_pressed_background));
+    public void setSelectionMode(boolean isSelectionMode) {
+        if (isSelectionMode) {
+            productCheckBox.setVisibility(View.VISIBLE);
+        } else {
+            productCheckBox.setVisibility(View.GONE);
+        }
     }
-    public void setColorItemDefault() {
-        productCardView.setCardBackgroundColor(ContextCompat.getColor(productCardView.getContext(), R.color.item_product_normal_background));
+
+    public void setCheckBoxListener(CheckBoxListener listener) {
+        productCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (listener != null) {
+                listener.onCheckBoxClick(getAdapterPosition(), isChecked);
+            }
+        });
     }
+
+    public void setCheckBoxChecked(boolean isChecked) {
+        productCheckBox.setChecked(isChecked);
+    }
+
 }
 

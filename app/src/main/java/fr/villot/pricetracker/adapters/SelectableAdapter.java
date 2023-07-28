@@ -7,14 +7,20 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+
+import fr.villot.pricetracker.model.Product;
 
 public abstract class SelectableAdapter<T, VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH> {
 
     protected List<T> itemList;
-    protected List<T> selectedItems = new ArrayList<>();
+    protected List<Integer> selectedItems = new ArrayList<>();
+    protected boolean isSelectionMode = false;
     protected OnItemClickListener<T> onItemClickListener;
+
+    private WeakReference<RecyclerView> recyclerViewWeakReference;
 
     public interface OnItemClickListener<T> {
         void onItemClick(T item);
@@ -38,24 +44,23 @@ public abstract class SelectableAdapter<T, VH extends RecyclerView.ViewHolder> e
 
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
-        T item = itemList.get(position);
-        bindViewHolder(holder, item);
+        bindViewHolder(holder, itemList.get(position));
 
         holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                boolean isSelected = selectedItems.contains(item);
+                int adapterPosition = holder.getAdapterPosition();
+
+                boolean isSelected = isItemSelected(adapterPosition);
 
                 if (isSelected) {
-                    selectedItems.remove(item);
-                    setItemSelection(holder, item, false);
+                    selectedItems.remove((Integer) adapterPosition);
                 } else {
-                    selectedItems.add(item);
-                    setItemSelection(holder, item, true);
+                    selectedItems.add(adapterPosition);
                 }
 
                 if (onItemClickListener != null) {
-                    onItemClickListener.onItemLongClick(item);
+                    onItemClickListener.onItemLongClick(itemList.get(adapterPosition));
                 }
 
                 return true;
@@ -66,7 +71,7 @@ public abstract class SelectableAdapter<T, VH extends RecyclerView.ViewHolder> e
             @Override
             public void onClick(View view) {
                 if (onItemClickListener != null) {
-                    onItemClickListener.onItemClick(item);
+                    onItemClickListener.onItemClick(itemList.get(position));
                 }
             }
         });
@@ -82,8 +87,13 @@ public abstract class SelectableAdapter<T, VH extends RecyclerView.ViewHolder> e
         notifyDataSetChanged();
     }
 
-    public List<T> getSelectedItems() {
-        return selectedItems;
+    public boolean isItemSelected(int position) {
+        return selectedItems.contains(position);
+    }
+
+    public void setSelectionMode(boolean isSelectionMode) {
+        this.isSelectionMode = isSelectionMode;
+        notifyDataSetChanged();
     }
 
     protected abstract int getItemLayoutId();
@@ -92,5 +102,23 @@ public abstract class SelectableAdapter<T, VH extends RecyclerView.ViewHolder> e
 
     protected abstract void bindViewHolder(VH holder, T item);
 
-    protected abstract void setItemSelection(VH holder, T item, boolean isSelected);
+    public VH getViewHolderAtPosition(int position) {
+        RecyclerView recyclerView = getRecyclerView();
+        if (recyclerView != null) {
+            return (VH) recyclerView.findViewHolderForAdapterPosition(position);
+        }
+        return null;
+    }
+
+    private RecyclerView getRecyclerView() {
+        if (recyclerViewWeakReference != null) {
+            return recyclerViewWeakReference.get();
+        }
+        return null;
+    }
+
+    public void setRecyclerView(RecyclerView recyclerView) {
+        recyclerViewWeakReference = new WeakReference<>(recyclerView);
+    }
+
 }

@@ -112,6 +112,8 @@ public class ProductsFragment extends Fragment {
             @Override
             public void onItemLongClick(Object item) {
                 if (item instanceof Product) {
+                    productAdapter.setSelectionMode(true);
+
                     Product product = (Product) item;
                 Snackbar.make(productRecyclerView, "TODO : Gestion du long press pour : "
                                 + product.getBarcode(),

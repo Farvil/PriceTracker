@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import java.util.List;
 
 import fr.villot.pricetracker.R;
+import fr.villot.pricetracker.model.Product;
 import fr.villot.pricetracker.model.Store;
 
 public class StoreAdapter extends SelectableAdapter<Store, StoreViewHolder> {
@@ -38,8 +39,13 @@ public class StoreAdapter extends SelectableAdapter<Store, StoreViewHolder> {
         holder.bind(store);
     }
 
-    @Override
-    protected void setItemSelection(StoreViewHolder holder, Store store, boolean isSelected) {
-        holder.setSelection(isSelected);
+//    protected void setItemSelection(StoreViewHolder holder, int position, boolean isSelected) {
+//        holder.setSelected(isSelected);
+//    }
+    protected void setItemSelection(SelectableAdapter<Store, StoreViewHolder> adapter, int position, boolean isSelected) {
+        StoreViewHolder holder = adapter.getViewHolderAtPosition(position);
+        if (holder != null) {
+            holder.setSelected(isSelected);
+        }
     }
 }

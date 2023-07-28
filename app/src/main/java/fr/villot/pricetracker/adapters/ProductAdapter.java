@@ -1,9 +1,8 @@
 package fr.villot.pricetracker.adapters;
 
 import android.content.Context;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
+import android.widget.CompoundButton;
 
 import androidx.annotation.NonNull;
 
@@ -12,7 +11,7 @@ import java.util.List;
 import fr.villot.pricetracker.R;
 import fr.villot.pricetracker.model.Product;
 
-public class ProductAdapter extends SelectableAdapter<Product, ProductViewHolder> {
+public class ProductAdapter extends SelectableAdapter<Product, ProductViewHolder> implements ProductViewHolder.CheckBoxListener {
 
     private Context context;
 
@@ -30,7 +29,9 @@ public class ProductAdapter extends SelectableAdapter<Product, ProductViewHolder
     @NonNull
     @Override
     protected ProductViewHolder createViewHolder(View view) {
-        return new ProductViewHolder(view);
+        ProductViewHolder viewHolder = new ProductViewHolder(view);
+        viewHolder.setCheckBoxListener(this); // Assurez-vous que ProductViewHolder reçoit les événements de clic CheckBox
+        return viewHolder;
     }
 
     @Override
@@ -38,8 +39,47 @@ public class ProductAdapter extends SelectableAdapter<Product, ProductViewHolder
         holder.bind(product);
     }
 
+
     @Override
-    protected void setItemSelection(ProductViewHolder holder, Product product, boolean isSelected) {
-        holder.setSelection(isSelected);
+    public void onBindViewHolder(@NonNull ProductViewHolder holder, int position) {
+        super.onBindViewHolder(holder, position);
+
+        holder.setSelectionMode(isSelectionMode);
+
+        holder.productCheckBox.setOnCheckedChangeListener(null);
+        holder.productCheckBox.setChecked(isItemSelected(holder.getAdapterPosition()));
+        holder.productCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                int adapterPosition = holder.getAdapterPosition();
+                if (isChecked) {
+                    selectedItems.add(adapterPosition);
+                } else {
+                    selectedItems.remove((Integer) adapterPosition);
+                }
+            }
+        });
     }
+
+
+
+    protected void setItemSelection(SelectableAdapter<Product, ProductViewHolder> adapter, int position, boolean isSelected) {
+        ProductViewHolder holder = adapter.getViewHolderAtPosition(position);
+        if (holder != null) {
+            holder.setSelected(isSelected);
+        }
+    }
+
+    @Override
+    public void onCheckBoxClick(int position, boolean isChecked) {
+        // Gestion du clic sur la CheckBox pour la sélection directe
+        if (isChecked) {
+            selectedItems.add(position);
+        } else {
+            selectedItems.remove((Integer) position);
+        }
+
+        setItemSelection(this, position, isChecked);
+    }
+
 }
