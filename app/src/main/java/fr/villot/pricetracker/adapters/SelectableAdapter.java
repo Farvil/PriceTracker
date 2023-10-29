@@ -5,6 +5,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.selection.ItemKeyProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.lang.ref.WeakReference;
@@ -119,6 +120,34 @@ public abstract class SelectableAdapter<T, VH extends RecyclerView.ViewHolder> e
 
     public void setRecyclerView(RecyclerView recyclerView) {
         recyclerViewWeakReference = new WeakReference<>(recyclerView);
+    }
+
+    // Ajoutez cette classe interne pour notre ItemKeyProvider personnalisé
+    public static class ProductItemKeyProvider extends ItemKeyProvider<Long> {
+        private final RecyclerView recyclerView;
+
+        public ProductItemKeyProvider(RecyclerView recyclerView) {
+            super(ItemKeyProvider.SCOPE_MAPPED);
+            this.recyclerView = recyclerView;
+        }
+
+        @Override
+        public Long getKey(int position) {
+            // Retournez l'identifiant unique (clé) pour l'élément à la position donnée
+            // Ici, vous pouvez utiliser l'identifiant de l'objet Product, par exemple : return productList.get(position).getId();
+            return (long) position; // Pour l'exemple, nous utilisons simplement la position comme identifiant
+        }
+
+        @Override
+        public int getPosition(@NonNull Long key) {
+            // Retournez la position de l'élément associé à la clé donnée
+            return key.intValue(); // Pour l'exemple, nous supposons que la clé est de type Long
+        }
+
+        @NonNull
+        public Long getSelectionKey(int position) {
+            return getKey(position);
+        }
     }
 
 }

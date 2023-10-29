@@ -84,7 +84,6 @@ public class ProductsFragment extends Fragment {
         // Recupération des vues
         productRecyclerView = view.findViewById(R.id.productRecyclerView);
         fabAdd = view.findViewById(R.id.fabAdd);
-
         // Initialisation du DatabaseHelper
         databaseHelper = MyApplication.getDatabaseHelper();
 

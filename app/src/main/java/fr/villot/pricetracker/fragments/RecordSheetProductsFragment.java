@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 
 import java.util.List;
 
+import fr.villot.pricetracker.R;
 import fr.villot.pricetracker.model.PriceRecord;
 import fr.villot.pricetracker.model.Product;
 
