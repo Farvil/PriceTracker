@@ -55,8 +55,11 @@ public class ProductViewHolder extends RecyclerView.ViewHolder {
         productNameTextView.setText(product.getName());
         productBrandTextView.setText(product.getBrand());
         productQuantityTextView.setText(product.getQuantity());
-        //productPriceTextView.setText(String.valueOf(product.getPrice()));
-        productPriceTextView.setVisibility(View.VISIBLE);
+        String price = product.getPrice();
+        if (price != null) {
+            productPriceTextView.setText(price + " €");
+            productPriceTextView.setVisibility(View.VISIBLE);
+        }
 
         // Utiliser Picasso pour charger l'image à partir de l'URL et l'afficher dans ImageView
         Picasso.get().load(product.getImageUrl()).into(productImageView);

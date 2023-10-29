@@ -62,6 +62,7 @@ public class RecordSheetProductsFragment extends ProductsFragment {
         PriceRecord priceRecord = new PriceRecord();
         priceRecord.setRecordSheetId(recordSheetId);
         priceRecord.setProductBarcode(product.getBarcode());
+        priceRecord.setPrice(10); // todo: stub
         databaseHelper.addPriceRecord(priceRecord);
     }
 

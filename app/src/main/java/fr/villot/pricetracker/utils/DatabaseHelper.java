@@ -269,7 +269,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         SQLiteDatabase db = this.getReadableDatabase();
 
-        String query = "SELECT p.* FROM " + TABLE_PRODUCTS + " p INNER JOIN " + TABLE_PRICE_RECORDS + " pr ON p." + KEY_PRODUCT_BARCODE + " = pr." + KEY_PRICE_RECORD_PRODUCT_BARCODE +
+        String query = "SELECT p.*,  pr.* FROM " + TABLE_PRODUCTS + " p INNER JOIN " + TABLE_PRICE_RECORDS + " pr ON p." + KEY_PRODUCT_BARCODE + " = pr." + KEY_PRICE_RECORD_PRODUCT_BARCODE +
                 " WHERE pr." + KEY_PRICE_RECORD_ID + " IN (SELECT " + KEY_PRICE_RECORD_ID + " FROM " + TABLE_PRICE_RECORDS + " WHERE " + KEY_PRICE_RECORD_RECORD_SHEET_ID + " = " + recordSheetId + ")";
 
         Cursor cursor = db.rawQuery(query, null);
@@ -282,6 +282,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 product.setBrand(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_BRAND)));
                 product.setQuantity(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_QUANTITY)));
                 product.setImageUrl(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_IMAGE_URL)));
+                product.setPrice(cursor.getString(cursor.getColumnIndex(KEY_PRICE_RECORD_PRICE)));
                 products.add(product);
             } while (cursor.moveToNext());
         }
