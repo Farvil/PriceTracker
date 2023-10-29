@@ -38,6 +38,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String KEY_STORE_ID = "store_id";
     private static final String KEY_STORE_NAME = "store_name";
     private static final String KEY_STORE_LOCATION = "store_location";
+    private static final String KEY_STORE_LOGO = "store_logo";
 
 
     // Table pour les listes de relevés de prix
@@ -84,7 +85,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String createStoresTableQuery = "CREATE TABLE " + TABLE_STORES + "("
                 + KEY_STORE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + KEY_STORE_NAME + " TEXT,"
-                + KEY_STORE_LOCATION + " TEXT" + ")";
+                + KEY_STORE_LOCATION + " TEXT,"
+                + KEY_STORE_LOGO + " TEXT" + ")";
         db.execSQL(createStoresTableQuery);
 
         String createRecordSheetsTable = "CREATE TABLE " + TABLE_RECORD_SHEETS + " (" +
@@ -98,7 +100,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         String createPriceRecordsTableQuery = "CREATE TABLE " + TABLE_PRICE_RECORDS + "("
                 + KEY_PRICE_RECORD_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                + KEY_PRICE_RECORD_PRICE + " REAL,"
+                + KEY_PRICE_RECORD_PRICE + " NUMERIC(10,2),"
                 + KEY_PRICE_RECORD_RECORD_SHEET_ID + " INTEGER,"
                 + KEY_PRICE_RECORD_PRODUCT_BARCODE + " TEXT,"
                 + "FOREIGN KEY(" + KEY_PRICE_RECORD_RECORD_SHEET_ID + ") REFERENCES " + TABLE_RECORD_SHEETS + "(" + KEY_RECORD_SHEET_ID + "),"
@@ -142,6 +144,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(KEY_STORE_NAME, store.getName());
         values.put(KEY_STORE_LOCATION, store.getLocation());
+        values.put(KEY_STORE_LOGO, store.getLogo());
 
         // Insertion du magasin dans la table "stores"
         long storeId = db.insert(TABLE_STORES, null, values);
@@ -254,6 +257,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 store.setId(cursor.getInt(cursor.getColumnIndex(KEY_STORE_ID)));
                 store.setName(cursor.getString(cursor.getColumnIndex(KEY_STORE_NAME)));
                 store.setLocation(cursor.getString(cursor.getColumnIndex(KEY_STORE_LOCATION)));
+                store.setLogo(cursor.getString(cursor.getColumnIndex(KEY_STORE_LOGO)));
 
                 storeList.add(store);
             } while (cursor.moveToNext());
@@ -282,7 +286,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 product.setBrand(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_BRAND)));
                 product.setQuantity(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_QUANTITY)));
                 product.setImageUrl(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_IMAGE_URL)));
-                product.setPrice(cursor.getString(cursor.getColumnIndex(KEY_PRICE_RECORD_PRICE)));
+                product.setPrice(cursor.getDouble(cursor.getColumnIndex(KEY_PRICE_RECORD_PRICE)));
                 products.add(product);
             } while (cursor.moveToNext());
         }
@@ -332,6 +336,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             store.setId(cursor.getInt(cursor.getColumnIndex(KEY_STORE_ID)));
             store.setName(cursor.getString(cursor.getColumnIndex(KEY_STORE_NAME)));
             store.setLocation(cursor.getString(cursor.getColumnIndex(KEY_STORE_LOCATION)));
+            store.setLogo(cursor.getString(cursor.getColumnIndex(KEY_STORE_LOGO)));
         }
 
         cursor.close();

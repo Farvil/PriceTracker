@@ -3,6 +3,7 @@ package fr.villot.pricetracker.adapters;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.cardview.widget.CardView;
@@ -21,6 +22,7 @@ public class ProductViewHolder extends RecyclerView.ViewHolder {
     private TextView productBrandTextView;
     private TextView productQuantityTextView;
     private TextView productPriceTextView;
+    private LinearLayout productPriceZone;
     private ImageView productImageView;
     public CheckBox productCheckBox;
     private CheckBoxListener checkBoxListener;
@@ -39,6 +41,7 @@ public class ProductViewHolder extends RecyclerView.ViewHolder {
         productBrandTextView = itemView.findViewById(R.id.productBrandTextView);
         productQuantityTextView = itemView.findViewById(R.id.productQuantityTextView);
         productPriceTextView = itemView.findViewById(R.id.productPriceTextView);
+        productPriceZone = itemView.findViewById(R.id.productPriceZone);
         productImageView = itemView.findViewById(R.id.productImageView);
         productCheckBox = itemView.findViewById(R.id.productCheckBox);
 
@@ -55,10 +58,13 @@ public class ProductViewHolder extends RecyclerView.ViewHolder {
         productNameTextView.setText(product.getName());
         productBrandTextView.setText(product.getBrand());
         productQuantityTextView.setText(product.getQuantity());
-        String price = product.getPrice();
+        Double price = product.getPrice();
         if (price != null) {
-            productPriceTextView.setText(price + " €");
-            productPriceTextView.setVisibility(View.VISIBLE);
+            productPriceZone.setVisibility(View.VISIBLE);
+            productPriceTextView.setText(String.format("%.2f", price));
+        }
+        else {
+            productPriceZone.setVisibility(View.GONE);
         }
 
         // Utiliser Picasso pour charger l'image à partir de l'URL et l'afficher dans ImageView

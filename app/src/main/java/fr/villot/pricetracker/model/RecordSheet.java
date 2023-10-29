@@ -64,6 +64,11 @@ public class RecordSheet {
         return storeId;
     }
 
+    public String getStoreLogo() {
+        return "auchan";
+    }
+
+
     public void setStoreId(int storeId) {
         this.storeId = storeId;
     }

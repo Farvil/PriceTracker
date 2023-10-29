@@ -1,6 +1,7 @@
 package fr.villot.pricetracker.adapters;
 
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -15,6 +16,7 @@ public class StoreViewHolder extends RecyclerView.ViewHolder {
 
     private TextView storeNameTextView;
     private TextView storeLocationTextView;
+    private ImageView storeImageView;
 
     private CardView storeCardView;
 
@@ -22,12 +24,18 @@ public class StoreViewHolder extends RecyclerView.ViewHolder {
         super(itemView);
         storeNameTextView = itemView.findViewById(R.id.storeNameTextView);
         storeLocationTextView = itemView.findViewById(R.id.storeLocationTextView);
+        storeImageView = itemView.findViewById(R.id.storeImageView);
         storeCardView = itemView.findViewById(R.id.storeCardView);
     }
 
     public void bind(Store store) {
         storeNameTextView.setText(store.getName());
         storeLocationTextView.setText(store.getLocation());
+
+        // Charger l'image du logo à partir des ressources
+        int imageResource = storeImageView.getContext().getResources().getIdentifier(store.getLogo(), "drawable", storeImageView.getContext().getPackageName());
+        storeImageView.setImageResource(imageResource);
+
     }
 
 

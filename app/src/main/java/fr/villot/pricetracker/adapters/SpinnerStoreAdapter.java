@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -37,10 +38,16 @@ public class SpinnerStoreAdapter extends ArrayAdapter<Store> {
 
         TextView storeNameTextView = view.findViewById(R.id.storeNameTextView);
         TextView storeLocationTextView = view.findViewById(R.id.storeLocationTextView);
+        ImageView storeImageView = view.findViewById(R.id.storeImageView);
+
 
         Store store = storeList.get(position);
         storeNameTextView.setText(store.getName());
         storeLocationTextView.setText(store.getLocation());
+
+        // Charger l'image du logo à partir des ressources
+        int imageResource = storeImageView.getContext().getResources().getIdentifier(store.getLogo(), "drawable", storeImageView.getContext().getPackageName());
+        storeImageView.setImageResource(imageResource);
 
         return view;
     }

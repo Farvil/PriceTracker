@@ -6,7 +6,7 @@ public class Product {
     private String brand;
     private String quantity;
     private String imageUrl;
-    private String price;
+    private Double price;
 
     public Product(String barcode, String name, String brand, String quantity, String imageUrl) {
         this.barcode = barcode;
@@ -59,6 +59,6 @@ public class Product {
         this.imageUrl = imageUrl;
     }
 
-    public String getPrice() { return price; }
-    public void setPrice(String price) { this.price = price; }
+    public Double getPrice() { return price; }
+    public void setPrice(Double price) { this.price = price; }
 }

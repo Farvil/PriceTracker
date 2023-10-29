@@ -8,9 +8,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.Spinner;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -28,7 +30,9 @@ import java.util.logging.Logger;
 
 import fr.villot.pricetracker.MyApplication;
 import fr.villot.pricetracker.activities.PriceRecordActivity;
+import fr.villot.pricetracker.adapters.LogoAdapter;
 import fr.villot.pricetracker.adapters.RecordSheetAdapter;
+import fr.villot.pricetracker.model.LogoItem;
 import fr.villot.pricetracker.model.RecordSheet;
 import fr.villot.pricetracker.utils.DatabaseHelper;
 import fr.villot.pricetracker.R;
@@ -143,6 +147,35 @@ public class StoresFragment extends Fragment {
         locationEditText.setHint("Localisation");
         layout.addView(locationEditText);
 
+//        // Create a Spinner for choosing a logo
+//        Spinner logoSpinner = new Spinner(context);
+//        // Récupérez la liste des noms de logos à afficher dans le Spinner
+//        String[] logoNames = new String[]{"aldi", "auchan", "carrefour", "casino", "g20", "leclerc", "lidl", "mousquetaires", "systeme_u"};
+//        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, logoNames);
+//        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//        logoSpinner.setAdapter(spinnerAdapter);
+//        layout.addView(logoSpinner);
+
+        // Create a Spinner for choosing a logo
+        Spinner logoSpinner = new Spinner(context);
+        List<LogoItem> logoItems = new ArrayList<>();
+
+        // Ajout des logos des magasins
+        logoItems.add(new LogoItem("aldi"));
+        logoItems.add(new LogoItem("auchan"));
+        logoItems.add(new LogoItem("carrefour"));
+        logoItems.add(new LogoItem("casino"));
+        logoItems.add(new LogoItem("g20"));
+        logoItems.add(new LogoItem("leclerc"));
+        logoItems.add(new LogoItem("lidl"));
+        logoItems.add(new LogoItem("mousquetaires"));
+        logoItems.add(new LogoItem("systeme_u"));
+
+        // Gestion de l'adapter
+        LogoAdapter logoAdapter = new LogoAdapter(context, logoItems);
+        logoSpinner.setAdapter(logoAdapter);
+        layout.addView(logoSpinner);
+
         builder.setView(layout);
 
         // Set up the buttons for Save and Cancel
@@ -151,12 +184,16 @@ public class StoresFragment extends Fragment {
             public void onClick(DialogInterface dialog, int which) {
                 String name = nameEditText.getText().toString().trim();
                 String location = locationEditText.getText().toString().trim();
+                // Récupérer l'objet LogoItem sélectionné
+                LogoItem selectedLogoItem = (LogoItem) logoSpinner.getSelectedItem();
+                String selectedLogo = selectedLogoItem.getImageName();
 
                 if (!name.isEmpty() && !location.isEmpty()) {
                     // Create a new Store object
                     Store newStore = new Store();
                     newStore.setName(name);
                     newStore.setLocation(location);
+                    newStore.setLogo(selectedLogo);
 
                     // Add the store to the database
                     databaseHelper.addStore(newStore);

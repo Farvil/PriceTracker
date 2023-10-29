@@ -192,56 +192,56 @@ public class RecordSheetsFragment extends Fragment {
     }
 
 
-    public void showAddRecordSheetDialog() {
-        // Création d'une boîte de dialogue pour demander le nom du relevé de prix
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle("Nom du relevé de prix");
-
-        // Ajout d'un champ de saisie
-        final EditText input = new EditText(getActivity());
-        builder.setView(input);
-
-        // Ajout des boutons "Annuler" et "Valider"
-        builder.setPositiveButton("Valider", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                String recordScheetName = input.getText().toString();
-                if (!recordScheetName.isEmpty()) {
-
-//                    // Recuperation de la date actuelle
-//                    Date now = new Date();
-//                    SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/YYYY HH:mm");
-//                    String date = formatter.format(now);
-
-                    // Création d'un RecordSheet
-                    RecordSheet newRecordSheet = new RecordSheet(recordScheetName, new Date(),1);
-
-                    // Ajoute la fiche d'enregistrements à la base de données
-                    databaseHelper.addRecordSheet(newRecordSheet);
-
-                    // Update the store list and refresh the spinner
-                    updateRecordSheetListViewFromDatabase(true);
-
+//    public void showAddRecordSheetDialog() {
+//        // Création d'une boîte de dialogue pour demander le nom du relevé de prix
+//        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+//        builder.setTitle("Nom du relevé de prix");
 //
-//                    // Création d'un nouvel objet PriceRecord
-//                    PriceRecordList priceRecordList = new PriceRecordList(recordName, null);
+//        // Ajout d'un champ de saisie
+//        final EditText input = new EditText(getActivity());
+//        builder.setView(input);
 //
-//                    // Ajout du nouvel objet à la liste
-//                    priceRecordList.add(priceRecord);
-//                    priceRecordListAdapter.notifyDataSetChanged();
-                }
-            }
-        });
-
-        builder.setNegativeButton("Annuler", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-
-        // Affichage de la boîte de dialogue
-        builder.show();
-    }
+//        // Ajout des boutons "Annuler" et "Valider"
+//        builder.setPositiveButton("Valider", new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialog, int which) {
+//                String recordScheetName = input.getText().toString();
+//                if (!recordScheetName.isEmpty()) {
+//
+////                    // Recuperation de la date actuelle
+////                    Date now = new Date();
+////                    SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/YYYY HH:mm");
+////                    String date = formatter.format(now);
+//
+//                    // Création d'un RecordSheet
+//                    RecordSheet newRecordSheet = new RecordSheet(recordScheetName, new Date(),1);
+//
+//                    // Ajoute la fiche d'enregistrements à la base de données
+//                    databaseHelper.addRecordSheet(newRecordSheet);
+//
+//                    // Update the store list and refresh the spinner
+//                    updateRecordSheetListViewFromDatabase(true);
+//
+////
+////                    // Création d'un nouvel objet PriceRecord
+////                    PriceRecordList priceRecordList = new PriceRecordList(recordName, null);
+////
+////                    // Ajout du nouvel objet à la liste
+////                    priceRecordList.add(priceRecord);
+////                    priceRecordListAdapter.notifyDataSetChanged();
+//                }
+//            }
+//        });
+//
+//        builder.setNegativeButton("Annuler", new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialog, int which) {
+//                dialog.cancel();
+//            }
+//        });
+//
+//        // Affichage de la boîte de dialogue
+//        builder.show();
+//    }
 
 }

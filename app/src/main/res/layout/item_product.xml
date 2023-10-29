@@ -90,14 +90,30 @@
 
                     </LinearLayout>
 
-                    <TextView
-                        android:id="@+id/productPriceTextView"
+                    <LinearLayout
+                        android:id="@+id/productPriceZone"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textAppearance="?android:textAppearanceMedium"
-                        android:textColor="@android:color/black"
-                        android:textStyle="bold"
-                        android:visibility="gone"/>
+                        android:visibility="gone"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/productPriceTextView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?android:textAppearanceMedium"
+                            android:textColor="@android:color/black"
+                            android:text="0.00"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?android:textAppearanceMedium"
+                            android:textColor="@android:color/black"
+                            android:text=" €"
+                            android:textStyle="bold" />
+                    </LinearLayout>
 
                 </LinearLayout>
 

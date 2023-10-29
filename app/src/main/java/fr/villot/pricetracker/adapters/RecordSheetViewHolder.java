@@ -1,6 +1,7 @@
 package fr.villot.pricetracker.adapters;
 
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -18,6 +19,7 @@ public class RecordSheetViewHolder extends RecyclerView.ViewHolder {
 
     private TextView nameTextView;
     private TextView dateTextView;
+    private ImageView recordSheetImageView;
 
     private CardView recordSheetCardView;
 
@@ -25,6 +27,7 @@ public class RecordSheetViewHolder extends RecyclerView.ViewHolder {
         super(itemView);
         nameTextView = itemView.findViewById(R.id.nameTextView);
         dateTextView = itemView.findViewById(R.id.dateTextView);
+        recordSheetImageView = itemView.findViewById(R.id.recordSheetImageView);
         recordSheetCardView = itemView.findViewById(R.id.recordSheetCardView);
     }
 
@@ -33,6 +36,10 @@ public class RecordSheetViewHolder extends RecyclerView.ViewHolder {
         SimpleDateFormat dateFormat = new SimpleDateFormat("EEE dd/MM/yyyy HH:mm:ss", Locale.FRANCE);
         String formattedDate = dateFormat.format(recordSheet.getDate());
         dateTextView.setText(formattedDate);
+
+        // Charger l'image du logo à partir des ressources
+        int imageResource = recordSheetImageView.getContext().getResources().getIdentifier(recordSheet.getStoreLogo(), "drawable", recordSheetImageView.getContext().getPackageName());
+        recordSheetImageView.setImageResource(imageResource);
     }
 
 

@@ -5,6 +5,7 @@ public class Store {
 
     private String name;
     private String location;
+    private String logo;
 
     public Store(String name, String location) {
         this.name = name;
@@ -37,4 +38,9 @@ public class Store {
     public void setId(int anInt) {
         id = anInt;
     }
+
+    public String getLogo() {
+        return logo;
+    }
+    public void setLogo(String logo) { this.logo = logo; }
 }
