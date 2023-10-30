@@ -14,6 +14,7 @@ import java.util.Locale;
 
 import fr.villot.pricetracker.R;
 import fr.villot.pricetracker.model.RecordSheet;
+import fr.villot.pricetracker.model.Store;
 
 public class RecordSheetViewHolder extends RecyclerView.ViewHolder {
 
@@ -38,7 +39,7 @@ public class RecordSheetViewHolder extends RecyclerView.ViewHolder {
         dateTextView.setText(formattedDate);
 
         // Charger l'image du logo à partir des ressources
-        int imageResource = recordSheetImageView.getContext().getResources().getIdentifier(recordSheet.getStoreLogo(), "drawable", recordSheetImageView.getContext().getPackageName());
+        int imageResource = recordSheetImageView.getContext().getResources().getIdentifier(recordSheet.getLogo(), "drawable", recordSheetImageView.getContext().getPackageName());
         recordSheetImageView.setImageResource(imageResource);
     }
 

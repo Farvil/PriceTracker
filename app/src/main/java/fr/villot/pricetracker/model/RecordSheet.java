@@ -11,16 +11,20 @@ public class RecordSheet {
     private String name;
     private Date date;
     private int storeId;
+
+    private String logo;
+
     private List<PriceRecord> priceRecords;
 
     public RecordSheet() {
         priceRecords = new ArrayList<>();
     }
 
-    public RecordSheet(String name, Date date, int storeId) {
+    public RecordSheet(String name, Date date, int storeId, String logo) {
         this.name = name;
         this.date = date;
         this.storeId = storeId;
+        this.logo = logo;
         priceRecords = new ArrayList<>();
     }
 
@@ -64,12 +68,15 @@ public class RecordSheet {
         return storeId;
     }
 
-    public String getStoreLogo() {
-        return "auchan";
-    }
-
-
     public void setStoreId(int storeId) {
         this.storeId = storeId;
+    }
+
+    public String getLogo() {
+        return logo;
+    }
+
+    public void setLogo(String logo) {
+        this.logo = logo;
     }
 }

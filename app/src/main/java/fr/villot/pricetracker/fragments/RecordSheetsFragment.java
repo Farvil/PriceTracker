@@ -171,7 +171,7 @@ public class RecordSheetsFragment extends Fragment {
                     Store selectedStore = (Store) storeSpinner.getSelectedItem();
                     if (selectedStore != null) {
                         // Création d'un RecordSheet
-                        RecordSheet newRecordSheet = new RecordSheet(recordSheetName, new Date(),selectedStore.getId());
+                        RecordSheet newRecordSheet = new RecordSheet(recordSheetName, new Date(),selectedStore.getId(), selectedStore.getLogo());
 
                         // Ajoute la fiche d'enregistrements à la base de données
                         databaseHelper.addRecordSheet(newRecordSheet);

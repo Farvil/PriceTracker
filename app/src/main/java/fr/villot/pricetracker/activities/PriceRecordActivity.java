@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.ActionBar;
@@ -35,6 +36,8 @@ public class PriceRecordActivity extends AppCompatActivity {
 
     private TextView storeNameTextView;
     private TextView storeLocationTextView;
+    Toolbar toolbar;
+    private ImageView storeImageView;
     private CardView storeCardView;
 
     @Override
@@ -45,9 +48,10 @@ public class PriceRecordActivity extends AppCompatActivity {
         // Récuperation des vues
         storeNameTextView = findViewById(R.id.storeNameTextView);
         storeLocationTextView = findViewById(R.id.storeLocationTextView);
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
         storeCardView = findViewById(R.id.storeCardView);
         storeCardView.setRadius(0);
+        storeImageView = findViewById(R.id.storeImageView);
 
         // Initialisation du DatabaseHelper
         databaseHelper = MyApplication.getDatabaseHelper();
@@ -57,7 +61,6 @@ public class PriceRecordActivity extends AppCompatActivity {
         RecordSheet recordSheet = databaseHelper.getRecordSheetById(recordSheetId);
 
         // Titre de la toolbar = nom de la RecordSheet
-//        String recordSheetName = getIntent().getStringExtra("record_sheet_name");
         toolbar.setTitle(recordSheet.getName());
         setSupportActionBar(toolbar);
 
@@ -67,17 +70,16 @@ public class PriceRecordActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        // TODO: Récupérer le bon magasin.
+        // Récupération du magasin
         Store store = databaseHelper.getStoreById(recordSheet.getStoreId());
         if (store != null) {
             storeNameTextView.setText(store.getName());
             storeLocationTextView.setText(store.getLocation());
+            int imageResource = storeImageView.getContext().getResources().getIdentifier(recordSheet.getLogo(), "drawable", storeImageView.getContext().getPackageName());
+            storeImageView.setImageResource(imageResource);
         }
 
-//        // Récupération des produits dans la base de données.
-//        productList = databaseHelper.getProductsOnRecordSheet(recordSheetId);
-
-        // Fragment qui gere la liste des produits.
+        // Fragment qui gere la liste des produits de la recordsheet
         RecordSheetProductsFragment recordSheetProductsFragment = RecordSheetProductsFragment.newInstance(recordSheetId);
         getSupportFragmentManager()
                 .beginTransaction()

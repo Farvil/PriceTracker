@@ -1,14 +1,21 @@
 package fr.villot.pricetracker.fragments;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
+import android.text.InputType;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+
+import androidx.appcompat.app.AlertDialog;
+
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.List;
 
-import fr.villot.pricetracker.R;
 import fr.villot.pricetracker.model.PriceRecord;
 import fr.villot.pricetracker.model.Product;
 
@@ -58,12 +65,8 @@ public class RecordSheetProductsFragment extends ProductsFragment {
     protected void addOrUpdateProduct(Product product) {
         super.addOrUpdateProduct(product);
 
-        // Ajout du produit dans la RecordSheet
-        PriceRecord priceRecord = new PriceRecord();
-        priceRecord.setRecordSheetId(recordSheetId);
-        priceRecord.setProductBarcode(product.getBarcode());
-        priceRecord.setPrice(10); // todo: stub
-        databaseHelper.addPriceRecord(priceRecord);
+        // Demander le prix à l'utilisateur et l'enregistrer dans la base de données
+        showPriceInputDialogAndUpdateDatabase(product);
     }
 
     protected void handleBarcodeScanResult(String barcode) {
@@ -72,16 +75,68 @@ public class RecordSheetProductsFragment extends ProductsFragment {
         // Sinon on propose à l'utilisateur de créer le produit.
         Product product = databaseHelper.getProductFromBarCode(barcode);
         if (product != null) {
-            PriceRecord priceRecord = new PriceRecord();
-            priceRecord.setRecordSheetId(recordSheetId);
-            priceRecord.setProductBarcode(product.getBarcode());
-            databaseHelper.addPriceRecord(priceRecord);
-
-            super.updateProductListViewFromDatabase(true);
+            showPriceInputDialogAndUpdateDatabase(product);
         }
         else {
             super.getProductDataFromOpenFoodFacts(barcode);
         }
     }
+
+    protected void updateProductListViewFromDatabase(boolean lastItemDisplayed) {
+        super.updateProductListViewFromDatabase(lastItemDisplayed);
+    }
+
+    protected void clickOnProduct(Product product) {
+        showPriceInputDialogAndUpdateDatabase(product);
+    }
+
+    private void showPriceInputDialogAndUpdateDatabase(Product product) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("Saisir le prix");
+
+        // Ajoutez un champ de texte pour la saisie du prix
+        final EditText priceEditText = new EditText(getActivity());
+        priceEditText.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        builder.setView(priceEditText);
+
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String priceStr = priceEditText.getText().toString();
+                if (!TextUtils.isEmpty(priceStr)) {
+                    try {
+                        double price = Double.parseDouble(priceStr);
+
+                        // Mettez à jour l'objet PriceRecord avec le prix saisi
+                        PriceRecord priceRecord = new PriceRecord();
+                        priceRecord.setRecordSheetId(recordSheetId);
+                        priceRecord.setProductBarcode(product.getBarcode());
+                        priceRecord.setPrice(price);
+
+                        // Ajoutez ou mettez à jour le PriceRecord dans la base de données
+                        databaseHelper.addOrUpdatePriceRecord(priceRecord);
+
+                        updateProductListViewFromDatabase(true);
+
+                        // Mettez à jour la liste des produits ou effectuez d'autres actions si nécessaires
+                        // par exemple, rafraîchir l'interface utilisateur
+                    } catch (NumberFormatException e) {
+                        // La saisie n'est pas un nombre valide, vous pouvez afficher un message d'erreur
+                        // ou prendre d'autres mesures appropriées.
+                    }
+                }
+            }
+        });
+
+        builder.setNegativeButton("Annuler", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // L'utilisateur a annulé la saisie, rien à faire.
+            }
+        });
+
+        builder.show();
+    }
+
 
 }

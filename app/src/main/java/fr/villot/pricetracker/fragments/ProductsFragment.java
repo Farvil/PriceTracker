@@ -102,9 +102,7 @@ public class ProductsFragment extends Fragment {
             public void onItemClick(Object item) {
                 if (item instanceof Product) {
                     Product product = (Product) item;
-                Snackbar.make(productRecyclerView, "TODO : Afficher les listes des relevés de prix associées au produit : "
-                        + product.getBarcode(),
-                        Snackbar.LENGTH_LONG).show();
+                    clickOnProduct(product);
                 }
             }
 
@@ -137,6 +135,12 @@ public class ProductsFragment extends Fragment {
             }
         });
 
+    }
+
+    protected void clickOnProduct(Product product) {
+        Snackbar.make(productRecyclerView, "TODO : Afficher les listes des relevés de prix associées au produit : "
+                        + product.getBarcode(),
+                Snackbar.LENGTH_LONG).show();
     }
 
     protected List<Product> getProducts() {

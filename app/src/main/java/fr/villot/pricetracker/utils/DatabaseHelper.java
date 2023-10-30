@@ -47,6 +47,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String KEY_RECORD_SHEET_NAME = "record_sheet_name";
     private static final String KEY_RECORD_SHEET_DATE = "record_sheet_date";
     private static final String KEY_RECORD_SHEET_STORE_ID = "record_sheet_store_id";
+    private static final String KEY_RECORD_SHEET_LOGO = "store_logo";
 
 
     // Table des relevés de prix
@@ -94,18 +95,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 KEY_RECORD_SHEET_NAME + " TEXT," +
                 KEY_RECORD_SHEET_DATE + " DATETIME," +
                 KEY_RECORD_SHEET_STORE_ID + " INTEGER," +
+                KEY_RECORD_SHEET_LOGO + " TEXT," +
                 "FOREIGN KEY(" + KEY_RECORD_SHEET_STORE_ID + ") REFERENCES " + TABLE_STORES + "(" + KEY_STORE_ID + ")" +
         ")";
         db.execSQL(createRecordSheetsTable);
 
         String createPriceRecordsTableQuery = "CREATE TABLE " + TABLE_PRICE_RECORDS + "("
                 + KEY_PRICE_RECORD_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                + KEY_PRICE_RECORD_PRICE + " NUMERIC(10,2),"
+                + KEY_PRICE_RECORD_PRICE + " NUMERIC(10, 2),"
                 + KEY_PRICE_RECORD_RECORD_SHEET_ID + " INTEGER,"
                 + KEY_PRICE_RECORD_PRODUCT_BARCODE + " TEXT,"
                 + "FOREIGN KEY(" + KEY_PRICE_RECORD_RECORD_SHEET_ID + ") REFERENCES " + TABLE_RECORD_SHEETS + "(" + KEY_RECORD_SHEET_ID + "),"
-                + "FOREIGN KEY(" + KEY_PRICE_RECORD_PRODUCT_BARCODE + ") REFERENCES " + TABLE_PRODUCTS + "(" + KEY_PRODUCT_BARCODE + ")"
+                + "FOREIGN KEY(" + KEY_PRICE_RECORD_PRODUCT_BARCODE + ") REFERENCES " + TABLE_PRODUCTS + "(" + KEY_PRODUCT_BARCODE + "),"
+                + "UNIQUE (" + KEY_PRICE_RECORD_RECORD_SHEET_ID + ", " + KEY_PRICE_RECORD_PRODUCT_BARCODE + ")"  // Contrainte d'unicité
                 + ")";
+
+
         db.execSQL(createPriceRecordsTableQuery);
     }
 
@@ -148,6 +153,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         // Insertion du magasin dans la table "stores"
         long storeId = db.insert(TABLE_STORES, null, values);
+        db.close();
 
         // Retourne l'ID du magasin nouvellement inséré
         return storeId;
@@ -162,17 +168,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         long currentDate = System.currentTimeMillis();
         values.put(KEY_RECORD_SHEET_DATE, currentDate);
-
         values.put(KEY_RECORD_SHEET_STORE_ID,recordSheet.getStoreId());
+        values.put(KEY_RECORD_SHEET_LOGO, recordSheet.getLogo());
 
         // Insertion de la liste de relevés de prix dans la table "price_records_lists"
         long recordSheetId = db.insert(TABLE_RECORD_SHEETS, null, values);
+        db.close();
 
         // Retourne l'ID de la liste de relevés de prix nouvellement insérée
         return recordSheetId;
     }
 
-    public long addPriceRecord(PriceRecord priceRecord) {
+    public long addOrUpdatePriceRecord(PriceRecord priceRecord) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -180,8 +187,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(KEY_PRICE_RECORD_RECORD_SHEET_ID, priceRecord.getRecordSheetId());
         values.put(KEY_PRICE_RECORD_PRODUCT_BARCODE, priceRecord.getProductBarcode());
 
-        // Insertion du relevé de prix dans la table "price_records"
-        long priceRecordId = db.insert(TABLE_PRICE_RECORDS, null, values);
+        // Ajoute ou met a jour le relevé de prix s'il existe déjà
+        long priceRecordId = db.insertWithOnConflict(TABLE_PRICE_RECORDS, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+        db.close();
 
         // Retourne l'ID du relevé de prix nouvellement inséré
         return priceRecordId;
@@ -208,6 +216,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         cursor.close();
+        db.close();
         return productList;
     }
 
@@ -231,6 +240,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 Date date = new Date(dateMillis);
                 recordSheet.setDate(date);
                 recordSheet.setStoreId(cursor.getInt(cursor.getColumnIndex(KEY_RECORD_SHEET_STORE_ID)));
+                recordSheet.setLogo(cursor.getString(cursor.getColumnIndex(KEY_RECORD_SHEET_LOGO)));
 
                 recordSheetList.add(recordSheet);
             } while (cursor.moveToNext());
@@ -264,6 +274,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         cursor.close();
+        db.close();
+
         return storeList;
     }
 
@@ -314,6 +326,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             Date date = new Date(dateMillis);
             recordSheet.setDate(date);
             recordSheet.setStoreId(cursor.getInt(cursor.getColumnIndex(KEY_RECORD_SHEET_STORE_ID)));
+            recordSheet.setLogo(cursor.getString(cursor.getColumnIndex(KEY_RECORD_SHEET_LOGO)));
         }
 
         cursor.close();
