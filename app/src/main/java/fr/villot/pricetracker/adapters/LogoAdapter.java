@@ -31,7 +31,7 @@ public class LogoAdapter extends ArrayAdapter<LogoItem> {
         LogoItem item = getItem(position);
 
         if (convertView == null) {
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.spinner_item_logo, parent, false);
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_logo_spinner, parent, false);
         }
 
         ImageView logoImageView = convertView.findViewById(R.id.logoImageView);
