@@ -131,33 +131,16 @@ public class StoresFragment extends Fragment {
 
     private void showAddStoreDialog(Context context) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+        View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_create_store, null);
+        builder.setView(dialogView);
         builder.setTitle("Ajouter un nouveau magasin");
 
-        // Create the layout for the dialog
-        LinearLayout layout = new LinearLayout(context);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(40, 20, 40, 0);
-
-        // Create EditText fields for store name and location
-        EditText nameEditText = new EditText(context);
-        nameEditText.setHint("Nom du magasin");
-        layout.addView(nameEditText);
-
-        EditText locationEditText = new EditText(context);
-        locationEditText.setHint("Localisation");
-        layout.addView(locationEditText);
-
-//        // Create a Spinner for choosing a logo
-//        Spinner logoSpinner = new Spinner(context);
-//        // Récupérez la liste des noms de logos à afficher dans le Spinner
-//        String[] logoNames = new String[]{"aldi", "auchan", "carrefour", "casino", "g20", "leclerc", "lidl", "mousquetaires", "systeme_u"};
-//        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, logoNames);
-//        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-//        logoSpinner.setAdapter(spinnerAdapter);
-//        layout.addView(logoSpinner);
+        Spinner storeLogoSpinner = dialogView.findViewById(R.id.storeLogoSpinner);
+        EditText storeNameEditText = dialogView.findViewById(R.id.storeNameEditText);
+        EditText storeLocationEditText = dialogView.findViewById(R.id.storeLocationEditText);
 
         // Create a Spinner for choosing a logo
-        Spinner logoSpinner = new Spinner(context);
         List<LogoItem> logoItems = new ArrayList<>();
 
         // Ajout des logos des magasins
@@ -173,19 +156,16 @@ public class StoresFragment extends Fragment {
 
         // Gestion de l'adapter
         LogoAdapter logoAdapter = new LogoAdapter(context, logoItems);
-        logoSpinner.setAdapter(logoAdapter);
-        layout.addView(logoSpinner);
-
-        builder.setView(layout);
+        storeLogoSpinner.setAdapter(logoAdapter);
 
         // Set up the buttons for Save and Cancel
         builder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                String name = nameEditText.getText().toString().trim();
-                String location = locationEditText.getText().toString().trim();
+                String name = storeNameEditText.getText().toString().trim();
+                String location = storeLocationEditText.getText().toString().trim();
                 // Récupérer l'objet LogoItem sélectionné
-                LogoItem selectedLogoItem = (LogoItem) logoSpinner.getSelectedItem();
+                LogoItem selectedLogoItem = (LogoItem) storeLogoSpinner.getSelectedItem();
                 String selectedLogo = selectedLogoItem.getImageName();
 
                 if (!name.isEmpty() && !location.isEmpty()) {

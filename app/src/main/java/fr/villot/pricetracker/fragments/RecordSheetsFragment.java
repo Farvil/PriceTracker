@@ -131,7 +131,7 @@ public class RecordSheetsFragment extends Fragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         View dialogView = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_create_recordsheet, null);
         builder.setView(dialogView);
-        builder.setTitle("Créer une nouvelle recordsheet");
+        builder.setTitle("Créer un nouveau relevé de prix");
 
         Spinner storeSpinner = dialogView.findViewById(R.id.storeSpinner);
         EditText recordsheetNameEditText = dialogView.findViewById(R.id.recordsheetNameEditText);
@@ -142,22 +142,6 @@ public class RecordSheetsFragment extends Fragment {
         List<Store> storeList = databaseHelper.getAllStores();
         SpinnerStoreAdapter spinnerStoreAdapter = new SpinnerStoreAdapter(getContext(), storeList);
         storeSpinner.setAdapter(spinnerStoreAdapter);
-
-//        storeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-//            @Override
-//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-//                Store selectedStore = (Store) parent.getSelectedItem();
-//                // Vous pouvez maintenant accéder aux propriétés du magasin sélectionné, par exemple :
-//                String storeName = selectedStore.getName();
-//                String storeLocation = selectedStore.getLocation();
-//                // et ainsi de suite...
-//            }
-//
-//            @Override
-//            public void onNothingSelected(AdapterView<?> parent) {
-//                // Action à effectuer lorsqu'aucun élément n'est sélectionné
-//            }
-//        });
 
         builder.setPositiveButton("Créer", new DialogInterface.OnClickListener() {
             @Override
