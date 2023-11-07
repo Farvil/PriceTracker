@@ -17,7 +17,12 @@ import android.widget.Spinner;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.selection.SelectionPredicates;
+import androidx.recyclerview.selection.SelectionTracker;
+import androidx.recyclerview.selection.StableIdKeyProvider;
+import androidx.recyclerview.selection.StorageStrategy;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -29,8 +34,10 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import fr.villot.pricetracker.MyApplication;
+import fr.villot.pricetracker.activities.MainActivity;
 import fr.villot.pricetracker.activities.PriceRecordActivity;
 import fr.villot.pricetracker.adapters.LogoAdapter;
+import fr.villot.pricetracker.adapters.MyDetailsLookup;
 import fr.villot.pricetracker.adapters.RecordSheetAdapter;
 import fr.villot.pricetracker.model.LogoItem;
 import fr.villot.pricetracker.model.RecordSheet;
@@ -43,7 +50,7 @@ public class StoresFragment extends Fragment {
 
     private DatabaseHelper databaseHelper;
     private RecyclerView storeRecyclerView;
-    private StoreAdapter storeAdapter;
+    public StoreAdapter storeAdapter;
     private List<Store> storeList;
     private FloatingActionButton fabAdd;
 
@@ -76,30 +83,62 @@ public class StoresFragment extends Fragment {
         storeAdapter = new StoreAdapter(getActivity(), storeList);
         storeRecyclerView.setAdapter(storeAdapter);
 
-        storeAdapter.setOnItemClickListener(new StoreAdapter.OnItemClickListener() {
+        SelectionTracker<Long> selectionTracker = new SelectionTracker.Builder<>(
+                "store_selection",
+                storeRecyclerView,
+                new StableIdKeyProvider(storeRecyclerView),
+                new MyDetailsLookup(storeRecyclerView),
+                StorageStrategy.createLongStorage()
+        ).build();
+        storeAdapter.setSelectionTracker(selectionTracker);
+
+        selectionTracker.addObserver(new SelectionTracker.SelectionObserver<Long>() {
             @Override
-            public void onItemClick(Object item) {
-                if (item instanceof Store) {
-                    Store store = (Store) item;
-                    // TODO : Afficher la liste des relevés de prix pour ce magasin.
-                    Snackbar.make(storeRecyclerView, "TODO : Afficher la liste des relevés de prix pour ce magasin : "
-                                    + store.getName(),
-                            Snackbar.LENGTH_LONG).show();
+            public void onSelectionChanged() {
+                super.onSelectionChanged();
+                // Réagir aux changements de sélection ici
+                int numSelected = selectionTracker.getSelection().size();
+                if (numSelected == 0) {
+                    ((MainActivity) requireActivity()).setSelectionMode(false);
+                    storeAdapter.notifyDataSetChanged(); // Rafraichit tous les items pour supprimer les checkbox
+                }
+                else if (numSelected == 1) {
+                    ((MainActivity) requireActivity()).setSelectionMode(true);
+                    String selectionCount = String.valueOf(numSelected) + " magasin";
+                    ((AppCompatActivity) requireActivity()).getSupportActionBar().setTitle(selectionCount);
+                }
+                else {
+                    String selectionCount = String.valueOf(numSelected) + " magasins";
+                    ((AppCompatActivity) requireActivity()).getSupportActionBar().setTitle(selectionCount);
                 }
             }
-
-            @Override
-            public void onItemLongClick(Object item) {
-                if (item instanceof Store) {
-                    Store store = (Store) item;
-                    // TODO : Gérer le long click
-                    Snackbar.make(storeRecyclerView, "TODO : Gérer le click long pour ce magasin : "
-                                    + store.getName(),
-                            Snackbar.LENGTH_LONG).show();
-                }
-            }
-
         });
+
+
+//        storeAdapter.setOnItemClickListener(new StoreAdapter.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(Object item) {
+//                if (item instanceof Store) {
+//                    Store store = (Store) item;
+//                    // TODO : Afficher la liste des relevés de prix pour ce magasin.
+//                    Snackbar.make(storeRecyclerView, "TODO : Afficher la liste des relevés de prix pour ce magasin : "
+//                                    + store.getName(),
+//                            Snackbar.LENGTH_LONG).show();
+//                }
+//            }
+//
+//            @Override
+//            public void onItemLongClick(Object item) {
+//                if (item instanceof Store) {
+//                    Store store = (Store) item;
+//                    // TODO : Gérer le long click
+//                    Snackbar.make(storeRecyclerView, "TODO : Gérer le click long pour ce magasin : "
+//                                    + store.getName(),
+//                            Snackbar.LENGTH_LONG).show();
+//                }
+//            }
+//
+//        });
 
         fabAdd = view.findViewById(R.id.fabAdd);
         fabAdd.setOnClickListener(new View.OnClickListener() {
@@ -194,5 +233,13 @@ public class StoresFragment extends Fragment {
         });
 
         builder.show();
+    }
+
+    public void clearSelection() {
+        // Logique pour effacer la sélection
+        if (storeAdapter != null && storeAdapter.getSelectionTracker() != null) {
+            storeAdapter.getSelectionTracker().clearSelection();
+            storeAdapter.notifyDataSetChanged();
+        }
     }
 }

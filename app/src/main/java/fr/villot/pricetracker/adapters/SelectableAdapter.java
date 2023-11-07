@@ -12,8 +12,6 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
-import fr.villot.pricetracker.model.Product;
-
 public abstract class SelectableAdapter<T, VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH> {
 
     protected List<T> itemList;

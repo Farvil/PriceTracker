@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.tabs.TabLayout;
@@ -18,6 +19,7 @@ import java.util.logging.Logger;
 
 import fr.villot.pricetracker.MyApplication;
 import fr.villot.pricetracker.adapters.PageAdapter;
+import fr.villot.pricetracker.fragments.StoresFragment;
 import fr.villot.pricetracker.utils.DatabaseHelper;
 import fr.villot.pricetracker.R;
 
@@ -28,6 +30,8 @@ public class MainActivity extends AppCompatActivity {
     private PageAdapter pageAdapter;
     private Toolbar toolbar;
     DrawerLayout drawerLayout;
+    private boolean isSelectionModeActive = false;
+
 
     private static final Logger logger = Logger.getLogger(MainActivity.class.getName());
 
@@ -49,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setHomeAsUpIndicator(R.drawable.ic_menu); // Remplacez ic_menu par votre icône hamburger personnalisée si nécessaire
+            actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
         }
 
         pageAdapter = new PageAdapter(getSupportFragmentManager());
@@ -62,26 +66,36 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        // Inflate the menu resource
-//        MenuInflater inflater = getMenuInflater();
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu resource
+        MenuInflater inflater = getMenuInflater();
 //        inflater.inflate(R.menu.main_menu, menu);
-//        return true;
-//    }
+        if (isSelectionModeActive)
+            inflater.inflate(R.menu.toolbar_selection_menu, menu);
+
+        return true;
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle menu item clicks
         switch (item.getItemId()) {
-            case android.R.id.home: // Cela correspond à l'ID par défaut pour le bouton d'accueil (hamburger)
-                // Gérer l'action du clic sur le bouton hamburger ici
-                // Par exemple, ouvrir le menu déroulant du DrawerLayout
-                drawerLayout.openDrawer(GravityCompat.START);
+            case android.R.id.home:
+                if (isSelectionModeActive) {
+                    setSelectionMode(false);
+                } else {
+                    // Ouverture du menu déroulant hamburger
+                    drawerLayout.openDrawer(GravityCompat.START);
+                }
                 return true;
             case R.id.action_settings:
                 // Do something when the settings menu item is clicked
                 // Replace this with the action you want to perform
+                return true;
+            case R.id.action_delete:
+                // Logique pour supprimer les éléments sélectionnés
+//                deleteSelectedItems();
                 return true;
             // Add more cases if you have more menu items
             // For example, if you have another menu item with ID "action_item2":
@@ -93,6 +107,31 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void setSelectionMode(boolean isSelectionModeActive) {
+        // Rafraichissement de la toolbar si nécessaire
+        if (this.isSelectionModeActive != isSelectionModeActive) {
+            this.isSelectionModeActive = isSelectionModeActive;
+            if (!isSelectionModeActive) {
+                getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
+                getSupportActionBar().setTitle(R.string.app_name);
+
+//                // Demande au fragment StoreFragment d'annuler la sélection
+//                if (viewPager != null && pageAdapter != null) {
+//                    int storeFragmentIndex = 1; // Store fragment
+//                    Fragment fragment = pageAdapter.getItem(storeFragmentIndex);
+//
+//                    if (fragment instanceof StoresFragment) {
+//                        StoresFragment storesFragment = (StoresFragment) fragment;
+//                        storesFragment.clearSelection();
+//                    }
+//                }
+
+            } else {
+                getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_cancel);
+            }
+            invalidateOptionsMenu(); // Rafraichissement du menu de la toolbar
+        }
+    }
 }
 
 
