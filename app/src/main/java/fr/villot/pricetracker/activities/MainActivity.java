@@ -64,6 +64,22 @@ public class MainActivity extends AppCompatActivity {
         //Design purpose. Tabs have the same width
         tabLayout.setTabMode(TabLayout.MODE_FIXED);
 
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                // L'utilisateur a changé d'onglet
+                setSelectionMode(false); // Quitter le mode de sélection
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+            }
+        });
+
     }
 
     @Override
@@ -115,16 +131,17 @@ public class MainActivity extends AppCompatActivity {
                 getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
                 getSupportActionBar().setTitle(R.string.app_name);
 
-//                // Demande au fragment StoreFragment d'annuler la sélection
-//                if (viewPager != null && pageAdapter != null) {
-//                    int storeFragmentIndex = 1; // Store fragment
-//                    Fragment fragment = pageAdapter.getItem(storeFragmentIndex);
-//
-//                    if (fragment instanceof StoresFragment) {
-//                        StoresFragment storesFragment = (StoresFragment) fragment;
-//                        storesFragment.clearSelection();
-//                    }
-//                }
+                // Demande au fragment StoreFragment d'annuler la sélection
+                if (viewPager != null && pageAdapter != null) {
+//TODO: revoir
+// viewPager.getCurrentItem()
+                    Fragment fragment = pageAdapter.getItem(pageAdapter.getItemPositionFromTitle("Magasins"));
+
+                    if (fragment instanceof StoresFragment) {
+                        StoresFragment storesFragment = (StoresFragment) fragment;
+                        storesFragment.clearSelection();
+                    }
+                }
 
             } else {
                 getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_cancel);

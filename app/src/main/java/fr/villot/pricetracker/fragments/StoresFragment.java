@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,6 +30,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -48,6 +50,7 @@ import fr.villot.pricetracker.model.Store;
 
 public class StoresFragment extends Fragment {
 
+    private static StoresFragment instance;
     private DatabaseHelper databaseHelper;
     private RecyclerView storeRecyclerView;
     public StoreAdapter storeAdapter;
@@ -55,10 +58,14 @@ public class StoresFragment extends Fragment {
     private FloatingActionButton fabAdd;
 
 
+
 //    private static final Logger logger = Logger.getLogger(StoresFragment.class.getName());
 
-    public static StoresFragment newInstance() {
-        return new StoresFragment();
+    public static StoresFragment getInstance() {
+        if (instance == null) {
+            instance = new StoresFragment();
+        }
+        return instance;
     }
 
     @Nullable
@@ -100,7 +107,7 @@ public class StoresFragment extends Fragment {
                 int numSelected = selectionTracker.getSelection().size();
                 if (numSelected == 0) {
                     ((MainActivity) requireActivity()).setSelectionMode(false);
-                    storeAdapter.notifyDataSetChanged(); // Rafraichit tous les items pour supprimer les checkbox
+//                    storeAdapter.notifyDataSetChanged(); // Rafraichit tous les items pour supprimer les checkbox
                 }
                 else if (numSelected == 1) {
                     ((MainActivity) requireActivity()).setSelectionMode(true);
@@ -239,7 +246,8 @@ public class StoresFragment extends Fragment {
         // Logique pour effacer la sélection
         if (storeAdapter != null && storeAdapter.getSelectionTracker() != null) {
             storeAdapter.getSelectionTracker().clearSelection();
-            storeAdapter.notifyDataSetChanged();
+            Log.w("StoresFragment", "clearSelection()" + storeAdapter);
+//            storeAdapter.notifyDataSetChanged();
         }
     }
 }

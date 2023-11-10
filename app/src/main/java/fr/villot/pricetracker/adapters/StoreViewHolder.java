@@ -21,7 +21,7 @@ public class StoreViewHolder extends RecyclerView.ViewHolder {
     private ImageView storeImageView;
 
     private CardView storeCardView;
-    private CheckBox storeCheckBox;
+    private ImageView storeSelectionImage;
 
     public StoreViewHolder(@NonNull View itemView) {
         super(itemView);
@@ -29,7 +29,7 @@ public class StoreViewHolder extends RecyclerView.ViewHolder {
         storeLocationTextView = itemView.findViewById(R.id.storeLocationTextView);
         storeImageView = itemView.findViewById(R.id.storeImageView);
         storeCardView = itemView.findViewById(R.id.storeCardView);
-        storeCheckBox = itemView.findViewById(R.id.storeCheckBox);
+        storeSelectionImage = itemView.findViewById(R.id.storeSelectionImage);
     }
 
 //    public void bind(Store store) {
@@ -42,7 +42,7 @@ public class StoreViewHolder extends RecyclerView.ViewHolder {
 //
 //    }
 
-    public void bind(Store store, boolean isSelected, boolean hasSelection) {
+    public void bind(Store store, boolean isSelected) {
         storeNameTextView.setText(store.getName());
         storeLocationTextView.setText(store.getLocation());
 
@@ -50,15 +50,9 @@ public class StoreViewHolder extends RecyclerView.ViewHolder {
         int imageResource = storeImageView.getContext().getResources().getIdentifier(store.getLogo(), "drawable", storeImageView.getContext().getPackageName());
         storeImageView.setImageResource(imageResource);
 
-        if (hasSelection) {
-            storeCheckBox.setVisibility(View.VISIBLE);
-        }
-        else {
-            storeCheckBox.setVisibility(View.GONE);
-        }
         if (isSelected) {
             storeCardView.setCardBackgroundColor(ContextCompat.getColor(storeCardView.getContext(), R.color.item_product_pressed_background));
-            storeCheckBox.setChecked(true);
+            storeSelectionImage.setVisibility(View.VISIBLE);
 
             // Mettez en évidence visuellement l'élément sélectionné (par exemple, changez la couleur de l'arrière-plan).
 //                itemView.setBackgroundColor(context.getResources().getColor(R.color.selected_background_color));
@@ -66,7 +60,7 @@ public class StoreViewHolder extends RecyclerView.ViewHolder {
 
         } else {
             storeCardView.setCardBackgroundColor(ContextCompat.getColor(storeCardView.getContext(), R.color.item_product_normal_background));
-            storeCheckBox.setChecked(false);
+            storeSelectionImage.setVisibility(View.GONE);
 //            itemView.setBackgroundColor(storeImageView.getResources().getColor(android.R.color.transparent));
         }
     }

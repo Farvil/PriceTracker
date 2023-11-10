@@ -38,7 +38,7 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreViewHolder> {
     @Override
     public void onBindViewHolder(StoreViewHolder holder, int position) {
         Store store = storeList.get(position);
-        holder.bind(store, selectionTracker.isSelected((long) position), selectionTracker.hasSelection());
+        holder.bind(store, selectionTracker.isSelected((long) position));
     }
 
     @Override

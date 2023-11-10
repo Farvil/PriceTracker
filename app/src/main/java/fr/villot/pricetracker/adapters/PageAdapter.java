@@ -1,5 +1,6 @@
 package fr.villot.pricetracker.adapters;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
@@ -25,11 +26,11 @@ public class PageAdapter extends FragmentPagerAdapter {
     public Fragment getItem(int position) {
         switch (position){
             case 0:
-                return ProductsFragment.newInstance();
+                return ProductsFragment.getInstance();
             case 1:
-                return StoresFragment.newInstance();
+                return StoresFragment.getInstance();
             case 2:
-                return RecordSheetsFragment.newInstance();
+                return RecordSheetsFragment.getInstance();
             default:
                 return null;
         }
@@ -48,4 +49,19 @@ public class PageAdapter extends FragmentPagerAdapter {
                 return null;
         }
     }
+
+    public int getItemPositionFromTitle(CharSequence title) {
+        if (title.equals("Produits"))
+            return 0;
+        else if (title.equals("Magasins"))
+            return 1;
+        else if (title.equals("Relevés de prix"))
+            return 2;
+        else
+            return -1;
+    }
+
+    @Override
+    public int getItemPosition(@NonNull Object object) {
+        return POSITION_UNCHANGED;    }
 }

@@ -38,7 +38,7 @@ import fr.villot.pricetracker.R;
 import fr.villot.pricetracker.model.Product;
 
 public class ProductsFragment extends Fragment {
-
+    private static ProductsFragment instance;
     protected DatabaseHelper databaseHelper;
     private RecyclerView productRecyclerView;
     protected ProductAdapter productAdapter;
@@ -48,10 +48,11 @@ public class ProductsFragment extends Fragment {
 
     private FloatingActionButton fabAdd;
 
-    public static ProductsFragment newInstance() {
-        Log.w("ProductsFragment", "newInstance()");
-
-        return new ProductsFragment();
+    public static ProductsFragment getInstance() {
+        if (instance == null) {
+            instance = new ProductsFragment();
+        }
+        return instance;
     }
 
     // Gestion du resultat de l'activité de scan

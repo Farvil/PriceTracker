@@ -6,8 +6,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 
@@ -34,15 +32,18 @@ import fr.villot.pricetracker.model.Store;
 import fr.villot.pricetracker.utils.DatabaseHelper;
 
 public class RecordSheetsFragment extends Fragment {
-
+    private static RecordSheetsFragment instance;
     private DatabaseHelper databaseHelper;
     private RecyclerView recordSheetRecyclerView;
     private RecordSheetAdapter recordSheetAdapter;
     private List<RecordSheet> recordSheetList;
     private FloatingActionButton fabAdd;
 
-    public static RecordSheetsFragment newInstance() {
-        return new RecordSheetsFragment();
+    public static RecordSheetsFragment getInstance() {
+        if (instance == null) {
+            instance = new RecordSheetsFragment();
+        }
+        return instance;
     }
 
     @Nullable
