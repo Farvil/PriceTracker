@@ -19,6 +19,7 @@ import java.util.logging.Logger;
 
 import fr.villot.pricetracker.MyApplication;
 import fr.villot.pricetracker.adapters.PageAdapter;
+import fr.villot.pricetracker.fragments.RecordSheetsFragment;
 import fr.villot.pricetracker.fragments.StoresFragment;
 import fr.villot.pricetracker.utils.DatabaseHelper;
 import fr.villot.pricetracker.R;
@@ -31,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
     private Toolbar toolbar;
     DrawerLayout drawerLayout;
     private boolean isSelectionModeActive = false;
-    private StoresFragment storesFragment;
+    private Fragment currentFragment;
 
 
     private static final Logger logger = Logger.getLogger(MainActivity.class.getName());
@@ -65,9 +66,6 @@ public class MainActivity extends AppCompatActivity {
         //Design purpose. Tabs have the same width
         tabLayout.setTabMode(TabLayout.MODE_FIXED);
 
-        // Récupération du fragment storesFragment
-        storesFragment = (StoresFragment) pageAdapter.getItem(pageAdapter.getItemPositionFromTitle("Magasins"));
-
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -76,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPageSelected(int position) {
                 // L'utilisateur a changé d'onglet
-                setSelectionMode(false); // Quitter le mode de sélection
+                setSelectionMode(currentFragment, false); // Quitter le mode de sélection
             }
 
             @Override
@@ -103,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case android.R.id.home:
                 if (isSelectionModeActive) {
-                    setSelectionMode(false);
+                    setSelectionMode(currentFragment, false);
                 } else {
                     // Ouverture du menu déroulant hamburger
                     drawerLayout.openDrawer(GravityCompat.START);
@@ -114,7 +112,15 @@ public class MainActivity extends AppCompatActivity {
                 // Replace this with the action you want to perform
                 return true;
             case R.id.action_delete:
-                storesFragment.deleteSelectedItems();
+                if (currentFragment instanceof StoresFragment) {
+                    StoresFragment storesFragment = (StoresFragment) currentFragment;
+                    storesFragment.deleteSelectedItems();
+                }
+                else if (currentFragment instanceof RecordSheetsFragment) {
+                    RecordSheetsFragment recordSheetsFragment = (RecordSheetsFragment) currentFragment;
+                    recordSheetsFragment.deleteSelectedItems();
+                }
+
                 return true;
             // Add more cases if you have more menu items
             // For example, if you have another menu item with ID "action_item2":
@@ -126,7 +132,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void setSelectionMode(boolean isSelectionModeActive) {
+    public void setSelectionMode(Fragment fragment, boolean isSelectionModeActive) {
+
+        //Sauvegarde le fragment en cours pour les actions de la toolbar
+        currentFragment = fragment;
+
         // Rafraichissement de la toolbar si nécessaire
         if (this.isSelectionModeActive != isSelectionModeActive) {
             this.isSelectionModeActive = isSelectionModeActive;
@@ -134,19 +144,14 @@ public class MainActivity extends AppCompatActivity {
                 getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
                 getSupportActionBar().setTitle(R.string.app_name);
 
-                storesFragment.clearSelection();
-
-//                // Demande au fragment StoreFragment d'annuler la sélection
-//                if (viewPager != null && pageAdapter != null) {
-////TODO: revoir
-//// viewPager.getCurrentItem()
-//                    Fragment fragment = pageAdapter.getItem(pageAdapter.getItemPositionFromTitle("Magasins"));
-//
-//                    if (fragment instanceof StoresFragment) {
-//                        StoresFragment storesFragment = (StoresFragment) fragment;
-//                        storesFragment.clearSelection();
-//                    }
-//                }
+                if (currentFragment instanceof StoresFragment) {
+                    StoresFragment storesFragment = (StoresFragment) currentFragment;
+                    storesFragment.clearSelection();
+                }
+                else if (currentFragment instanceof RecordSheetsFragment) {
+                    RecordSheetsFragment recordSheetsFragment = (RecordSheetsFragment) currentFragment;
+                    recordSheetsFragment.clearSelection();
+                }
 
             } else {
                 getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_cancel);

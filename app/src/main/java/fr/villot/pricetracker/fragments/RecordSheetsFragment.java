@@ -12,7 +12,12 @@ import android.widget.Spinner;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.selection.Selection;
+import androidx.recyclerview.selection.SelectionTracker;
+import androidx.recyclerview.selection.StableIdKeyProvider;
+import androidx.recyclerview.selection.StorageStrategy;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -24,7 +29,9 @@ import java.util.List;
 
 import fr.villot.pricetracker.MyApplication;
 import fr.villot.pricetracker.R;
+import fr.villot.pricetracker.activities.MainActivity;
 import fr.villot.pricetracker.activities.PriceRecordActivity;
+import fr.villot.pricetracker.adapters.MyDetailsLookup;
 import fr.villot.pricetracker.adapters.RecordSheetAdapter;
 import fr.villot.pricetracker.adapters.SpinnerStoreAdapter;
 import fr.villot.pricetracker.model.RecordSheet;
@@ -38,6 +45,8 @@ public class RecordSheetsFragment extends Fragment {
     private RecordSheetAdapter recordSheetAdapter;
     private List<RecordSheet> recordSheetList;
     private FloatingActionButton fabAdd;
+    private static final String RECORDSHEET_SELECTION_KEY = "recordsheet_selection";
+
 
     public static RecordSheetsFragment getInstance() {
         if (instance == null) {
@@ -72,30 +81,48 @@ public class RecordSheetsFragment extends Fragment {
         recordSheetAdapter = new RecordSheetAdapter(getActivity(), recordSheetList);
         recordSheetRecyclerView.setAdapter(recordSheetAdapter);
 
-        recordSheetAdapter.setOnItemClickListener(new RecordSheetAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(Object item) {
-                if (item instanceof RecordSheet) {
-                    RecordSheet recordSheet = (RecordSheet) item;
-                    Intent intent = new Intent(getActivity(), PriceRecordActivity.class);
-                    intent.putExtra("record_sheet_name", recordSheet.getName());
-                    intent.putExtra("record_sheet_id", recordSheet.getId());
-                    startActivity(intent);
+        // Gestion de la selection d'items
+        SelectionTracker<Long> selectionTracker = new SelectionTracker.Builder<>(
+                RECORDSHEET_SELECTION_KEY,
+                recordSheetRecyclerView,
+                new StableIdKeyProvider(recordSheetRecyclerView),
+                new MyDetailsLookup(recordSheetRecyclerView),
+                StorageStrategy.createLongStorage()
+        ).build();
+        recordSheetAdapter.setSelectionTracker(selectionTracker);
 
+        selectionTracker.addObserver(new SelectionTracker.SelectionObserver<Long>() {
+            @Override
+            public void onSelectionChanged() {
+                super.onSelectionChanged();
+                // Réagir aux changements de sélection ici
+                int numSelected = selectionTracker.getSelection().size();
+                if (numSelected == 0) {
+                    ((MainActivity) requireActivity()).setSelectionMode(getInstance(),false);
+                    fabAdd.setVisibility(View.VISIBLE);
+                }
+                else if (numSelected == 1) {
+                    ((MainActivity) requireActivity()).setSelectionMode(getInstance(),true);
+                    String selectionCount = String.valueOf(numSelected) + " relevé";
+                    ((AppCompatActivity) requireActivity()).getSupportActionBar().setTitle(selectionCount);
+                    fabAdd.setVisibility(View.INVISIBLE);
+                }
+                else {
+                    String selectionCount = String.valueOf(numSelected) + " relevés";
+                    ((AppCompatActivity) requireActivity()).getSupportActionBar().setTitle(selectionCount);
                 }
             }
+        });
 
+        //Lancement de l'activité PriceRecordActivity sur clic d'un relevé de prix
+        recordSheetAdapter.setOnItemClickListener(new RecordSheetAdapter.OnItemClickListener<RecordSheet>() {
             @Override
-            public void onItemLongClick(Object item) {
-                if (item instanceof RecordSheet) {
-                    RecordSheet recordSheet = (RecordSheet) item;
-                    Snackbar.make(recordSheetRecyclerView, "TODO : Afficher les options du relevé de prix : "
-                                    + recordSheet.getName(),
-                            Snackbar.LENGTH_LONG).show();
-
-                }
+            public void onItemClick(RecordSheet recordSheet) {
+                Intent intent = new Intent(getActivity(), PriceRecordActivity.class);
+                intent.putExtra("record_sheet_name", recordSheet.getName());
+                intent.putExtra("record_sheet_id", recordSheet.getId());
+                startActivity(intent);
             }
-
         });
 
         // Action du bouton flottant
@@ -176,57 +203,32 @@ public class RecordSheetsFragment extends Fragment {
         dialog.show();
     }
 
+    public void clearSelection() {
+        // Logique pour effacer la sélection
+        if (recordSheetAdapter != null && recordSheetAdapter.getSelectionTracker() != null) {
+            recordSheetAdapter.getSelectionTracker().clearSelection();
+            fabAdd.setVisibility(View.VISIBLE);
+        }
+    }
 
-//    public void showAddRecordSheetDialog() {
-//        // Création d'une boîte de dialogue pour demander le nom du relevé de prix
-//        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-//        builder.setTitle("Nom du relevé de prix");
-//
-//        // Ajout d'un champ de saisie
-//        final EditText input = new EditText(getActivity());
-//        builder.setView(input);
-//
-//        // Ajout des boutons "Annuler" et "Valider"
-//        builder.setPositiveButton("Valider", new DialogInterface.OnClickListener() {
-//            @Override
-//            public void onClick(DialogInterface dialog, int which) {
-//                String recordScheetName = input.getText().toString();
-//                if (!recordScheetName.isEmpty()) {
-//
-////                    // Recuperation de la date actuelle
-////                    Date now = new Date();
-////                    SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/YYYY HH:mm");
-////                    String date = formatter.format(now);
-//
-//                    // Création d'un RecordSheet
-//                    RecordSheet newRecordSheet = new RecordSheet(recordScheetName, new Date(),1);
-//
-//                    // Ajoute la fiche d'enregistrements à la base de données
-//                    databaseHelper.addRecordSheet(newRecordSheet);
-//
-//                    // Update the store list and refresh the spinner
-//                    updateRecordSheetListViewFromDatabase(true);
-//
-////
-////                    // Création d'un nouvel objet PriceRecord
-////                    PriceRecordList priceRecordList = new PriceRecordList(recordName, null);
-////
-////                    // Ajout du nouvel objet à la liste
-////                    priceRecordList.add(priceRecord);
-////                    priceRecordListAdapter.notifyDataSetChanged();
-//                }
-//            }
-//        });
-//
-//        builder.setNegativeButton("Annuler", new DialogInterface.OnClickListener() {
-//            @Override
-//            public void onClick(DialogInterface dialog, int which) {
-//                dialog.cancel();
-//            }
-//        });
-//
-//        // Affichage de la boîte de dialogue
-//        builder.show();
-//    }
+    public void deleteSelectedItems() {
+        if (recordSheetAdapter != null && recordSheetAdapter.getSelectionTracker() != null) {
+
+            Selection<Long> selection = recordSheetAdapter.getSelectionTracker().getSelection();
+
+            String toDelete = new String();
+            for (Long selectedItem : selection) {
+                RecordSheet recordSheet = recordSheetList.get(selectedItem.intValue());
+//                databaseHelper.deleteRecordSheet(recordSheet.getId());
+                toDelete += recordSheet.getName() + " ";
+            }
+
+            Snackbar.make(getView(),"RecordSheet : " + toDelete, Snackbar.LENGTH_SHORT).show();
+
+            // Mettre à jour la liste après la suppression
+            updateRecordSheetListViewFromDatabase(false);
+            clearSelection();
+        }
+    }
 
 }

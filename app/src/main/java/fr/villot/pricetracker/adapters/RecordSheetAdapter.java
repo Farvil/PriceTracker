@@ -6,46 +6,78 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.selection.SelectionTracker;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
 import fr.villot.pricetracker.R;
 import fr.villot.pricetracker.model.Product;
 import fr.villot.pricetracker.model.RecordSheet;
+import fr.villot.pricetracker.model.Store;
 
-public class RecordSheetAdapter extends SelectableAdapter<RecordSheet, RecordSheetViewHolder> {
+public class RecordSheetAdapter extends RecyclerView.Adapter<RecordSheetViewHolder> {
 
+    private List<RecordSheet> recordSheetList;
     private Context context;
+    private SelectionTracker<Long> selectionTracker;
+
+    private OnItemClickListener<RecordSheet> onItemClickListener;
+
+    public interface OnItemClickListener<RecordSheet> {
+        void onItemClick(RecordSheet recordSheet);
+    }
+
+    public void setOnItemClickListener(OnItemClickListener<RecordSheet> listener) {
+        this.onItemClickListener = listener;
+    }
 
     public RecordSheetAdapter(Context context, List<RecordSheet> recordSheetList) {
-        super(recordSheetList);
         this.context = context;
+        this.recordSheetList = recordSheetList;
+        setHasStableIds(true); // Indique que les IDs sont stables.
     }
 
-    @NonNull
-    @Override
-    protected int getItemLayoutId() {
-        return R.layout.item_record_sheet;
+    public void setSelectionTracker(SelectionTracker<Long> selectionTracker) {
+        this.selectionTracker = selectionTracker;
     }
 
-    @NonNull
     @Override
-    protected RecordSheetViewHolder createViewHolder(View view) {
+    public RecordSheetViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(context).inflate(R.layout.item_record_sheet, parent, false);
         return new RecordSheetViewHolder(view);
     }
 
     @Override
-    protected void bindViewHolder(RecordSheetViewHolder holder, RecordSheet recordSheet) {
-        holder.bind(recordSheet);
+    public void onBindViewHolder(RecordSheetViewHolder holder, int position) {
+        RecordSheet recordSheet = recordSheetList.get(position);
+        holder.bind(recordSheet, selectionTracker.isSelected((long) position));
+
+        holder.itemView.setOnClickListener(view -> {
+            if (onItemClickListener != null) {
+                onItemClickListener.onItemClick(recordSheetList.get(position));
+            }
+        });
     }
 
-//    protected void setItemSelection(RecordSheetViewHolder holder, int position, boolean isSelected) {
-//        holder.setSelected(isSelected);
-//    }
-    protected void setItemSelection(SelectableAdapter<RecordSheet, RecordSheetViewHolder> adapter, int position, boolean isSelected) {
-        RecordSheetViewHolder holder = adapter.getViewHolderAtPosition(position);
-        if (holder != null) {
-            holder.setSelected(isSelected);
-        }
+    @Override
+    public int getItemCount() {
+        return recordSheetList.size();
     }
+
+    public void setItemList(List<RecordSheet> itemList) {
+        this.recordSheetList = itemList;
+        notifyDataSetChanged();
+    }
+
+    @Override
+    public long getItemId(int position) {
+        // Retourne un ID unique pour chaque élément, par exemple, l'ID de l'élément à la position donnée.
+        return position;
+    }
+
+    public SelectionTracker<Long> getSelectionTracker() {
+        return selectionTracker;
+    }
+
 }

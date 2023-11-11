@@ -58,6 +58,8 @@ public class StoresFragment extends Fragment {
     private List<Store> storeList;
     private FloatingActionButton fabAdd;
 
+    private static final String STORE_SELECTION_KEY = "store_selection";
+
 
 
 //    private static final Logger logger = Logger.getLogger(StoresFragment.class.getName());
@@ -92,7 +94,7 @@ public class StoresFragment extends Fragment {
         storeRecyclerView.setAdapter(storeAdapter);
 
         SelectionTracker<Long> selectionTracker = new SelectionTracker.Builder<>(
-                "store_selection",
+                STORE_SELECTION_KEY,
                 storeRecyclerView,
                 new StableIdKeyProvider(storeRecyclerView),
                 new MyDetailsLookup(storeRecyclerView),
@@ -107,11 +109,11 @@ public class StoresFragment extends Fragment {
                 // Réagir aux changements de sélection ici
                 int numSelected = selectionTracker.getSelection().size();
                 if (numSelected == 0) {
-                    ((MainActivity) requireActivity()).setSelectionMode(false);
+                    ((MainActivity) requireActivity()).setSelectionMode(getInstance(),false);
                     fabAdd.setVisibility(View.VISIBLE);
                 }
                 else if (numSelected == 1) {
-                    ((MainActivity) requireActivity()).setSelectionMode(true);
+                    ((MainActivity) requireActivity()).setSelectionMode(getInstance(),true);
                     String selectionCount = String.valueOf(numSelected) + " magasin";
                     ((AppCompatActivity) requireActivity()).getSupportActionBar().setTitle(selectionCount);
                     fabAdd.setVisibility(View.INVISIBLE);

@@ -54,9 +54,9 @@
                 android:id="@+id/storeSelectionImage"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:scaleType="centerInside"
                 android:layout_weight="1"
-                android:visibility="invisible"
+                android:scaleType="centerInside"
+                android:visibility="gone"
                 android:src="@drawable/ic_check" />
 
         </LinearLayout>
