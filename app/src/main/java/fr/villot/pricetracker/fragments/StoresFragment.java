@@ -20,6 +20,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.selection.Selection;
 import androidx.recyclerview.selection.SelectionPredicates;
 import androidx.recyclerview.selection.SelectionTracker;
 import androidx.recyclerview.selection.StableIdKeyProvider;
@@ -107,12 +108,13 @@ public class StoresFragment extends Fragment {
                 int numSelected = selectionTracker.getSelection().size();
                 if (numSelected == 0) {
                     ((MainActivity) requireActivity()).setSelectionMode(false);
-//                    storeAdapter.notifyDataSetChanged(); // Rafraichit tous les items pour supprimer les checkbox
+                    fabAdd.setVisibility(View.VISIBLE);
                 }
                 else if (numSelected == 1) {
                     ((MainActivity) requireActivity()).setSelectionMode(true);
                     String selectionCount = String.valueOf(numSelected) + " magasin";
                     ((AppCompatActivity) requireActivity()).getSupportActionBar().setTitle(selectionCount);
+                    fabAdd.setVisibility(View.INVISIBLE);
                 }
                 else {
                     String selectionCount = String.valueOf(numSelected) + " magasins";
@@ -246,8 +248,28 @@ public class StoresFragment extends Fragment {
         // Logique pour effacer la sélection
         if (storeAdapter != null && storeAdapter.getSelectionTracker() != null) {
             storeAdapter.getSelectionTracker().clearSelection();
-            Log.w("StoresFragment", "clearSelection()" + storeAdapter);
-//            storeAdapter.notifyDataSetChanged();
+            fabAdd.setVisibility(View.VISIBLE);
         }
     }
+
+    public void deleteSelectedItems() {
+        if (storeAdapter != null && storeAdapter.getSelectionTracker() != null) {
+
+            Selection<Long> selection = storeAdapter.getSelectionTracker().getSelection();
+
+//            String toDelete = new String();
+            for (Long selectedItem : selection) {
+                Store store = storeList.get(selectedItem.intValue());
+                databaseHelper.deleteStore(store.getId());
+//                toDelete += store.getName() + " ";
+            }
+
+//            Snackbar.make(getView(),"Store : " + toDelete, Snackbar.LENGTH_SHORT).show();
+
+            // Mettre à jour la liste après la suppression
+            updateStoreListViewFromDatabase(false);
+            clearSelection();
+        }
+    }
+
 }

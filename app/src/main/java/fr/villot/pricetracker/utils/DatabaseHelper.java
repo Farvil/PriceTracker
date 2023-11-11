@@ -381,4 +381,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return product;
     }
+
+    public void deleteStore(long storeId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        //TODO : Supprimer uniquement si pas de dependances
+        // Supprimer le magasin en utilisant l'ID
+        db.delete(TABLE_STORES, KEY_STORE_ID + " = ?", new String[]{String.valueOf(storeId)});
+
+        db.close();
+    }
+
 }

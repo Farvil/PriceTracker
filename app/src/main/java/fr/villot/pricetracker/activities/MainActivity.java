@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
     private Toolbar toolbar;
     DrawerLayout drawerLayout;
     private boolean isSelectionModeActive = false;
+    private StoresFragment storesFragment;
 
 
     private static final Logger logger = Logger.getLogger(MainActivity.class.getName());
@@ -63,6 +64,9 @@ public class MainActivity extends AppCompatActivity {
         tabLayout.setupWithViewPager(viewPager);
         //Design purpose. Tabs have the same width
         tabLayout.setTabMode(TabLayout.MODE_FIXED);
+
+        // Récupération du fragment storesFragment
+        storesFragment = (StoresFragment) pageAdapter.getItem(pageAdapter.getItemPositionFromTitle("Magasins"));
 
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -110,8 +114,7 @@ public class MainActivity extends AppCompatActivity {
                 // Replace this with the action you want to perform
                 return true;
             case R.id.action_delete:
-                // Logique pour supprimer les éléments sélectionnés
-//                deleteSelectedItems();
+                storesFragment.deleteSelectedItems();
                 return true;
             // Add more cases if you have more menu items
             // For example, if you have another menu item with ID "action_item2":
@@ -131,17 +134,19 @@ public class MainActivity extends AppCompatActivity {
                 getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
                 getSupportActionBar().setTitle(R.string.app_name);
 
-                // Demande au fragment StoreFragment d'annuler la sélection
-                if (viewPager != null && pageAdapter != null) {
-//TODO: revoir
-// viewPager.getCurrentItem()
-                    Fragment fragment = pageAdapter.getItem(pageAdapter.getItemPositionFromTitle("Magasins"));
+                storesFragment.clearSelection();
 
-                    if (fragment instanceof StoresFragment) {
-                        StoresFragment storesFragment = (StoresFragment) fragment;
-                        storesFragment.clearSelection();
-                    }
-                }
+//                // Demande au fragment StoreFragment d'annuler la sélection
+//                if (viewPager != null && pageAdapter != null) {
+////TODO: revoir
+//// viewPager.getCurrentItem()
+//                    Fragment fragment = pageAdapter.getItem(pageAdapter.getItemPositionFromTitle("Magasins"));
+//
+//                    if (fragment instanceof StoresFragment) {
+//                        StoresFragment storesFragment = (StoresFragment) fragment;
+//                        storesFragment.clearSelection();
+//                    }
+//                }
 
             } else {
                 getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_cancel);
