@@ -78,7 +78,7 @@ public class RecordSheetProductsFragment extends ProductsFragment {
             showPriceInputDialogAndUpdateDatabase(product);
         }
         else {
-            super.getProductDataFromOpenFoodFacts(barcode);
+            super.getProductDataFromOpenFoodFacts(barcode, false);
         }
     }
 

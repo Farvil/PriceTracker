@@ -10,6 +10,8 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.selection.ItemDetailsLookup;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.squareup.picasso.Picasso;
+
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
@@ -45,6 +47,7 @@ public class RecordSheetViewHolder extends RecyclerView.ViewHolder {
         // Charger l'image du logo à partir des ressources
         int imageResource = recordSheetImageView.getContext().getResources().getIdentifier(recordSheet.getLogo(), "drawable", recordSheetImageView.getContext().getPackageName());
         recordSheetImageView.setImageResource(imageResource);
+//        Picasso.get().load(imageResource).into(recordSheetImageView);
 
         if (isSelected) {
             recordSheetCardView.setCardBackgroundColor(ContextCompat.getColor(recordSheetCardView.getContext(), R.color.item_product_pressed_background));

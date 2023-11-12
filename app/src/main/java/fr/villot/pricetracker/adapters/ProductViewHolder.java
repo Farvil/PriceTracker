@@ -7,6 +7,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.selection.ItemDetailsLookup;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.squareup.picasso.Picasso;
@@ -25,7 +27,8 @@ public class ProductViewHolder extends RecyclerView.ViewHolder {
     private LinearLayout productPriceZone;
     private ImageView productImageView;
     public CheckBox productCheckBox;
-    private CheckBoxListener checkBoxListener;
+
+    private ImageView productSelectionImage;
 
     public interface CheckBoxListener {
         void onCheckBoxClick(int position, boolean isChecked);
@@ -43,21 +46,18 @@ public class ProductViewHolder extends RecyclerView.ViewHolder {
         productPriceTextView = itemView.findViewById(R.id.productPriceTextView);
         productPriceZone = itemView.findViewById(R.id.productPriceZone);
         productImageView = itemView.findViewById(R.id.productImageView);
-        productCheckBox = itemView.findViewById(R.id.productCheckBox);
+        productSelectionImage = itemView.findViewById(R.id.productSelectionImage);
 
-        productCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (checkBoxListener != null) {
-                checkBoxListener.onCheckBoxClick(getAdapterPosition(), isChecked);
-            }
-        });
     }
 
-    public void bind(Product product) {
+    public void bind(Product product, boolean isSelected) {
         // Mettre à jour les vues avec les données du produit
         productBarcodeTextView.setText(product.getBarcode());
         productNameTextView.setText(product.getName());
         productBrandTextView.setText(product.getBrand());
         productQuantityTextView.setText(product.getQuantity());
+
+        // Gestion de la zone de prix
         Double price = product.getPrice();
         if (price != null) {
             productPriceZone.setVisibility(View.VISIBLE);
@@ -69,32 +69,29 @@ public class ProductViewHolder extends RecyclerView.ViewHolder {
 
         // Utiliser Picasso pour charger l'image à partir de l'URL et l'afficher dans ImageView
         Picasso.get().load(product.getImageUrl()).into(productImageView);
-    }
 
-    public void setSelected(boolean isSelected) {
-        productCheckBox.setVisibility(View.VISIBLE);
-        productCheckBox.setChecked(isSelected);
-        // Couleur de selection
-//        if (isSelected)
-//            productCardView.setCardBackgroundColor(ContextCompat.getColor(productCardView.getContext(), R.color.item_product_pressed_background));
-//        else
-//            productCardView.setCardBackgroundColor(ContextCompat.getColor(productCardView.getContext(), R.color.item_product_normal_background));
-    }
+        // Gestion de la selection
+        if (isSelected) {
+            productCardView.setCardBackgroundColor(ContextCompat.getColor(productCardView.getContext(), R.color.item_product_pressed_background));
+            productSelectionImage.setVisibility(View.VISIBLE);
 
-    public void setSelectionMode(boolean isSelectionMode) {
-        if (isSelectionMode) {
-            productCheckBox.setVisibility(View.VISIBLE);
         } else {
-            productCheckBox.setVisibility(View.GONE);
+            productCardView.setCardBackgroundColor(ContextCompat.getColor(productCardView.getContext(), R.color.item_product_normal_background));
+            productSelectionImage.setVisibility(View.GONE);
         }
     }
 
-    public void setCheckBoxListener(CheckBoxListener listener) {
-        this.checkBoxListener = listener;
-    }
+    public ItemDetailsLookup.ItemDetails<Long> getItemDetails() {
+        return new ItemDetailsLookup.ItemDetails<Long>() {
+            @Override
+            public int getPosition() {
+                return getAdapterPosition();
+            }
 
-    public void setCheckBoxChecked(boolean isChecked) {
-        productCheckBox.setChecked(isChecked);
+            @Override
+            public Long getSelectionKey() {
+                return (long) getAdapterPosition();
+            }
+        };
     }
-
 }

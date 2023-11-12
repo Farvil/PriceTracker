@@ -19,7 +19,10 @@ public class MyDetailsLookup extends ItemDetailsLookup<Long> {
         View view = recyclerView.findChildViewUnder(e.getX(), e.getY());
         if (view != null) {
             RecyclerView.ViewHolder viewHolder = recyclerView.getChildViewHolder(view);
-            if (viewHolder instanceof StoreViewHolder) {
+            if (viewHolder instanceof ProductViewHolder) {
+                return ((ProductViewHolder) viewHolder).getItemDetails();
+            }
+            else if (viewHolder instanceof StoreViewHolder) {
                 return ((StoreViewHolder) viewHolder).getItemDetails();
             }
             else if (viewHolder instanceof RecordSheetViewHolder) {

@@ -19,6 +19,7 @@ import java.util.logging.Logger;
 
 import fr.villot.pricetracker.MyApplication;
 import fr.villot.pricetracker.adapters.PageAdapter;
+import fr.villot.pricetracker.fragments.ProductsFragment;
 import fr.villot.pricetracker.fragments.RecordSheetsFragment;
 import fr.villot.pricetracker.fragments.StoresFragment;
 import fr.villot.pricetracker.utils.DatabaseHelper;
@@ -112,7 +113,11 @@ public class MainActivity extends AppCompatActivity {
                 // Replace this with the action you want to perform
                 return true;
             case R.id.action_delete:
-                if (currentFragment instanceof StoresFragment) {
+                if (currentFragment instanceof ProductsFragment) {
+                    ProductsFragment productsFragment = (ProductsFragment) currentFragment;
+                    productsFragment.deleteSelectedItems();
+                }
+                else if (currentFragment instanceof StoresFragment) {
                     StoresFragment storesFragment = (StoresFragment) currentFragment;
                     storesFragment.deleteSelectedItems();
                 }
@@ -144,7 +149,11 @@ public class MainActivity extends AppCompatActivity {
                 getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
                 getSupportActionBar().setTitle(R.string.app_name);
 
-                if (currentFragment instanceof StoresFragment) {
+                if (currentFragment instanceof ProductsFragment) {
+                    ProductsFragment productsFragment = (ProductsFragment) currentFragment;
+                    productsFragment.clearSelection();
+                }
+                else if (currentFragment instanceof StoresFragment) {
                     StoresFragment storesFragment = (StoresFragment) currentFragment;
                     storesFragment.clearSelection();
                 }
