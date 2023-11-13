@@ -86,10 +86,6 @@ public class RecordSheetProductsFragment extends ProductsFragment {
         super.updateProductListViewFromDatabase(lastItemDisplayed);
     }
 
-    protected void clickOnProduct(Product product) {
-        showPriceInputDialogAndUpdateDatabase(product);
-    }
-
     private void showPriceInputDialogAndUpdateDatabase(Product product) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("Saisir le prix");

@@ -34,13 +34,16 @@ import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
 import com.squareup.picasso.Picasso;
 
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 import fr.villot.pricetracker.MyApplication;
 import fr.villot.pricetracker.activities.BarCodeScannerActivity;
 import fr.villot.pricetracker.activities.MainActivity;
 import fr.villot.pricetracker.adapters.MyDetailsLookup;
 import fr.villot.pricetracker.adapters.ProductAdapter;
+import fr.villot.pricetracker.model.Store;
 import fr.villot.pricetracker.utils.DatabaseHelper;
 import fr.villot.pricetracker.utils.OpenFoodFactsAPIManager;
 import fr.villot.pricetracker.R;
@@ -314,7 +317,7 @@ public class ProductsFragment extends Fragment {
                 title = "Ajouter le produit ?";
                 break;
             case DIALOG_TYPE_UPDATE:
-                title = "Mettre à jour le produit ?";
+                title = "Mettre à jour les données du produit ?";
                 break;
             case DIALOG_TYPE_INFO:
                 title = "Lancer un navigateur ?";
@@ -335,12 +338,18 @@ public class ProductsFragment extends Fragment {
 
                 switch (dialogType) {
                     case DIALOG_TYPE_ADD:
-                    case DIALOG_TYPE_UPDATE:
                         // Ajouter le produit à la base de données et à la ListView
                         addOrUpdateProduct(product);
 
                         // Afficher la nouvelle liste avec ce produit en fin de liste.
                         updateProductListViewFromDatabase(true);
+                        break;
+                    case DIALOG_TYPE_UPDATE:
+                        // Ajouter le produit à la base de données et à la ListView
+                        databaseHelper.updateProduct(product);
+
+                        // Afficher la nouvelle liste avec ce produit en fin de liste.
+                        updateProductListViewFromDatabase(false);
                         break;
                     case DIALOG_TYPE_INFO:
                         String barcode = product.getBarcode();
@@ -385,25 +394,99 @@ public class ProductsFragment extends Fragment {
             fabAdd.setVisibility(View.VISIBLE);
         }
     }
+//
+//    public void deleteSelectedItems() {
+//
+//        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+//        builder.setMessage("Voulez-vous vraiment supprimer les produits sélectionnés ?");
+//
+//        builder.setPositiveButton("Oui", new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialog, int which) {
+//
+//                if (productAdapter != null && productAdapter.getSelectionTracker() != null) {
+//
+//                    Selection<Long> selection = productAdapter.getSelectionTracker().getSelection();
+//
+//                    String toDelete = new String();
+//                    for (Long selectedItem : selection) {
+//                        Product product = productList.get(selectedItem.intValue());
+////                databaseHelper.deleteProduct(product.getId());
+//                        toDelete += product.getName() + " ";
+//                    }
+//
+//                    Snackbar.make(getView(),"Product : " + toDelete, Snackbar.LENGTH_SHORT).show();
+//
+//                    // Mettre à jour la liste après la suppression
+//                    updateProductListViewFromDatabase(false);
+//                    clearSelection();
+//                }
+//
+//            }
+//        });
+//
+//        builder.setNegativeButton("Non", null);
+//
+//        AlertDialog dialog = builder.create();
+//        dialog.show();
+//
+//    }
+
+
 
     public void deleteSelectedItems() {
         if (productAdapter != null && productAdapter.getSelectionTracker() != null) {
-
             Selection<Long> selection = productAdapter.getSelectionTracker().getSelection();
+            Queue<Product> productsToDelete = new LinkedList<>();
 
-            String toDelete = new String();
+            // Ajout des magasins à supprimer à la file d'attente
             for (Long selectedItem : selection) {
                 Product product = productList.get(selectedItem.intValue());
-//                databaseHelper.deleteProduct(product.getId());
-                toDelete += product.getName() + " ";
+                productsToDelete.offer(product);
             }
 
-            Snackbar.make(getView(),"Product : " + toDelete, Snackbar.LENGTH_SHORT).show();
+            // Suppression des magasins de la file d'attente
+            deleteProductsInQueue(productsToDelete);
 
-            // Mettre à jour la liste après la suppression
-            updateProductListViewFromDatabase(false);
+            // Annule le mode de selection
             clearSelection();
         }
     }
 
+    private void deleteProductsInQueue(Queue<Product> productsToDelete) {
+        if (!productsToDelete.isEmpty()) {
+            Product product = productsToDelete.poll();
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setMessage("Voulez-vous vraiment supprimer le produit " + product.getName() + " ?");
+            builder.setCancelable(false);
+
+            builder.setPositiveButton("Oui", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    // Suppression uniquement si pas de dépendances avec des priceRecords.
+                    if (!databaseHelper.hasPriceRecordsOnProduct(product.getBarcode())) {
+                        databaseHelper.deleteProduct(product.getBarcode());
+                        updateProductListViewFromDatabase(false);
+                    } else {
+                        Snackbar.make(getView(), "Suppression impossible car au moins un relevé de prix associée au produit", Snackbar.LENGTH_SHORT).show();
+                    }
+
+                    // Appeler la suppression des magasins restants dans la file d'attente
+                    deleteProductsInQueue(productsToDelete);
+                }
+            });
+
+            builder.setNegativeButton("Non", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    // Si l'utilisateur clique sur "Non", passage au magasin suivant dans la file d'attente
+                    deleteProductsInQueue(productsToDelete);
+                }
+            });
+
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        }
+    }
 }

@@ -34,6 +34,7 @@ import fr.villot.pricetracker.activities.PriceRecordActivity;
 import fr.villot.pricetracker.adapters.MyDetailsLookup;
 import fr.villot.pricetracker.adapters.RecordSheetAdapter;
 import fr.villot.pricetracker.adapters.SpinnerStoreAdapter;
+import fr.villot.pricetracker.model.Product;
 import fr.villot.pricetracker.model.RecordSheet;
 import fr.villot.pricetracker.model.Store;
 import fr.villot.pricetracker.utils.DatabaseHelper;
@@ -212,23 +213,41 @@ public class RecordSheetsFragment extends Fragment {
     }
 
     public void deleteSelectedItems() {
-        if (recordSheetAdapter != null && recordSheetAdapter.getSelectionTracker() != null) {
 
-            Selection<Long> selection = recordSheetAdapter.getSelectionTracker().getSelection();
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setMessage("Voulez-vous vraiment supprimer les feuilles de relevés de prix sélectionnées ?");
 
-            String toDelete = new String();
-            for (Long selectedItem : selection) {
-                RecordSheet recordSheet = recordSheetList.get(selectedItem.intValue());
-//                databaseHelper.deleteRecordSheet(recordSheet.getId());
-                toDelete += recordSheet.getName() + " ";
+        builder.setPositiveButton("Oui", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                if (recordSheetAdapter != null && recordSheetAdapter.getSelectionTracker() != null) {
+
+                    Selection<Long> selection = recordSheetAdapter.getSelectionTracker().getSelection();
+
+                    for (Long selectedItem : selection) {
+                        RecordSheet recordSheet = recordSheetList.get(selectedItem.intValue());
+                        try {
+                            databaseHelper.deleteRecordSheet(recordSheet.getId());
+                        } catch (Exception e) {
+                            Snackbar.make(getView(),"Erreur lors de la suppression de " + recordSheet.getName() + " !", Snackbar.LENGTH_SHORT).show();
+                            break; // Ne tente pas d'autres suppressions en cas d'erreur
+                        }
+                    }
+
+                    // Mettre à jour la liste après la suppression
+                    updateRecordSheetListViewFromDatabase(false);
+                    clearSelection();
+                }
+
             }
+        });
 
-            Snackbar.make(getView(),"RecordSheet : " + toDelete, Snackbar.LENGTH_SHORT).show();
+        builder.setNegativeButton("Non", null);
 
-            // Mettre à jour la liste après la suppression
-            updateRecordSheetListViewFromDatabase(false);
-            clearSelection();
-        }
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
     }
 
 }

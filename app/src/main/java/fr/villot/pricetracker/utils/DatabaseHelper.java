@@ -6,6 +6,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -142,6 +143,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return result;
     }
+
+    public int updateProduct(Product product) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_PRODUCT_NAME, product.getName());
+        values.put(KEY_PRODUCT_BRAND, product.getBrand());
+        values.put(KEY_PRODUCT_QUANTITY, product.getQuantity());
+        values.put(KEY_PRODUCT_IMAGE_URL, product.getImageUrl());
+
+        // Clause WHERE pour spécifier quel produit mettre à jour en fonction du code-barres
+        String whereClause = KEY_PRODUCT_BARCODE + " = ?";
+        String[] whereArgs = { product.getBarcode() };
+
+        // Effectuer la mise à jour et obtenir le nombre de lignes affectées
+        int rowsAffected = db.update(TABLE_PRODUCTS, values, whereClause, whereArgs);
+
+        db.close();
+
+        return rowsAffected;
+    }
+
 
     public long addStore(Store store) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -336,6 +359,71 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     @SuppressLint("Range")
+    public List<RecordSheet> getRecordSheetsOnStore(long storeId) {
+        List<RecordSheet> recordSheets = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String selectQuery = "SELECT * FROM " + TABLE_RECORD_SHEETS + " WHERE " + KEY_RECORD_SHEET_STORE_ID + " = ?";
+        Cursor cursor = db.rawQuery(selectQuery, new String[]{String.valueOf(storeId)});
+
+        if (cursor.moveToFirst()) {
+            do {
+                RecordSheet recordSheet = new RecordSheet();
+                recordSheet.setId(cursor.getInt(cursor.getColumnIndex(KEY_RECORD_SHEET_ID)));
+                recordSheet.setName(cursor.getString(cursor.getColumnIndex(KEY_RECORD_SHEET_NAME)));
+                long dateMillis = cursor.getLong(cursor.getColumnIndex(KEY_RECORD_SHEET_DATE));
+                Date date = new Date(dateMillis);
+                recordSheet.setDate(date);
+                recordSheet.setStoreId(cursor.getInt(cursor.getColumnIndex(KEY_RECORD_SHEET_STORE_ID)));
+                recordSheet.setLogo(cursor.getString(cursor.getColumnIndex(KEY_RECORD_SHEET_LOGO)));
+
+                recordSheets.add(recordSheet);
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        db.close();
+
+        return recordSheets;
+    }
+
+    public boolean hasRecordSheetsOnStore(long storeId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String countQuery = "SELECT COUNT(*) FROM " + TABLE_RECORD_SHEETS + " WHERE " + KEY_RECORD_SHEET_STORE_ID + " = ?";
+        Cursor cursor = db.rawQuery(countQuery, new String[]{String.valueOf(storeId)});
+
+        if (cursor != null) {
+            cursor.moveToFirst();
+            int count = cursor.getInt(0);
+            cursor.close();
+            db.close();
+            return count > 0;
+        }
+
+        db.close();
+        return false;
+    }
+
+    public boolean hasPriceRecordsOnProduct(String barcode) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String countQuery = "SELECT COUNT(*) FROM " + TABLE_PRICE_RECORDS + " WHERE " + KEY_PRICE_RECORD_PRODUCT_BARCODE + " = ?";
+        Cursor cursor = db.rawQuery(countQuery, new String[]{String.valueOf(barcode)});
+
+        if (cursor != null) {
+            cursor.moveToFirst();
+            int count = cursor.getInt(0);
+            cursor.close();
+            db.close();
+            return count > 0;
+        }
+
+        db.close();
+        return false;
+    }
+
+    @SuppressLint("Range")
     public Store getStoreById(int storeId) {
         Store store = null;
         SQLiteDatabase db = this.getReadableDatabase();
@@ -382,14 +470,49 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return product;
     }
 
-    public void deleteStore(long storeId) {
-        SQLiteDatabase db = this.getWritableDatabase();
+    public void deleteProduct(String barcode) {
+        // Suppression uniquement s'il n'y a pas de priceRecords
+        if (!hasPriceRecordsOnProduct(barcode)) {
+            SQLiteDatabase db = this.getWritableDatabase();
 
-        //TODO : Supprimer uniquement si pas de dependances
-        // Supprimer le magasin en utilisant l'ID
-        db.delete(TABLE_STORES, KEY_STORE_ID + " = ?", new String[]{String.valueOf(storeId)});
+            db.delete(TABLE_PRODUCTS, KEY_PRODUCT_BARCODE + " = ?", new String[]{String.valueOf(barcode)});
 
-        db.close();
+            db.close();
+        }
     }
+
+    public void deleteStore(long storeId) {
+        // Suppression uniquement s'il n'y a pas de recordsheets dépendantes de ce magasin
+        if (!hasRecordSheetsOnStore(storeId)) {
+            SQLiteDatabase db = this.getWritableDatabase();
+
+            db.delete(TABLE_STORES, KEY_STORE_ID + " = ?", new String[]{String.valueOf(storeId)});
+
+            db.close();
+        }
+    }
+
+    public void deleteRecordSheet(long recordSheetId) throws Exception {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.beginTransaction();
+
+        try {
+            // Suppression des price records associés à la recordsheet
+            db.delete(TABLE_PRICE_RECORDS, KEY_PRICE_RECORD_RECORD_SHEET_ID + " = ?", new String[]{String.valueOf(recordSheetId)});
+
+            // Suppression de la recordsheet
+            db.delete(TABLE_RECORD_SHEETS, KEY_RECORD_SHEET_ID + " = ?", new String[]{String.valueOf(recordSheetId)});
+
+            // Validez la transaction si tout s'est bien passé
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            Log.e("DatabaseHelper", "Erreur deleteRecordSheet() : " + e.getMessage());
+            throw new Exception(e);
+        } finally {
+            db.endTransaction();
+            db.close();
+        }
+    }
+
 
 }

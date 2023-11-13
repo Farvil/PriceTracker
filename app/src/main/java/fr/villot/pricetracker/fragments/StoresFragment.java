@@ -33,7 +33,9 @@ import com.google.android.material.snackbar.Snackbar;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.logging.Logger;
 
 import fr.villot.pricetracker.MyApplication;
@@ -256,22 +258,59 @@ public class StoresFragment extends Fragment {
 
     public void deleteSelectedItems() {
         if (storeAdapter != null && storeAdapter.getSelectionTracker() != null) {
-
             Selection<Long> selection = storeAdapter.getSelectionTracker().getSelection();
+            Queue<Store> storesToDelete = new LinkedList<>();
 
-//            String toDelete = new String();
+            // Ajout des magasins à supprimer à la file d'attente
             for (Long selectedItem : selection) {
                 Store store = storeList.get(selectedItem.intValue());
-                databaseHelper.deleteStore(store.getId());
-//                toDelete += store.getName() + " ";
+                storesToDelete.offer(store);
             }
 
-//            Snackbar.make(getView(),"Store : " + toDelete, Snackbar.LENGTH_SHORT).show();
+            // Suppression des magasins de la file d'attente
+            deleteStoresInQueue(storesToDelete);
 
-            // Mettre à jour la liste après la suppression
-            updateStoreListViewFromDatabase(false);
+            // Annule le mode de selection
             clearSelection();
         }
     }
+
+    private void deleteStoresInQueue(Queue<Store> storesToDelete) {
+        if (!storesToDelete.isEmpty()) {
+            Store store = storesToDelete.poll();
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setMessage("Voulez-vous vraiment supprimer le magasin " + store.getName() + " ?");
+            builder.setCancelable(false);
+
+            builder.setPositiveButton("Oui", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    // Suppression uniquement si pas de dépendances avec des recordsheets.
+                    if (!databaseHelper.hasRecordSheetsOnStore(store.getId())) {
+                        databaseHelper.deleteStore(store.getId());
+                        updateStoreListViewFromDatabase(false);
+                    } else {
+                        Snackbar.make(getView(), "Suppression impossible car au moins une feuille de relevé de prix associée au magasin", Snackbar.LENGTH_SHORT).show();
+                    }
+
+                    // Appeler la suppression des magasins restants dans la file d'attente
+                    deleteStoresInQueue(storesToDelete);
+                }
+            });
+
+            builder.setNegativeButton("Non", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    // Si l'utilisateur clique sur "Non", passage au magasin suivant dans la file d'attente
+                    deleteStoresInQueue(storesToDelete);
+                }
+            });
+
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        }
+    }
+
 
 }
