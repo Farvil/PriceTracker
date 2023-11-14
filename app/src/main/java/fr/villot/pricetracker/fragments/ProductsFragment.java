@@ -21,6 +21,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.selection.Selection;
 import androidx.recyclerview.selection.SelectionTracker;
 import androidx.recyclerview.selection.StableIdKeyProvider;
@@ -41,6 +42,8 @@ import java.util.Queue;
 import fr.villot.pricetracker.MyApplication;
 import fr.villot.pricetracker.activities.BarCodeScannerActivity;
 import fr.villot.pricetracker.activities.MainActivity;
+import fr.villot.pricetracker.activities.PriceRecordActivity;
+import fr.villot.pricetracker.activities.SelectProductsActivity;
 import fr.villot.pricetracker.adapters.MyDetailsLookup;
 import fr.villot.pricetracker.adapters.ProductAdapter;
 import fr.villot.pricetracker.model.Store;
@@ -103,8 +106,6 @@ public class ProductsFragment extends Fragment {
 
         super.onViewCreated(view, savedInstanceState);
 
-        // TODO: Gerer une progressbar
-
         // Recupération des vues
         productRecyclerView = view.findViewById(R.id.productRecyclerView);
         fabAdd = view.findViewById(R.id.fabAdd);
@@ -136,12 +137,20 @@ public class ProductsFragment extends Fragment {
                 super.onSelectionChanged();
                 // Réagir aux changements de sélection ici
                 int numSelected = selectionTracker.getSelection().size();
+                FragmentActivity fragmentActivity = requireActivity();
                 if (numSelected == 0) {
-                    ((MainActivity) requireActivity()).setSelectionMode(getInstance(),false);
+                    if (fragmentActivity instanceof MainActivity)
+                        ((MainActivity) fragmentActivity).setSelectionMode(getInstance(),false);
+                    else if (fragmentActivity instanceof PriceRecordActivity)
+                        ((PriceRecordActivity) fragmentActivity).setSelectionMode(false);
                     fabAdd.setVisibility(View.VISIBLE);
                 }
                 else if (numSelected == 1) {
-                    ((MainActivity) requireActivity()).setSelectionMode(getInstance(),true);
+                    if (fragmentActivity instanceof MainActivity)
+                        ((MainActivity) fragmentActivity).setSelectionMode(getInstance(),true);
+                    else if (fragmentActivity instanceof PriceRecordActivity)
+                        ((PriceRecordActivity) fragmentActivity).setSelectionMode(true);
+
                     String selectionCount = String.valueOf(numSelected) + " produit";
                     ((AppCompatActivity) requireActivity()).getSupportActionBar().setTitle(selectionCount);
                     fabAdd.setVisibility(View.INVISIBLE);
@@ -158,34 +167,6 @@ public class ProductsFragment extends Fragment {
             @Override
             public void onItemClick(Product product) {
                 showUserQueryDialogBox(product, DialogType.DIALOG_TYPE_INFO);
-
-
-//                // Créer une boîte de dialogue de confirmation
-//                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-//                builder.setTitle("Informations sur le produit");
-//                builder.setMessage("Voulez-vous ouvrir un navigateur pour afficher les détails de ce produit ?");
-//
-//                builder.setPositiveButton("Oui", new DialogInterface.OnClickListener() {
-//                    @Override
-//                    public void onClick(DialogInterface dialog, int which) {
-//                        String barcode = product.getBarcode();
-//                        String url = "https://world.openfoodfacts.org/product/" + barcode;
-//
-//                        // Lancer le navigateur
-//                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-//                        startActivity(intent);
-//                    }
-//                });
-//
-//                builder.setNegativeButton("Non", new DialogInterface.OnClickListener() {
-//                    @Override
-//                    public void onClick(DialogInterface dialog, int which) {
-//                        // L'utilisateur a choisi de ne pas ouvrir le navigateur, vous pouvez ajouter ici d'autres actions si nécessaire.
-//                    }
-//                });
-//
-//                AlertDialog dialog = builder.create();
-//                dialog.show();
             }
         });
 
@@ -394,45 +375,6 @@ public class ProductsFragment extends Fragment {
             fabAdd.setVisibility(View.VISIBLE);
         }
     }
-//
-//    public void deleteSelectedItems() {
-//
-//        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-//        builder.setMessage("Voulez-vous vraiment supprimer les produits sélectionnés ?");
-//
-//        builder.setPositiveButton("Oui", new DialogInterface.OnClickListener() {
-//            @Override
-//            public void onClick(DialogInterface dialog, int which) {
-//
-//                if (productAdapter != null && productAdapter.getSelectionTracker() != null) {
-//
-//                    Selection<Long> selection = productAdapter.getSelectionTracker().getSelection();
-//
-//                    String toDelete = new String();
-//                    for (Long selectedItem : selection) {
-//                        Product product = productList.get(selectedItem.intValue());
-////                databaseHelper.deleteProduct(product.getId());
-//                        toDelete += product.getName() + " ";
-//                    }
-//
-//                    Snackbar.make(getView(),"Product : " + toDelete, Snackbar.LENGTH_SHORT).show();
-//
-//                    // Mettre à jour la liste après la suppression
-//                    updateProductListViewFromDatabase(false);
-//                    clearSelection();
-//                }
-//
-//            }
-//        });
-//
-//        builder.setNegativeButton("Non", null);
-//
-//        AlertDialog dialog = builder.create();
-//        dialog.show();
-//
-//    }
-
-
 
     public void deleteSelectedItems() {
         if (productAdapter != null && productAdapter.getSelectionTracker() != null) {

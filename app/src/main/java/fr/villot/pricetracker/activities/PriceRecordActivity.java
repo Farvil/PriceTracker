@@ -9,19 +9,25 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
+import androidx.fragment.app.Fragment;
 
 import com.google.android.material.snackbar.Snackbar;
 
 
+import java.io.Serializable;
 import java.util.List;
 
 import fr.villot.pricetracker.MyApplication;
 import fr.villot.pricetracker.R;
+import fr.villot.pricetracker.fragments.ProductsFragment;
 import fr.villot.pricetracker.fragments.RecordSheetProductsFragment;
+import fr.villot.pricetracker.fragments.RecordSheetsFragment;
+import fr.villot.pricetracker.fragments.StoresFragment;
 import fr.villot.pricetracker.model.Product;
 import fr.villot.pricetracker.model.RecordSheet;
 import fr.villot.pricetracker.model.Store;
@@ -30,6 +36,7 @@ import fr.villot.pricetracker.utils.DatabaseHelper;
 
 public class PriceRecordActivity extends AppCompatActivity {
 
+    private static final int SELECT_PRODUCTS_REQUEST_CODE = 1;
     private DatabaseHelper databaseHelper;
     private List<Product> productList;
     private long recordSheetId;
@@ -39,6 +46,30 @@ public class PriceRecordActivity extends AppCompatActivity {
     Toolbar toolbar;
     private ImageView storeImageView;
     private CardView storeCardView;
+    private boolean isSelectionModeActive = false;
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == SELECT_PRODUCTS_REQUEST_CODE && resultCode == RESULT_OK) {
+            // Récupérer la liste des produits sélectionnés
+            List<Product> selectedProducts = (List<Product>) data.getSerializableExtra("selected_products");
+
+
+            // Obtenez une référence au fragment
+            RecordSheetProductsFragment fragment = (RecordSheetProductsFragment) getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
+
+            // Appelez la méthode addOrUpdateProduct du fragment
+            if (fragment != null) {
+                for (Product selectedProduct : selectedProducts) {
+                    fragment.addOrUpdateProduct(selectedProduct);
+                }
+            }
+        }
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,7 +145,7 @@ public class PriceRecordActivity extends AppCompatActivity {
 
     private void addProductsFromDatabase() {
         Intent intent = new Intent(this, SelectProductsActivity.class);
-        startActivity(intent);
+        startActivityForResult(intent, SELECT_PRODUCTS_REQUEST_CODE);
     }
 
     private void deleteSelectedProducts() {
@@ -128,6 +159,30 @@ public class PriceRecordActivity extends AppCompatActivity {
 //
 //        // Mettre à jour votre RecyclerView
 //        productAdapter.notifyDataSetChanged();
+    }
+
+    public void setSelectionMode(boolean isSelectionModeActive) {
+
+        // Rafraichissement de la toolbar si nécessaire
+        if (this.isSelectionModeActive != isSelectionModeActive) {
+            this.isSelectionModeActive = isSelectionModeActive;
+            if (!isSelectionModeActive) {
+                getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
+                getSupportActionBar().setTitle(R.string.app_name);
+
+                // Obtenez une référence au fragment
+                RecordSheetProductsFragment recordSheetProductsFragment = (RecordSheetProductsFragment) getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
+
+                // Appelez la méthode addOrUpdateProduct du fragment
+                if (recordSheetProductsFragment != null) {
+                    recordSheetProductsFragment.clearSelection();
+                }
+
+            } else {
+                getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_cancel);
+            }
+            invalidateOptionsMenu(); // Rafraichissement du menu de la toolbar
+        }
     }
 
 }

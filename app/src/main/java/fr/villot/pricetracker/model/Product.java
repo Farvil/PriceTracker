@@ -1,6 +1,8 @@
 package fr.villot.pricetracker.model;
 
-public class Product {
+import java.io.Serializable;
+
+public class Product implements Serializable {
     private String barcode;
     private String name;
     private String brand;

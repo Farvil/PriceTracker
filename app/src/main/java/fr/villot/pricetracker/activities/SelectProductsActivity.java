@@ -1,19 +1,28 @@
 package fr.villot.pricetracker.activities;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.selection.Selection;
+import androidx.recyclerview.selection.SelectionPredicates;
 import androidx.recyclerview.selection.SelectionTracker;
+import androidx.recyclerview.selection.StableIdKeyProvider;
 import androidx.recyclerview.selection.StorageStrategy;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import fr.villot.pricetracker.MyApplication;
 import fr.villot.pricetracker.R;
+import fr.villot.pricetracker.adapters.MyDetailsLookup;
 import fr.villot.pricetracker.adapters.ProductAdapter;
 import fr.villot.pricetracker.model.Product;
 import fr.villot.pricetracker.utils.DatabaseHelper;
@@ -24,7 +33,10 @@ public class SelectProductsActivity extends AppCompatActivity {
     private RecyclerView productRecyclerView;
     private ProductAdapter productAdapter;
     private List<Product> productList;
-    private ActionMode actionMode;
+    private Button confirmButton;
+    SelectionTracker<Long> selectionTracker;
+    private static final String PRODUCT_ACTIVITY_SELECTION_KEY = "product_activity_selection";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +44,7 @@ public class SelectProductsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_select_products);
 
         productRecyclerView = findViewById(R.id.productRecyclerView);
+        confirmButton = findViewById(R.id.confirmButton);
 
         // Initialisation du DatabaseHelper
         databaseHelper = MyApplication.getDatabaseHelper();
@@ -45,35 +58,71 @@ public class SelectProductsActivity extends AppCompatActivity {
         productAdapter = new ProductAdapter(this, productList);
         productRecyclerView.setAdapter(productAdapter);
 
-//        // Créez et définissez le SelectionTracker pour gérer la sélection
-//        SelectionTracker<Long> selectionTracker = new SelectionTracker.Builder<>(
-//                "productSelection",
-//                productRecyclerView,
-//                new ProductAdapter.ProductItemKeyProvider(productRecyclerView), // Utilisez notre ItemKeyProvider personnalisé
-//                new ProductAdapter.DetailsLookup(productRecyclerView),
-//                StorageStrategy.createLongStorage()
-//        ).build();
+        // Gestion de la selection d'items
+        selectionTracker = new SelectionTracker.Builder<>(
+                PRODUCT_ACTIVITY_SELECTION_KEY,
+                productRecyclerView,
+                new StableIdKeyProvider(productRecyclerView),
+                new MyDetailsLookup(productRecyclerView),
+                StorageStrategy.createLongStorage()
+        ).withSelectionPredicate(SelectionPredicates.createSelectAnything()) // Permettre la sélection directe
+                .build();
+        productAdapter.setSelectionTracker(selectionTracker);
 
-//        // Écoutez les changements de sélection et mettez à jour l'interface utilisateur en conséquence
-//        selectionTracker.addObserver(new SelectionTracker.SelectionObserver<Long>() {
-//            @Override
-//            public void onSelectionChanged() {
-//                super.onSelectionChanged();
-//                if (actionMode == null) {
-//                    actionMode = startActionMode(actionModeCallback);
-//                }
-//                int selectedItemsCount = selectionTracker.getSelection().size();
-//                if (selectedItemsCount == 0) {
-//                    actionMode.finish();
-//                } else {
-//                    actionMode.setTitle(getString(R.string.selected_items, selectedItemsCount));
-//                }
-//            }
-//        });
-//
-//        // Définissez le SelectionTracker dans l'adaptateur pour gérer la sélection
-//        productAdapter.setSelectionTracker(selectionTracker);
+
+        selectionTracker.addObserver(new SelectionTracker.SelectionObserver<Long>() {
+            @Override
+            public void onItemStateChanged(Long key, boolean selected) {
+                // Logique à effectuer lorsqu'un élément est sélectionné ou désélectionné
+            }
+
+            @Override
+            public void onSelectionChanged() {
+                super.onSelectionChanged();
+
+                // Logique à effectuer lorsqu'il y a un changement dans la sélection
+                int numSelected = selectionTracker.getSelection().size();
+                // ...
+            }
+        });
+
+        confirmButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (selectionTracker != null) {
+                    // Récupérer les éléments sélectionnés
+                    Selection<Long> selection = selectionTracker.getSelection();
+
+                    // Créer une liste pour stocker les produits sélectionnés
+                    List<Product> selectedProducts = new ArrayList<>();
+
+                    // Parcourir la sélection et ajouter les produits correspondants à la liste
+                    for (Long selectedItem : selection) {
+                        Product selectedProduct = productList.get(selectedItem.intValue());
+                        selectedProducts.add(selectedProduct);
+                    }
+
+                    // Retourner la liste des produits à l'activité appelante
+                    Intent resultIntent = new Intent();
+                    resultIntent.putExtra("selected_products", (Serializable) selectedProducts);
+                    setResult(RESULT_OK, resultIntent);
+
+                    // Fermer l'activité
+                    finish();
+                }
+            }
+        });
+
+
     }
 
-    // Le reste de votre code pour le mode d'action (ActionMode) et les actions de menu reste inchangé
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (selectionTracker != null) {
+            selectionTracker.clearSelection();
+        }
+    }
+
+
 }

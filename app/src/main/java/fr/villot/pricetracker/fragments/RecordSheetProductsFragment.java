@@ -62,7 +62,7 @@ public class RecordSheetProductsFragment extends ProductsFragment {
             return super.getProducts();
     }
 
-    protected void addOrUpdateProduct(Product product) {
+    public void addOrUpdateProduct(Product product) {
         super.addOrUpdateProduct(product);
 
         // Demander le prix à l'utilisateur et l'enregistrer dans la base de données
