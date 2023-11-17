@@ -166,7 +166,7 @@ public class ProductsFragment extends Fragment {
         productAdapter.setOnItemClickListener(new ProductAdapter.OnItemClickListener<Product>() {
             @Override
             public void onItemClick(Product product) {
-                showUserQueryDialogBox(product, DialogType.DIALOG_TYPE_INFO);
+                handleClickOnProduct(product);
             }
         });
 
@@ -184,6 +184,11 @@ public class ProductsFragment extends Fragment {
                 barcodeScannerLauncher.launch(options);
             }
         });
+
+    }
+
+    protected void handleClickOnProduct(Product product) {
+        showUserQueryDialogBox(product, DialogType.DIALOG_TYPE_INFO);
 
     }
 
@@ -263,9 +268,9 @@ public class ProductsFragment extends Fragment {
 
     }
 
-    View getProductViewForDialog(Product product) {
+    View getProductViewForDialog(Product product, final int layoutResource) {
         LayoutInflater inflater = LayoutInflater.from(getActivity());
-        View dialogView = inflater.inflate(R.layout.item_product, null);
+        View dialogView = inflater.inflate(layoutResource, null);
 
         // Références des vues dans le layout de la boîte de dialogue
         TextView productBarcodeTextView = dialogView.findViewById(R.id.productBarcodeTextView);
@@ -286,10 +291,10 @@ public class ProductsFragment extends Fragment {
         return dialogView;
     }
 
-    private void showUserQueryDialogBox(Product product, DialogType dialogType) {
+    protected void showUserQueryDialogBox(Product product, DialogType dialogType) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setView(getProductViewForDialog(product));
+        builder.setView(getProductViewForDialog(product, R.layout.item_product));
 
         String title = null;
         String message = null;

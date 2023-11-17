@@ -1,6 +1,11 @@
 package fr.villot.pricetracker.fragments;
 
+import static fr.villot.pricetracker.fragments.ProductsFragment.DialogType.DIALOG_TYPE_ALREADY_EXIST;
+
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputType;
 import android.text.TextUtils;
@@ -8,14 +13,21 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
+import fr.villot.pricetracker.R;
 import fr.villot.pricetracker.model.PriceRecord;
 import fr.villot.pricetracker.model.Product;
 
@@ -47,19 +59,17 @@ public class RecordSheetProductsFragment extends ProductsFragment {
         return view;
     }
 
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        Log.w("RecordSheetProductsFragment", "onViewCreated()");
-
-        super.onViewCreated(view, savedInstanceState);
-    }
-
     protected List<Product> getProducts() {
         Log.w("RecordSheetProductsFragment", "getProducts(), recordSheetId : " + recordSheetId);
         if (recordSheetId != null && recordSheetId != -1)
             return databaseHelper.getProductsOnRecordSheet(recordSheetId);
         else
             return super.getProducts();
+    }
+
+    @Override
+    protected void handleClickOnProduct(Product product) {
+        showPriceInputDialogAndUpdateDatabase(product);
     }
 
     public void addOrUpdateProduct(Product product) {
@@ -69,31 +79,27 @@ public class RecordSheetProductsFragment extends ProductsFragment {
         showPriceInputDialogAndUpdateDatabase(product);
     }
 
-    protected void handleBarcodeScanResult(String barcode) {
+    protected void showUserQueryDialogBox(Product product, DialogType dialogType) {
 
-        // Si le produit existe on l'ajoute à la recordsheet
-        // Sinon on propose à l'utilisateur de créer le produit.
-        Product product = databaseHelper.getProductFromBarCode(barcode);
-        if (product != null) {
+        if (dialogType != DIALOG_TYPE_ALREADY_EXIST)
+            super.showUserQueryDialogBox(product,dialogType);
+        else {
             showPriceInputDialogAndUpdateDatabase(product);
         }
-        else {
-            super.getProductDataFromOpenFoodFacts(barcode, false);
-        }
-    }
 
-    protected void updateProductListViewFromDatabase(boolean lastItemDisplayed) {
-        super.updateProductListViewFromDatabase(lastItemDisplayed);
     }
 
     private void showPriceInputDialogAndUpdateDatabase(Product product) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle("Saisir le prix");
 
-        // Ajoutez un champ de texte pour la saisie du prix
-        final EditText priceEditText = new EditText(getActivity());
-        priceEditText.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-        builder.setView(priceEditText);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        View dialogView = getProductViewForDialog(product, R.layout.dialog_price_record);
+        builder.setView(dialogView);
+
+        EditText priceEditText = dialogView.findViewById(R.id.priceEditText);
+        builder.setTitle("Saisir le prix du produit");
+//            builder.setMessage("Veuillez saisir le prix du produit");
+        priceEditText.requestFocus();
+
 
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
@@ -131,7 +137,8 @@ public class RecordSheetProductsFragment extends ProductsFragment {
             }
         });
 
-        builder.show();
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
 

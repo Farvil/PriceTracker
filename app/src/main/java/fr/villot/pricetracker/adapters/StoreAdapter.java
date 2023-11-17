@@ -39,6 +39,18 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreViewHolder> {
     public void onBindViewHolder(StoreViewHolder holder, int position) {
         Store store = storeList.get(position);
         holder.bind(store, selectionTracker.isSelected((long) position));
+
+        // Ajout d'une marge bottom au dernier élément pour eviter la superposition avec le bouton flottant
+        ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) holder.itemView.getLayoutParams();
+        if (position == getItemCount() - 1) {
+            layoutParams.bottomMargin = context.getResources().getDimensionPixelSize(R.dimen.margin_bottom_last_item);
+            holder.itemView.setLayoutParams(layoutParams);
+        } else {
+            // Réinitialisation des marges pour les éléments précédents
+            layoutParams.bottomMargin = 0;
+            holder.itemView.setLayoutParams(layoutParams);
+        }
+
     }
 
     @Override
