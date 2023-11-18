@@ -515,4 +515,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
 
+    public void deleteProductOnRecordSheet(String barcode, Long recordSheetId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        // Supprimer les enregistrements dans TABLE_PRICE_RECORDS
+        db.delete(TABLE_PRICE_RECORDS,
+                KEY_PRICE_RECORD_PRODUCT_BARCODE + " = ? AND " + KEY_PRICE_RECORD_RECORD_SHEET_ID + " = ?",
+                new String[]{barcode, String.valueOf(recordSheetId)});
+
+        db.close();
+    }
 }

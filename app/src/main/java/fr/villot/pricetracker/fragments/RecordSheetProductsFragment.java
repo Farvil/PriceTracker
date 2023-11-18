@@ -21,15 +21,19 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.recyclerview.selection.Selection;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.squareup.picasso.Picasso;
 
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 import fr.villot.pricetracker.R;
 import fr.villot.pricetracker.model.PriceRecord;
 import fr.villot.pricetracker.model.Product;
+import fr.villot.pricetracker.model.RecordSheet;
 
 public class RecordSheetProductsFragment extends ProductsFragment {
 
@@ -141,5 +145,42 @@ public class RecordSheetProductsFragment extends ProductsFragment {
         dialog.show();
     }
 
+    public void deleteSelectedItems() {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setMessage("Voulez-vous vraiment retirer les produits selectionnés de ce relevé de prix ?");
+
+        builder.setPositiveButton("Oui", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                if (productAdapter != null && productAdapter.getSelectionTracker() != null) {
+
+                    Selection<Long> selection = productAdapter.getSelectionTracker().getSelection();
+
+                    for (Long selectedItem : selection) {
+                        Product product = productList.get(selectedItem.intValue());
+                        try {
+                            databaseHelper.deleteProductOnRecordSheet(product.getBarcode(), recordSheetId);
+                        } catch (Exception e) {
+                            Snackbar.make(getView(),"Erreur de suppression du produits dans le relevé " + recordSheetId + " !", Snackbar.LENGTH_SHORT).show();
+                            break; // Ne tente pas d'autres suppressions en cas d'erreur
+                        }
+                    }
+
+                    // Mettre à jour la liste après la suppression
+                    updateProductListViewFromDatabase(false);
+                    clearSelection();
+                }
+
+            }
+        });
+
+        builder.setNegativeButton("Non", null);
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+    }
 
 }

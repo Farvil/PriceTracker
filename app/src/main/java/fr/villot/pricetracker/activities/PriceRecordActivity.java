@@ -4,6 +4,7 @@ package fr.villot.pricetracker.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -99,6 +100,7 @@ public class PriceRecordActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeAsUpIndicator(R.drawable.ic_back);
         }
 
         // Récupération du magasin
@@ -121,7 +123,14 @@ public class PriceRecordActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_recordsheet, menu);
+
+        MenuInflater inflater = getMenuInflater();
+        if (!isSelectionModeActive)
+            inflater.inflate(R.menu.menu_recordsheet, menu);
+        else
+            inflater.inflate(R.menu.toolbar_selection_menu, menu);
+
+
         return true;
     }
 
@@ -129,7 +138,12 @@ public class PriceRecordActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemId = item.getItemId();
         if (itemId == android.R.id.home) {
-            onBackPressed(); // Retour à l'activité principale
+            if (!isSelectionModeActive) {
+                onBackPressed(); // Retour à l'activité principale
+            }
+            else {
+                setSelectionMode(false);
+            }
             return true;
         }
         else if (itemId == R.id.action_add_from_database) {
@@ -137,7 +151,13 @@ public class PriceRecordActivity extends AppCompatActivity {
             return true;
         }
         else if (itemId == R.id.action_delete) {
-            deleteSelectedProducts();
+            // Obtenez une référence au fragment
+            RecordSheetProductsFragment recordSheetProductsFragment = (RecordSheetProductsFragment) getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
+
+            // Appelez la méthode addOrUpdateProduct du fragment
+            if (recordSheetProductsFragment != null) {
+                recordSheetProductsFragment.deleteSelectedItems();
+            }
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -167,7 +187,7 @@ public class PriceRecordActivity extends AppCompatActivity {
         if (this.isSelectionModeActive != isSelectionModeActive) {
             this.isSelectionModeActive = isSelectionModeActive;
             if (!isSelectionModeActive) {
-                getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
+                getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_back);
                 getSupportActionBar().setTitle(R.string.app_name);
 
                 // Obtenez une référence au fragment
