@@ -1,5 +1,8 @@
 package fr.villot.pricetracker.activities;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.selection.OnContextClickListener;
+import androidx.recyclerview.selection.OnItemActivatedListener;
 import androidx.recyclerview.selection.Selection;
 import androidx.recyclerview.selection.SelectionPredicates;
 import androidx.recyclerview.selection.SelectionTracker;
@@ -13,8 +16,11 @@ import android.os.Bundle;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+
+import com.google.android.material.snackbar.Snackbar;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -36,6 +42,7 @@ public class SelectProductsActivity extends AppCompatActivity {
     private Button confirmButton;
     SelectionTracker<Long> selectionTracker;
     private static final String PRODUCT_ACTIVITY_SELECTION_KEY = "product_activity_selection";
+    private long recordSheetId;
 
 
     @Override
@@ -51,8 +58,17 @@ public class SelectProductsActivity extends AppCompatActivity {
 
         productRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
+        // Recupération du recordsheetId
+        recordSheetId = getIntent().getLongExtra("record_sheet_id", -1);
+
         // Récupération des produits dans la base de données.
-        productList = databaseHelper.getAllProducts();
+        productList = databaseHelper.getProductsNotInRecordSheet(recordSheetId);
+
+        if(productList.isEmpty()) {
+            // Retourne la liste des produits à l'activité appelante
+            setResult(RESULT_CANCELED);
+            finish();
+        }
 
         // Adapter entre RecyclerView et Produit.
         productAdapter = new ProductAdapter(this, productList);
@@ -65,11 +81,10 @@ public class SelectProductsActivity extends AppCompatActivity {
                 new StableIdKeyProvider(productRecyclerView),
                 new MyDetailsLookup(productRecyclerView),
                 StorageStrategy.createLongStorage()
-        ).withSelectionPredicate(SelectionPredicates.createSelectAnything()) // Permettre la sélection directe
+        ).withSelectionPredicate(SelectionPredicates.createSelectAnything())
                 .build();
         productAdapter.setSelectionTracker(selectionTracker);
-
-
+        
         selectionTracker.addObserver(new SelectionTracker.SelectionObserver<Long>() {
             @Override
             public void onItemStateChanged(Long key, boolean selected) {

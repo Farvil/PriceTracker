@@ -317,6 +317,8 @@ public class ProductsFragment extends Fragment {
 
         builder.setTitle(title);
         builder.setMessage(message);
+        builder.setCancelable(false);
+
 
         builder.setPositiveButton("Oui", new DialogInterface.OnClickListener() {
             @Override

@@ -58,7 +58,6 @@ public class PriceRecordActivity extends AppCompatActivity {
             // Récupérer la liste des produits sélectionnés
             List<Product> selectedProducts = (List<Product>) data.getSerializableExtra("selected_products");
 
-
             // Obtenez une référence au fragment
             RecordSheetProductsFragment fragment = (RecordSheetProductsFragment) getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
 
@@ -68,6 +67,8 @@ public class PriceRecordActivity extends AppCompatActivity {
                     fragment.addOrUpdateProduct(selectedProduct);
                 }
             }
+        } else if (requestCode == SELECT_PRODUCTS_REQUEST_CODE && resultCode == RESULT_CANCELED) {
+            Snackbar.make(storeNameTextView, "Aucun produit supplémentaire disponible dans la bibliothèque", Snackbar.LENGTH_SHORT).show();
         }
     }
 
@@ -89,7 +90,7 @@ public class PriceRecordActivity extends AppCompatActivity {
         databaseHelper = MyApplication.getDatabaseHelper();
 
         // Récupération du nom de la fiche de relevé de prix en paramètre et mise à jour du titre.
-        Long recordSheetId = getIntent().getLongExtra("record_sheet_id", -1);
+        recordSheetId = getIntent().getLongExtra("record_sheet_id", -1);
         RecordSheet recordSheet = databaseHelper.getRecordSheetById(recordSheetId);
 
         // Titre de la toolbar = nom de la RecordSheet
@@ -165,6 +166,7 @@ public class PriceRecordActivity extends AppCompatActivity {
 
     private void addProductsFromDatabase() {
         Intent intent = new Intent(this, SelectProductsActivity.class);
+        intent.putExtra("record_sheet_id", recordSheetId);
         startActivityForResult(intent, SELECT_PRODUCTS_REQUEST_CODE);
     }
 

@@ -187,6 +187,7 @@ public class StoresFragment extends Fragment {
         View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_create_store, null);
         builder.setView(dialogView);
         builder.setTitle("Ajouter un nouveau magasin");
+        builder.setCancelable(false);
 
         Spinner storeLogoSpinner = dialogView.findViewById(R.id.storeLogoSpinner);
         EditText storeNameEditText = dialogView.findViewById(R.id.storeNameEditText);

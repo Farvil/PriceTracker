@@ -240,6 +240,40 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         cursor.close();
         db.close();
+
+        return productList;
+    }
+
+
+    @SuppressLint("Range")
+    public List<Product> getProductsNotInRecordSheet(long recordSheetId) {
+        List<Product> productList = new ArrayList<>();
+
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        // Sélectionnez tous les produits qui ne sont pas liés à la recordsheet spécifiée
+        String query = "SELECT * FROM " + TABLE_PRODUCTS +
+                " WHERE " + KEY_PRODUCT_BARCODE + " NOT IN " +
+                "(SELECT " + KEY_PRICE_RECORD_PRODUCT_BARCODE + " FROM " + TABLE_PRICE_RECORDS +
+                " WHERE " + KEY_PRICE_RECORD_RECORD_SHEET_ID + " = ?)";
+
+        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(recordSheetId)});
+
+        if (cursor.moveToFirst()) {
+            do {
+                Product product = new Product();
+                product.setBarcode(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_BARCODE)));
+                product.setName(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_NAME)));
+                product.setBrand(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_BRAND)));
+                product.setQuantity(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_QUANTITY)));
+                product.setImageUrl(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_IMAGE_URL)));
+                productList.add(product);
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        db.close();
+
         return productList;
     }
 
@@ -525,4 +559,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         db.close();
     }
+
+
 }

@@ -2,7 +2,9 @@ package fr.villot.pricetracker.fragments;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.selection.Selection;
 import androidx.recyclerview.selection.SelectionTracker;
@@ -24,6 +27,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
@@ -161,6 +167,7 @@ public class RecordSheetsFragment extends Fragment {
         View dialogView = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_create_recordsheet, null);
         builder.setView(dialogView);
         builder.setTitle("Créer un nouveau relevé de prix");
+        builder.setCancelable(false);
 
         Spinner storeSpinner = dialogView.findViewById(R.id.storeSpinner);
         EditText recordsheetNameEditText = dialogView.findViewById(R.id.recordsheetNameEditText);
@@ -216,6 +223,7 @@ public class RecordSheetsFragment extends Fragment {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setMessage("Voulez-vous vraiment supprimer les feuilles de relevés de prix sélectionnées ?");
+        builder.setCancelable(false);
 
         builder.setPositiveButton("Oui", new DialogInterface.OnClickListener() {
             @Override
@@ -250,4 +258,84 @@ public class RecordSheetsFragment extends Fragment {
 
     }
 
+    public void shareRecordSheet() {
+        if (recordSheetAdapter != null && recordSheetAdapter.getSelectionTracker() != null) {
+            Selection<Long> selection = recordSheetAdapter.getSelectionTracker().getSelection();
+
+            // Vérifier s'il y a des éléments sélectionnés
+            if (!selection.isEmpty()) {
+                // Créer un fichier CSV
+                File csvFile = createCsvFile();
+
+                // Remplir le fichier CSV avec les données
+                fillCsvFile(csvFile, selection);
+
+                // Partager le fichier CSV
+                // shareCsvFile(csvFile);
+            }
+        }
+    }
+
+    private File createCsvFile() {
+        String fileName = "record_sheet_export.csv";
+        // Obtenez le répertoire spécifique à votre application dans le stockage externe privé
+        File exportDir = getActivity().getExternalFilesDir(null);
+        // File exportDir = new File(Environment.getExternalStorageDirectory(), "PriceTracker");
+
+        // Créer le répertoire s'il n'existe pas
+        if (!exportDir.exists()) {
+            exportDir.mkdirs();
+        }
+
+        return new File(exportDir, fileName);
+    }
+
+    private void fillCsvFile(File csvFile, Selection<Long> selection) {
+        try (FileWriter writer = new FileWriter(csvFile)) {
+            // En-têtes CSV
+            writer.append("Nom de la RecordSheet,Date,Store Name,Store Location,Barcode,Product Name,Brand,Quantity,Image URL\n");
+
+            for (Long selectedItem : selection) {
+                RecordSheet recordSheet = recordSheetList.get(selectedItem.intValue());
+
+                // Récupérer les produits associés à la RecordSheet
+                List<Product> products = databaseHelper.getProductsOnRecordSheet(recordSheet.getId());
+                Store store = databaseHelper.getStoreById(recordSheet.getStoreId());
+
+                // Remplir le fichier CSV avec les données de chaque produit
+                for (Product product : products) {
+                    writer.append(String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s\n",
+                            recordSheet.getName(),
+                            recordSheet.getDate(),
+                            store.getName(),
+                            store.getLocation(),
+                            product.getBarcode(),
+                            product.getName(),
+                            product.getBrand(),
+                            product.getQuantity(),
+                            product.getImageUrl()));
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    private void shareCsvFile(File csvFile) {
+
+//        Uri fileUri = FileProvider.getUriForFile(requireActivity(), getContext().getPackageName() + ".provider", csvFile);
+        Uri fileUri = FileProvider.getUriForFile(requireActivity(), "fr.villot.pricetracker.provider", csvFile);
+
+        // Créer l'intent de partage
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("text/csv");
+        shareIntent.putExtra(Intent.EXTRA_STREAM, fileUri);
+
+        // Ajouter le drapeau de permission temporaire pour accéder au contenu
+        shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        // Démarrer l'activité de partage
+        startActivity(Intent.createChooser(shareIntent, "Partager via"));
+    }
 }

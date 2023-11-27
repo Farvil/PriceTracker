@@ -1,13 +1,18 @@
 package fr.villot.pricetracker.activities;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
@@ -26,6 +31,8 @@ import fr.villot.pricetracker.utils.DatabaseHelper;
 import fr.villot.pricetracker.R;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 2;
 
     private TabLayout tabLayout;
     private ViewPager viewPager;
@@ -112,6 +119,21 @@ public class MainActivity extends AppCompatActivity {
                 // Do something when the settings menu item is clicked
                 // Replace this with the action you want to perform
                 return true;
+            case R.id.action_share:
+
+                // Vérifier si la permission d'écriture externe est accordée
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    // Demander la permission si elle n'est pas déjà accordée
+                    ActivityCompat.requestPermissions(this,
+                            new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                            MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
+                }
+                else if (currentFragment instanceof RecordSheetsFragment) {
+                    RecordSheetsFragment recordSheetsFragment = (RecordSheetsFragment) currentFragment;
+                    recordSheetsFragment.shareRecordSheet();
+                }
+                return true;
             case R.id.action_delete:
                 if (currentFragment instanceof ProductsFragment) {
                     ProductsFragment productsFragment = (ProductsFragment) currentFragment;
@@ -166,6 +188,20 @@ public class MainActivity extends AppCompatActivity {
                 getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_cancel);
             }
             invalidateOptionsMenu(); // Rafraichissement du menu de la toolbar
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE) {
+            // Vérifier si la permission a été accordée
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // La permission a été accordée, vous pouvez maintenant accéder au stockage externe
+            } else {
+                // La permission a été refusée, vous pouvez informer l'utilisateur ou prendre d'autres mesures
+            }
         }
     }
 }

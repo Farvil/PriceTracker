@@ -101,9 +101,8 @@ public class RecordSheetProductsFragment extends ProductsFragment {
 
         EditText priceEditText = dialogView.findViewById(R.id.priceEditText);
         builder.setTitle("Saisir le prix du produit");
-//            builder.setMessage("Veuillez saisir le prix du produit");
+        builder.setCancelable(false);
         priceEditText.requestFocus();
-
 
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
@@ -149,6 +148,7 @@ public class RecordSheetProductsFragment extends ProductsFragment {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setMessage("Voulez-vous vraiment retirer les produits selectionnés de ce relevé de prix ?");
+        builder.setCancelable(false);
 
         builder.setPositiveButton("Oui", new DialogInterface.OnClickListener() {
             @Override
