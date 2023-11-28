@@ -1,5 +1,6 @@
 package fr.villot.pricetracker.fragments;
 
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -271,16 +272,16 @@ public class RecordSheetsFragment extends Fragment {
                 fillCsvFile(csvFile, selection);
 
                 // Partager le fichier CSV
-                // shareCsvFile(csvFile);
+                 shareCsvFile(csvFile);
             }
         }
     }
 
     private File createCsvFile() {
         String fileName = "record_sheet_export.csv";
-        // Obtenez le répertoire spécifique à votre application dans le stockage externe privé
-        File exportDir = getActivity().getExternalFilesDir(null);
-        // File exportDir = new File(Environment.getExternalStorageDirectory(), "PriceTracker");
+
+        File privateRootDir = requireActivity().getFilesDir();
+        File exportDir = new File(privateRootDir, "export");
 
         // Créer le répertoire s'il n'existe pas
         if (!exportDir.exists()) {
@@ -324,18 +325,14 @@ public class RecordSheetsFragment extends Fragment {
 
     private void shareCsvFile(File csvFile) {
 
-//        Uri fileUri = FileProvider.getUriForFile(requireActivity(), getContext().getPackageName() + ".provider", csvFile);
-        Uri fileUri = FileProvider.getUriForFile(requireActivity(), "fr.villot.pricetracker.provider", csvFile);
+        // Uri du fichier à partager via le FileProvider defini dans le manifest.
+        Uri fileUri = FileProvider.getUriForFile(requireActivity(), getContext().getPackageName() + ".provider", csvFile);
 
-        // Créer l'intent de partage
+        // Intent de partage en ajoutant les droits temporaires d'accès au fichier
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         shareIntent.setType("text/csv");
         shareIntent.putExtra(Intent.EXTRA_STREAM, fileUri);
-
-        // Ajouter le drapeau de permission temporaire pour accéder au contenu
-        shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-        // Démarrer l'activité de partage
         startActivity(Intent.createChooser(shareIntent, "Partager via"));
     }
 }

@@ -1,6 +1,8 @@
 package fr.villot.pricetracker.activities;
 
 import android.Manifest;
+import android.app.Activity;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.Menu;
@@ -20,20 +22,16 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.tabs.TabLayout;
 
+import java.io.File;
 import java.util.logging.Logger;
 
-import fr.villot.pricetracker.MyApplication;
 import fr.villot.pricetracker.adapters.PageAdapter;
 import fr.villot.pricetracker.fragments.ProductsFragment;
 import fr.villot.pricetracker.fragments.RecordSheetsFragment;
 import fr.villot.pricetracker.fragments.StoresFragment;
-import fr.villot.pricetracker.utils.DatabaseHelper;
 import fr.villot.pricetracker.R;
 
 public class MainActivity extends AppCompatActivity {
-
-    private static final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 2;
-
     private TabLayout tabLayout;
     private ViewPager viewPager;
     private PageAdapter pageAdapter;
@@ -41,7 +39,6 @@ public class MainActivity extends AppCompatActivity {
     DrawerLayout drawerLayout;
     private boolean isSelectionModeActive = false;
     private Fragment currentFragment;
-
 
     private static final Logger logger = Logger.getLogger(MainActivity.class.getName());
 
@@ -66,14 +63,13 @@ public class MainActivity extends AppCompatActivity {
             actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
         }
 
+        // Gestion de la navigation par onglets
         pageAdapter = new PageAdapter(getSupportFragmentManager());
-        //Set Adapter PageAdapter and glue it together
         viewPager.setAdapter(pageAdapter);
-        //Glue TabLayout and ViewPager together
         tabLayout.setupWithViewPager(viewPager);
-        //Design purpose. Tabs have the same width
         tabLayout.setTabMode(TabLayout.MODE_FIXED);
 
+        // Annulation du mode de selection sur changement d'onglet
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -81,7 +77,6 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onPageSelected(int position) {
-                // L'utilisateur a changé d'onglet
                 setSelectionMode(currentFragment, false); // Quitter le mode de sélection
             }
 
@@ -94,7 +89,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu resource
         MenuInflater inflater = getMenuInflater();
 //        inflater.inflate(R.menu.main_menu, menu);
         if (isSelectionModeActive)
@@ -116,20 +110,9 @@ public class MainActivity extends AppCompatActivity {
                 }
                 return true;
             case R.id.action_settings:
-                // Do something when the settings menu item is clicked
-                // Replace this with the action you want to perform
                 return true;
             case R.id.action_share:
-
-                // Vérifier si la permission d'écriture externe est accordée
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    // Demander la permission si elle n'est pas déjà accordée
-                    ActivityCompat.requestPermissions(this,
-                            new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                            MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
-                }
-                else if (currentFragment instanceof RecordSheetsFragment) {
+                if (currentFragment instanceof RecordSheetsFragment) {
                     RecordSheetsFragment recordSheetsFragment = (RecordSheetsFragment) currentFragment;
                     recordSheetsFragment.shareRecordSheet();
                 }
@@ -147,18 +130,13 @@ public class MainActivity extends AppCompatActivity {
                     RecordSheetsFragment recordSheetsFragment = (RecordSheetsFragment) currentFragment;
                     recordSheetsFragment.deleteSelectedItems();
                 }
-
                 return true;
-            // Add more cases if you have more menu items
-            // For example, if you have another menu item with ID "action_item2":
-            // case R.id.action_item2:
-            //     // Do something for action_item2
-            //     return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
+    // Gestion du mode de sélection
     public void setSelectionMode(Fragment fragment, boolean isSelectionModeActive) {
 
         //Sauvegarde le fragment en cours pour les actions de la toolbar
@@ -188,20 +166,6 @@ public class MainActivity extends AppCompatActivity {
                 getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_cancel);
             }
             invalidateOptionsMenu(); // Rafraichissement du menu de la toolbar
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE) {
-            // Vérifier si la permission a été accordée
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // La permission a été accordée, vous pouvez maintenant accéder au stockage externe
-            } else {
-                // La permission a été refusée, vous pouvez informer l'utilisateur ou prendre d'autres mesures
-            }
         }
     }
 }
