@@ -5,6 +5,7 @@
         android:id="@+id/action_share"
         android:icon="@drawable/ic_share"
         android:title="Partager"
+        android:visible="false"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/action_delete"

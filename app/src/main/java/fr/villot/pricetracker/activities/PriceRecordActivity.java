@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -15,20 +14,15 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
-import androidx.fragment.app.Fragment;
 
 import com.google.android.material.snackbar.Snackbar;
 
-
-import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 import fr.villot.pricetracker.MyApplication;
 import fr.villot.pricetracker.R;
-import fr.villot.pricetracker.fragments.ProductsFragment;
 import fr.villot.pricetracker.fragments.RecordSheetProductsFragment;
-import fr.villot.pricetracker.fragments.RecordSheetsFragment;
-import fr.villot.pricetracker.fragments.StoresFragment;
 import fr.villot.pricetracker.model.Product;
 import fr.villot.pricetracker.model.RecordSheet;
 import fr.villot.pricetracker.model.Store;
@@ -38,15 +32,11 @@ import fr.villot.pricetracker.utils.DatabaseHelper;
 public class PriceRecordActivity extends AppCompatActivity {
 
     private static final int SELECT_PRODUCTS_REQUEST_CODE = 1;
-    private DatabaseHelper databaseHelper;
-    private List<Product> productList;
+//    private List<Product> productList;
     private long recordSheetId;
 
     private TextView storeNameTextView;
-    private TextView storeLocationTextView;
     Toolbar toolbar;
-    private ImageView storeImageView;
-    private CardView storeCardView;
     private boolean isSelectionModeActive = false;
 
 
@@ -56,6 +46,7 @@ public class PriceRecordActivity extends AppCompatActivity {
 
         if (requestCode == SELECT_PRODUCTS_REQUEST_CODE && resultCode == RESULT_OK) {
             // Récupérer la liste des produits sélectionnés
+            assert data != null;
             List<Product> selectedProducts = (List<Product>) data.getSerializableExtra("selected_products");
 
             // Obtenez une référence au fragment
@@ -80,14 +71,14 @@ public class PriceRecordActivity extends AppCompatActivity {
 
         // Récuperation des vues
         storeNameTextView = findViewById(R.id.storeNameTextView);
-        storeLocationTextView = findViewById(R.id.storeLocationTextView);
+        TextView storeLocationTextView = findViewById(R.id.storeLocationTextView);
         toolbar = findViewById(R.id.toolbar);
-        storeCardView = findViewById(R.id.storeCardView);
+        CardView storeCardView = findViewById(R.id.storeCardView);
         storeCardView.setRadius(0);
-        storeImageView = findViewById(R.id.storeImageView);
+        ImageView storeImageView = findViewById(R.id.storeImageView);
 
         // Initialisation du DatabaseHelper
-        databaseHelper = MyApplication.getDatabaseHelper();
+        DatabaseHelper databaseHelper = MyApplication.getDatabaseHelper();
 
         // Récupération du nom de la fiche de relevé de prix en paramètre et mise à jour du titre.
         recordSheetId = getIntent().getLongExtra("record_sheet_id", -1);
@@ -154,10 +145,15 @@ public class PriceRecordActivity extends AppCompatActivity {
         else if (itemId == R.id.action_delete) {
             // Obtenez une référence au fragment
             RecordSheetProductsFragment recordSheetProductsFragment = (RecordSheetProductsFragment) getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
-
-            // Appelez la méthode addOrUpdateProduct du fragment
             if (recordSheetProductsFragment != null) {
                 recordSheetProductsFragment.deleteSelectedItems();
+            }
+            return true;
+        }
+        else if (itemId == R.id.action_share) {
+            RecordSheetProductsFragment recordSheetProductsFragment = (RecordSheetProductsFragment) getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
+            if (recordSheetProductsFragment != null) {
+                recordSheetProductsFragment.shareRecordSheet();
             }
             return true;
         }
@@ -170,26 +166,13 @@ public class PriceRecordActivity extends AppCompatActivity {
         startActivityForResult(intent, SELECT_PRODUCTS_REQUEST_CODE);
     }
 
-    private void deleteSelectedProducts() {
-        Snackbar.make(storeNameTextView, "TODO : Supprimer la fiche avec popup de confirmation", Snackbar.LENGTH_SHORT).show();
-
-//        // Récupérer les produits sélectionnés (par exemple, à partir d'une liste de sélection)
-//        List<Product> selectedProducts = productAdapter.getSelectedProducts();
-//
-//        // Supprimer les produits sélectionnés de votre liste de produits
-//        productList.removeAll(selectedProducts);
-//
-//        // Mettre à jour votre RecyclerView
-//        productAdapter.notifyDataSetChanged();
-    }
-
     public void setSelectionMode(boolean isSelectionModeActive) {
 
         // Rafraichissement de la toolbar si nécessaire
         if (this.isSelectionModeActive != isSelectionModeActive) {
             this.isSelectionModeActive = isSelectionModeActive;
             if (!isSelectionModeActive) {
-                getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_back);
+                Objects.requireNonNull(getSupportActionBar()).setHomeAsUpIndicator(R.drawable.ic_back);
                 getSupportActionBar().setTitle(R.string.app_name);
 
                 // Obtenez une référence au fragment
@@ -201,7 +184,7 @@ public class PriceRecordActivity extends AppCompatActivity {
                 }
 
             } else {
-                getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_cancel);
+                Objects.requireNonNull(getSupportActionBar()).setHomeAsUpIndicator(R.drawable.ic_cancel);
             }
             invalidateOptionsMenu(); // Rafraichissement du menu de la toolbar
         }

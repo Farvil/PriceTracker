@@ -7,4 +7,9 @@
         android:icon="@drawable/ic_add_product"
         android:title="Ajouter depuis la bibliothèque"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/action_share"
+        android:icon="@drawable/ic_share"
+        android:title="Partager"
+        app:showAsAction="never" />
 </menu>

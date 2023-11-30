@@ -294,18 +294,18 @@ public class RecordSheetsFragment extends Fragment {
     private void fillCsvFile(File csvFile, Selection<Long> selection) {
         try (FileWriter writer = new FileWriter(csvFile)) {
             // En-têtes CSV
-            writer.append("Nom de la RecordSheet,Date,Store Name,Store Location,Barcode,Product Name,Brand,Quantity,Image URL\n");
+            writer.append("Nom du relevé de Prix,Date,Nom du magasin,Localisation du magasin, Code barre,Nom du produit,Marque,Quantité,Image URL,Prix\n");
 
             for (Long selectedItem : selection) {
                 RecordSheet recordSheet = recordSheetList.get(selectedItem.intValue());
 
-                // Récupérer les produits associés à la RecordSheet
+                // Récupérer les produits et magasin associés à la RecordSheet
                 List<Product> products = databaseHelper.getProductsOnRecordSheet(recordSheet.getId());
                 Store store = databaseHelper.getStoreById(recordSheet.getStoreId());
 
                 // Remplir le fichier CSV avec les données de chaque produit
                 for (Product product : products) {
-                    writer.append(String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s\n",
+                    writer.append(String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n",
                             recordSheet.getName(),
                             recordSheet.getDate(),
                             store.getName(),
@@ -314,7 +314,8 @@ public class RecordSheetsFragment extends Fragment {
                             product.getName(),
                             product.getBrand(),
                             product.getQuantity(),
-                            product.getImageUrl()));
+                            product.getImageUrl(),
+                            product.getPrice()));
                 }
             }
         } catch (IOException e) {
