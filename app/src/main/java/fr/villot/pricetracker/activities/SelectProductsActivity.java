@@ -84,7 +84,7 @@ public class SelectProductsActivity extends AppCompatActivity {
         ).withSelectionPredicate(SelectionPredicates.createSelectAnything())
                 .build();
         productAdapter.setSelectionTracker(selectionTracker);
-        
+
         selectionTracker.addObserver(new SelectionTracker.SelectionObserver<Long>() {
             @Override
             public void onItemStateChanged(Long key, boolean selected) {
@@ -98,6 +98,14 @@ public class SelectProductsActivity extends AppCompatActivity {
                 // Logique à effectuer lorsqu'il y a un changement dans la sélection
                 int numSelected = selectionTracker.getSelection().size();
                 // ...
+            }
+        });
+
+        // Gestion du click sur un produit
+        productAdapter.setOnItemClickListener(new ProductAdapter.OnItemClickListener<Product>() {
+            @Override
+            public void onItemClick(Product product) {
+                    Snackbar.make(productRecyclerView, "Faire un appui long pour entrer dans le mode de sélection", Snackbar.LENGTH_SHORT).show();
             }
         });
 

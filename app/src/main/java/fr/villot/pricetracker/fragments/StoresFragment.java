@@ -125,8 +125,15 @@ public class StoresFragment extends Fragment {
                     ((AppCompatActivity) requireActivity()).getSupportActionBar().setTitle(selectionCount);
                 }
             }
+
         });
 
+        storeAdapter.setOnItemClickListener(new StoreAdapter.OnItemClickListener<Store>() {
+            @Override
+            public void onItemClick(Store store) {
+                Snackbar.make(storeRecyclerView,"Faire un appui long pour entrer dans le mode de sélection", Snackbar.LENGTH_SHORT).show();
+            }
+        });
 
 //        storeAdapter.setOnItemClickListener(new StoreAdapter.OnItemClickListener() {
 //            @Override

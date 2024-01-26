@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 import fr.villot.pricetracker.R;
 import fr.villot.pricetracker.fragments.StoresFragment;
+import fr.villot.pricetracker.model.Product;
 import fr.villot.pricetracker.model.Store;
 
 public class StoreAdapter extends RecyclerView.Adapter<StoreViewHolder> {
@@ -18,6 +19,16 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreViewHolder> {
     private List<Store> storeList;
     private Context context;
     private SelectionTracker<Long> selectionTracker;
+
+    private StoreAdapter.OnItemClickListener<Store> onItemClickListener;
+
+    public interface OnItemClickListener<Store> {
+        void onItemClick(Store store);
+    }
+
+    public void setOnItemClickListener(StoreAdapter.OnItemClickListener<Store> listener) {
+        this.onItemClickListener = listener;
+    }
 
     public StoreAdapter(Context context, List<Store> storeList) {
         this.context = context;
@@ -50,6 +61,12 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreViewHolder> {
             layoutParams.bottomMargin = 0;
             holder.itemView.setLayoutParams(layoutParams);
         }
+
+        holder.itemView.setOnClickListener(view -> {
+            if (onItemClickListener != null) {
+                onItemClickListener.onItemClick(storeList.get(position));
+            }
+        });
 
     }
 

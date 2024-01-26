@@ -166,6 +166,10 @@ public class ProductsFragment extends Fragment {
         productAdapter.setOnItemClickListener(new ProductAdapter.OnItemClickListener<Product>() {
             @Override
             public void onItemClick(Product product) {
+//                if (!selectionTracker.hasSelection())
+//                {
+//                    Snackbar.make(productRecyclerView,"TODO : Afficher la liste des relevés de prix associés au produit", Snackbar.LENGTH_SHORT).show();
+//                }
                 handleClickOnProduct(product);
             }
         });
