@@ -100,7 +100,7 @@ public class PriceRecordActivity extends AppCompatActivity {
         if (store != null) {
             storeNameTextView.setText(store.getName());
             storeLocationTextView.setText(store.getLocation());
-            int imageResource = storeImageView.getContext().getResources().getIdentifier(recordSheet.getLogo(), "drawable", storeImageView.getContext().getPackageName());
+            int imageResource = storeImageView.getContext().getResources().getIdentifier(recordSheet.getStore().getLogo(), "drawable", storeImageView.getContext().getPackageName());
             storeImageView.setImageResource(imageResource);
         }
 

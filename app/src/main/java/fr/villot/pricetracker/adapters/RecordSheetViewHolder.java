@@ -28,6 +28,9 @@ public class RecordSheetViewHolder extends RecyclerView.ViewHolder {
     private CardView recordSheetCardView;
     private ImageView recordSheetSelectionImage;
 
+    private TextView storeNameTextView;
+    private TextView storeLocationTextView;
+
 
     public RecordSheetViewHolder(@NonNull View itemView) {
         super(itemView);
@@ -36,16 +39,21 @@ public class RecordSheetViewHolder extends RecyclerView.ViewHolder {
         recordSheetImageView = itemView.findViewById(R.id.recordSheetImageView);
         recordSheetCardView = itemView.findViewById(R.id.recordSheetCardView);
         recordSheetSelectionImage = itemView.findViewById(R.id.recordSheetSelectionImage);
+        storeNameTextView = itemView.findViewById(R.id.storeNameTextView);
+        storeLocationTextView = itemView.findViewById(R.id.storeLocationTextView);
     }
 
     public void bind(RecordSheet recordSheet, boolean isSelected) {
         nameTextView.setText(recordSheet.getName());
+        storeNameTextView.setText(recordSheet.getStore().getName());
+        storeLocationTextView.setText(recordSheet.getStore().getLocation());
+
         SimpleDateFormat dateFormat = new SimpleDateFormat("EEE dd/MM/yyyy HH:mm:ss", Locale.FRANCE);
         String formattedDate = dateFormat.format(recordSheet.getDate());
         dateTextView.setText(formattedDate);
 
         // Charger l'image du logo à partir des ressources
-        int imageResource = recordSheetImageView.getContext().getResources().getIdentifier(recordSheet.getLogo(), "drawable", recordSheetImageView.getContext().getPackageName());
+        int imageResource = recordSheetImageView.getContext().getResources().getIdentifier(recordSheet.getStore().getLogo(), "drawable", recordSheetImageView.getContext().getPackageName());
         recordSheetImageView.setImageResource(imageResource);
 //        Picasso.get().load(imageResource).into(recordSheetImageView);
 

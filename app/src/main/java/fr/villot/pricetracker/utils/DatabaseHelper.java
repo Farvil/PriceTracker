@@ -48,8 +48,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String KEY_RECORD_SHEET_NAME = "record_sheet_name";
     private static final String KEY_RECORD_SHEET_DATE = "record_sheet_date";
     private static final String KEY_RECORD_SHEET_STORE_ID = "record_sheet_store_id";
-    private static final String KEY_RECORD_SHEET_LOGO = "store_logo";
-
 
     // Table des relevés de prix
     private static final String TABLE_PRICE_RECORDS = "price_records";
@@ -96,7 +94,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 KEY_RECORD_SHEET_NAME + " TEXT," +
                 KEY_RECORD_SHEET_DATE + " DATETIME," +
                 KEY_RECORD_SHEET_STORE_ID + " INTEGER," +
-                KEY_RECORD_SHEET_LOGO + " TEXT," +
                 "FOREIGN KEY(" + KEY_RECORD_SHEET_STORE_ID + ") REFERENCES " + TABLE_STORES + "(" + KEY_STORE_ID + ")" +
         ")";
         db.execSQL(createRecordSheetsTable);
@@ -192,7 +189,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         long currentDate = System.currentTimeMillis();
         values.put(KEY_RECORD_SHEET_DATE, currentDate);
         values.put(KEY_RECORD_SHEET_STORE_ID,recordSheet.getStoreId());
-        values.put(KEY_RECORD_SHEET_LOGO, recordSheet.getLogo());
 
         // Insertion de la liste de relevés de prix dans la table "price_records_lists"
         long recordSheetId = db.insert(TABLE_RECORD_SHEETS, null, values);
@@ -296,8 +292,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 long dateMillis = cursor.getLong(cursor.getColumnIndex(KEY_RECORD_SHEET_DATE));
                 Date date = new Date(dateMillis);
                 recordSheet.setDate(date);
-                recordSheet.setStoreId(cursor.getInt(cursor.getColumnIndex(KEY_RECORD_SHEET_STORE_ID)));
-                recordSheet.setLogo(cursor.getString(cursor.getColumnIndex(KEY_RECORD_SHEET_LOGO)));
+
+                Store store = getStoreById(cursor.getInt(cursor.getColumnIndex(KEY_RECORD_SHEET_STORE_ID)));
+                recordSheet.setStore(store);
 
                 recordSheetList.add(recordSheet);
             } while (cursor.moveToNext());
@@ -382,8 +379,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             long dateMillis = cursor.getLong(cursor.getColumnIndex(KEY_RECORD_SHEET_DATE));
             Date date = new Date(dateMillis);
             recordSheet.setDate(date);
-            recordSheet.setStoreId(cursor.getInt(cursor.getColumnIndex(KEY_RECORD_SHEET_STORE_ID)));
-            recordSheet.setLogo(cursor.getString(cursor.getColumnIndex(KEY_RECORD_SHEET_LOGO)));
+            Store store = getStoreById(cursor.getInt(cursor.getColumnIndex(KEY_RECORD_SHEET_STORE_ID)));
+            recordSheet.setStore(store);
         }
 
         cursor.close();
@@ -408,8 +405,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 long dateMillis = cursor.getLong(cursor.getColumnIndex(KEY_RECORD_SHEET_DATE));
                 Date date = new Date(dateMillis);
                 recordSheet.setDate(date);
-                recordSheet.setStoreId(cursor.getInt(cursor.getColumnIndex(KEY_RECORD_SHEET_STORE_ID)));
-                recordSheet.setLogo(cursor.getString(cursor.getColumnIndex(KEY_RECORD_SHEET_LOGO)));
+                Store store = getStoreById(cursor.getInt(cursor.getColumnIndex(KEY_RECORD_SHEET_STORE_ID)));
+                recordSheet.setStore(store);
 
                 recordSheets.add(recordSheet);
             } while (cursor.moveToNext());

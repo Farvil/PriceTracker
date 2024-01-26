@@ -4,15 +4,17 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import fr.villot.pricetracker.MyApplication;
+import fr.villot.pricetracker.utils.DatabaseHelper;
+
 public class RecordSheet {
 
     private int id = -1;
 
     private String name;
     private Date date;
-    private int storeId;
 
-    private String logo;
+    private Store store;
 
     private List<PriceRecord> priceRecords;
 
@@ -20,11 +22,10 @@ public class RecordSheet {
         priceRecords = new ArrayList<>();
     }
 
-    public RecordSheet(String name, Date date, int storeId, String logo) {
+    public RecordSheet(String name, Date date, Store store) {
         this.name = name;
         this.date = date;
-        this.storeId = storeId;
-        this.logo = logo;
+        this.store = store;
         priceRecords = new ArrayList<>();
     }
 
@@ -65,18 +66,15 @@ public class RecordSheet {
     }
 
     public int getStoreId() {
-        return storeId;
+        return store.getId();
     }
 
-    public void setStoreId(int storeId) {
-        this.storeId = storeId;
+    public void setStore(Store store) {
+        this.store = store;
     }
 
-    public String getLogo() {
-        return logo;
+    public Store getStore() {
+        return store;
     }
 
-    public void setLogo(String logo) {
-        this.logo = logo;
-    }
 }
