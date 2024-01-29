@@ -22,7 +22,7 @@ import java.util.Objects;
 
 import fr.villot.pricetracker.MyApplication;
 import fr.villot.pricetracker.R;
-import fr.villot.pricetracker.fragments.RecordSheetProductsFragment;
+import fr.villot.pricetracker.fragments.ProductsOnRecordSheetFragment;
 import fr.villot.pricetracker.model.Product;
 import fr.villot.pricetracker.model.RecordSheet;
 import fr.villot.pricetracker.model.Store;
@@ -50,7 +50,7 @@ public class PriceRecordActivity extends AppCompatActivity {
             List<Product> selectedProducts = (List<Product>) data.getSerializableExtra("selected_products");
 
             // Obtenez une référence au fragment
-            RecordSheetProductsFragment fragment = (RecordSheetProductsFragment) getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
+            ProductsOnRecordSheetFragment fragment = (ProductsOnRecordSheetFragment) getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
 
             // Appelez la méthode addOrUpdateProduct du fragment
             if (fragment != null) {
@@ -105,10 +105,10 @@ public class PriceRecordActivity extends AppCompatActivity {
         }
 
         // Fragment qui gere la liste des produits de la recordsheet
-        RecordSheetProductsFragment recordSheetProductsFragment = RecordSheetProductsFragment.newInstance(recordSheetId);
+        ProductsOnRecordSheetFragment productsOnRecordSheetFragment = ProductsOnRecordSheetFragment.newInstance(recordSheetId);
         getSupportFragmentManager()
                 .beginTransaction()
-                .add(R.id.fragmentContainer, recordSheetProductsFragment)
+                .add(R.id.fragmentContainer, productsOnRecordSheetFragment)
                 .commit();
 
     }
@@ -144,16 +144,16 @@ public class PriceRecordActivity extends AppCompatActivity {
         }
         else if (itemId == R.id.action_delete) {
             // Obtenez une référence au fragment
-            RecordSheetProductsFragment recordSheetProductsFragment = (RecordSheetProductsFragment) getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
-            if (recordSheetProductsFragment != null) {
-                recordSheetProductsFragment.deleteSelectedItems();
+            ProductsOnRecordSheetFragment productsOnRecordSheetFragment = (ProductsOnRecordSheetFragment) getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
+            if (productsOnRecordSheetFragment != null) {
+                productsOnRecordSheetFragment.deleteSelectedItems();
             }
             return true;
         }
         else if (itemId == R.id.action_share) {
-            RecordSheetProductsFragment recordSheetProductsFragment = (RecordSheetProductsFragment) getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
-            if (recordSheetProductsFragment != null) {
-                recordSheetProductsFragment.shareRecordSheet();
+            ProductsOnRecordSheetFragment productsOnRecordSheetFragment = (ProductsOnRecordSheetFragment) getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
+            if (productsOnRecordSheetFragment != null) {
+                productsOnRecordSheetFragment.shareRecordSheet();
             }
             return true;
         }
@@ -176,11 +176,11 @@ public class PriceRecordActivity extends AppCompatActivity {
                 getSupportActionBar().setTitle(R.string.app_name);
 
                 // Obtenez une référence au fragment
-                RecordSheetProductsFragment recordSheetProductsFragment = (RecordSheetProductsFragment) getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
+                ProductsOnRecordSheetFragment productsOnRecordSheetFragment = (ProductsOnRecordSheetFragment) getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
 
                 // Appelez la méthode addOrUpdateProduct du fragment
-                if (recordSheetProductsFragment != null) {
-                    recordSheetProductsFragment.clearSelection();
+                if (productsOnRecordSheetFragment != null) {
+                    productsOnRecordSheetFragment.clearSelection();
                 }
 
             } else {

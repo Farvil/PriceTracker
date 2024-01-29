@@ -41,6 +41,7 @@ import java.util.logging.Logger;
 import fr.villot.pricetracker.MyApplication;
 import fr.villot.pricetracker.activities.MainActivity;
 import fr.villot.pricetracker.activities.PriceRecordActivity;
+import fr.villot.pricetracker.activities.RecordSheetActivity;
 import fr.villot.pricetracker.adapters.LogoAdapter;
 import fr.villot.pricetracker.adapters.MyDetailsLookup;
 import fr.villot.pricetracker.adapters.RecordSheetAdapter;
@@ -113,52 +114,34 @@ public class StoresFragment extends Fragment {
                 if (numSelected == 0) {
                     ((MainActivity) requireActivity()).setSelectionMode(getInstance(),false);
                     fabAdd.setVisibility(View.VISIBLE);
+                    ((MainActivity) requireActivity()).hideEditIcon();
                 }
                 else if (numSelected == 1) {
                     ((MainActivity) requireActivity()).setSelectionMode(getInstance(),true);
                     String selectionCount = String.valueOf(numSelected) + " magasin";
                     ((AppCompatActivity) requireActivity()).getSupportActionBar().setTitle(selectionCount);
+                    ((MainActivity) requireActivity()).showEditIcon();
                     fabAdd.setVisibility(View.INVISIBLE);
                 }
                 else {
                     String selectionCount = String.valueOf(numSelected) + " magasins";
                     ((AppCompatActivity) requireActivity()).getSupportActionBar().setTitle(selectionCount);
+                    ((MainActivity) requireActivity()).hideEditIcon();
                 }
             }
 
         });
 
+        // Lancement de l'activité RecordSheetActivity sur click d'un magasin
         storeAdapter.setOnItemClickListener(new StoreAdapter.OnItemClickListener<Store>() {
             @Override
             public void onItemClick(Store store) {
-                Snackbar.make(storeRecyclerView,"Faire un appui long pour entrer dans le mode de sélection", Snackbar.LENGTH_SHORT).show();
+                Intent intent = new Intent(getActivity(), RecordSheetActivity.class);
+                intent.putExtra("store_id", store.getId());
+                startActivity(intent);
             }
         });
 
-//        storeAdapter.setOnItemClickListener(new StoreAdapter.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(Object item) {
-//                if (item instanceof Store) {
-//                    Store store = (Store) item;
-//                    // TODO : Afficher la liste des relevés de prix pour ce magasin.
-//                    Snackbar.make(storeRecyclerView, "TODO : Afficher la liste des relevés de prix pour ce magasin : "
-//                                    + store.getName(),
-//                            Snackbar.LENGTH_LONG).show();
-//                }
-//            }
-//
-//            @Override
-//            public void onItemLongClick(Object item) {
-//                if (item instanceof Store) {
-//                    Store store = (Store) item;
-//                    // TODO : Gérer le long click
-//                    Snackbar.make(storeRecyclerView, "TODO : Gérer le click long pour ce magasin : "
-//                                    + store.getName(),
-//                            Snackbar.LENGTH_LONG).show();
-//                }
-//            }
-//
-//        });
 
         fabAdd = view.findViewById(R.id.fabAdd);
         fabAdd.setOnClickListener(new View.OnClickListener() {
@@ -320,5 +303,8 @@ public class StoresFragment extends Fragment {
         }
     }
 
-
+    // Modification du magasin
+    public void editStore() {
+        Snackbar.make(getView(), "TODO: Modification du magasin", Snackbar.LENGTH_SHORT).show();
+    }
 }

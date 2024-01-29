@@ -48,7 +48,7 @@ import fr.villot.pricetracker.utils.DatabaseHelper;
 
 public class RecordSheetsFragment extends Fragment {
     private static RecordSheetsFragment instance;
-    private DatabaseHelper databaseHelper;
+    protected DatabaseHelper databaseHelper;
     private RecyclerView recordSheetRecyclerView;
     private RecordSheetAdapter recordSheetAdapter;
     private List<RecordSheet> recordSheetList;
@@ -122,7 +122,7 @@ public class RecordSheetsFragment extends Fragment {
             }
         });
 
-        //Lancement de l'activité PriceRecordActivity sur clic d'un relevé de prix
+        //Lancement de l'activité PriceRecordActivity sur click d'un relevé de prix
         recordSheetAdapter.setOnItemClickListener(new RecordSheetAdapter.OnItemClickListener<RecordSheet>() {
             @Override
             public void onItemClick(RecordSheet recordSheet) {

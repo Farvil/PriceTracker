@@ -2,37 +2,27 @@ package fr.villot.pricetracker.fragments;
 
 import static fr.villot.pricetracker.fragments.ProductsFragment.DialogType.DIALOG_TYPE_ALREADY_EXIST;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.selection.Selection;
 
 import com.google.android.material.snackbar.Snackbar;
-import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 
 import fr.villot.pricetracker.R;
 import fr.villot.pricetracker.model.PriceRecord;
@@ -40,14 +30,14 @@ import fr.villot.pricetracker.model.Product;
 import fr.villot.pricetracker.model.RecordSheet;
 import fr.villot.pricetracker.model.Store;
 
-public class RecordSheetProductsFragment extends ProductsFragment {
+public class ProductsOnRecordSheetFragment extends ProductsFragment {
 
     private Long recordSheetId;
 
-    public static RecordSheetProductsFragment newInstance(long recordSheetId) {
+    public static ProductsOnRecordSheetFragment newInstance(long recordSheetId) {
         Log.w("RecordSheetProductsFragment", "newInstance()");
 
-        RecordSheetProductsFragment fragment = new RecordSheetProductsFragment();
+        ProductsOnRecordSheetFragment fragment = new ProductsOnRecordSheetFragment();
         Bundle args = new Bundle();
         args.putLong("record_sheet_id", recordSheetId);
         fragment.setArguments(args);
@@ -60,7 +50,7 @@ public class RecordSheetProductsFragment extends ProductsFragment {
 
         View view = super.onCreateView(inflater, container, savedInstanceState);
 
-        // TODO: Récupérer les données du Bundle
+        // Récupération des données du Bundle
         Bundle bundle = getArguments();
         if (bundle != null) {
             recordSheetId = bundle.getLong("record_sheet_id",-1);

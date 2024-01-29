@@ -1,5 +1,6 @@
 package fr.villot.pricetracker.activities;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -19,10 +20,12 @@ import fr.villot.pricetracker.adapters.PageAdapter;
 import fr.villot.pricetracker.fragments.ProductsFragment;
 import fr.villot.pricetracker.fragments.RecordSheetsFragment;
 import fr.villot.pricetracker.fragments.StoresFragment;
+import fr.villot.pricetracker.model.Store;
 
 public class MainActivity extends AppCompatActivity {
     //    DrawerLayout drawerLayout;
     private boolean isSelectionModeActive = false;
+    private boolean showEditIcon = false;
     private Fragment currentFragment;
 
 //    private static final Logger logger = Logger.getLogger(MainActivity.class.getName());
@@ -82,6 +85,15 @@ public class MainActivity extends AppCompatActivity {
                 MenuItem itemShare = menu.getItem(0);
                 itemShare.setVisible(true);
             }
+
+            // Icone d'edition du magasin
+            if (showEditIcon) {
+                if (currentFragment instanceof StoresFragment) {
+                    MenuItem itemEdit = menu.getItem(1);
+                    itemEdit.setVisible(true);
+                }
+            }
+
         }
 
         return true;
@@ -107,7 +119,15 @@ public class MainActivity extends AppCompatActivity {
                 recordSheetsFragment.shareRecordSheet();
             }
             return true;
-        } else if (itemId == R.id.action_delete) {
+        } else if (itemId == R.id.action_edit) {
+
+            if (currentFragment instanceof StoresFragment) {
+                StoresFragment storesFragment = (StoresFragment) currentFragment;
+                storesFragment.editStore();
+            }
+            return true;
+        }
+        else if (itemId == R.id.action_delete) {
             if (currentFragment instanceof ProductsFragment) {
                 ProductsFragment productsFragment = (ProductsFragment) currentFragment;
                 productsFragment.deleteSelectedItems();
@@ -158,6 +178,21 @@ public class MainActivity extends AppCompatActivity {
             invalidateOptionsMenu(); // Rafraichissement du menu de la toolbar
         }
     }
+
+    @SuppressLint("RestrictedApi")
+    public void showEditIcon() {
+        showEditIcon = true;
+        //TODO: verifier si correct
+        getSupportActionBar().invalidateOptionsMenu();
+    }
+
+    @SuppressLint("RestrictedApi")
+    public void hideEditIcon() {
+        showEditIcon = false;
+        //TODO: verifier si correct
+        getSupportActionBar().invalidateOptionsMenu();
+    }
+
 }
 
 
