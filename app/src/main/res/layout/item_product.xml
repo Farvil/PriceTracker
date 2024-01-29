@@ -117,7 +117,6 @@
                 android:id="@+id/productSelectionImage"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:layout_weight="1"
                 android:scaleType="centerInside"
                 android:visibility="gone"
                 android:layout_gravity="center_vertical"
