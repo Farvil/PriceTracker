@@ -14,6 +14,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
+import androidx.fragment.app.Fragment;
 
 import com.google.android.material.snackbar.Snackbar;
 
@@ -22,14 +23,18 @@ import java.util.Objects;
 
 import fr.villot.pricetracker.MyApplication;
 import fr.villot.pricetracker.R;
+import fr.villot.pricetracker.fragments.ProductsFragment;
 import fr.villot.pricetracker.fragments.ProductsOnRecordSheetFragment;
+import fr.villot.pricetracker.fragments.RecordSheetsFragment;
+import fr.villot.pricetracker.fragments.StoresFragment;
+import fr.villot.pricetracker.interfaces.OnSelectionChangedListener;
 import fr.villot.pricetracker.model.Product;
 import fr.villot.pricetracker.model.RecordSheet;
 import fr.villot.pricetracker.model.Store;
 import fr.villot.pricetracker.utils.DatabaseHelper;
 
 
-public class PriceRecordActivity extends AppCompatActivity {
+public class PriceRecordActivity extends AppCompatActivity implements OnSelectionChangedListener {
 
     private static final int SELECT_PRODUCTS_REQUEST_CODE = 1;
 //    private List<Product> productList;
@@ -134,7 +139,7 @@ public class PriceRecordActivity extends AppCompatActivity {
                 onBackPressed(); // Retour à l'activité principale
             }
             else {
-                setSelectionMode(false);
+                clearSelection();
             }
             return true;
         }
@@ -174,15 +179,6 @@ public class PriceRecordActivity extends AppCompatActivity {
             if (!isSelectionModeActive) {
                 Objects.requireNonNull(getSupportActionBar()).setHomeAsUpIndicator(R.drawable.ic_back);
                 getSupportActionBar().setTitle(R.string.app_name);
-
-                // Obtenez une référence au fragment
-                ProductsOnRecordSheetFragment productsOnRecordSheetFragment = (ProductsOnRecordSheetFragment) getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
-
-                // Appelez la méthode addOrUpdateProduct du fragment
-                if (productsOnRecordSheetFragment != null) {
-                    productsOnRecordSheetFragment.clearSelection();
-                }
-
             } else {
                 Objects.requireNonNull(getSupportActionBar()).setHomeAsUpIndicator(R.drawable.ic_cancel);
             }
@@ -190,4 +186,35 @@ public class PriceRecordActivity extends AppCompatActivity {
         }
     }
 
+    public void clearSelection() {
+
+        // Appel à la méthode clearSelection() du fragment
+        ProductsOnRecordSheetFragment productsOnRecordSheetFragment = (ProductsOnRecordSheetFragment) getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
+        if (productsOnRecordSheetFragment != null) {
+            productsOnRecordSheetFragment.clearSelection();
+        }
+    }
+
+    @Override
+    public void onSelectionChanged(Fragment fragment, int numSelectedItems) {
+
+        // Sauvegarde le fragment en cours pour les actions de la toolbar
+        // currentFragment = fragment;
+
+        if (numSelectedItems == 0) {
+            setSelectionMode(false);
+        }
+        else {
+            setSelectionMode(true);
+
+            // Modification du titre de la toolbar pour indiquer le nombre d'éléments sélectionnés.
+            String selectionCount = String.valueOf(numSelectedItems) + " relevé";
+
+            // Mise au pluriel de "relevé" si plusieurs elements sélectionnés
+            if (numSelectedItems > 1)
+                selectionCount += "s";
+
+            getSupportActionBar().setTitle(selectionCount);
+        }
+    }
 }

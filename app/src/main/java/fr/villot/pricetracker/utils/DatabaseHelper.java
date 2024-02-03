@@ -57,6 +57,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String KEY_PRICE_RECORD_RECORD_SHEET_ID = "price_record_record_sheet_id";
     private static final String KEY_PRICE_RECORD_PRODUCT_BARCODE = "price_record_product_barcode";
 
+    // Table des enseignes
+    private static final String TABLE_BRANDS = "brands";
+    private static final String BRAND_ID = "brand_id";
+    private static final String BRAND_NAME = "brand_name";
+
+
     private DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         this.context = context.getApplicationContext();
@@ -89,14 +95,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + KEY_STORE_LOGO + " TEXT" + ")";
         db.execSQL(createStoresTableQuery);
 
-        String createRecordSheetsTable = "CREATE TABLE " + TABLE_RECORD_SHEETS + " (" +
+        String createRecordSheetsTableQuery = "CREATE TABLE " + TABLE_RECORD_SHEETS + " (" +
                 KEY_RECORD_SHEET_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                 KEY_RECORD_SHEET_NAME + " TEXT," +
                 KEY_RECORD_SHEET_DATE + " DATETIME," +
                 KEY_RECORD_SHEET_STORE_ID + " INTEGER," +
                 "FOREIGN KEY(" + KEY_RECORD_SHEET_STORE_ID + ") REFERENCES " + TABLE_STORES + "(" + KEY_STORE_ID + ")" +
         ")";
-        db.execSQL(createRecordSheetsTable);
+        db.execSQL(createRecordSheetsTableQuery);
 
         String createPriceRecordsTableQuery = "CREATE TABLE " + TABLE_PRICE_RECORDS + "("
                 + KEY_PRICE_RECORD_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -107,9 +113,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + "FOREIGN KEY(" + KEY_PRICE_RECORD_PRODUCT_BARCODE + ") REFERENCES " + TABLE_PRODUCTS + "(" + KEY_PRODUCT_BARCODE + "),"
                 + "UNIQUE (" + KEY_PRICE_RECORD_RECORD_SHEET_ID + ", " + KEY_PRICE_RECORD_PRODUCT_BARCODE + ")"  // Contrainte d'unicité
                 + ")";
-
-
         db.execSQL(createPriceRecordsTableQuery);
+
+        // Méthode pour créer la table BRANDS
+        String createBrandTableQuery = "CREATE TABLE " + TABLE_BRANDS + "("
+                + BRAND_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + BRAND_NAME + " TEXT)";
+        db.execSQL(createBrandTableQuery);
+
+        insertBrands(db);
+
     }
 
     @Override
@@ -119,6 +132,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_STORES);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_RECORD_SHEETS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_PRICE_RECORDS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_BRANDS);
         onCreate(db);
     }
 
@@ -557,5 +571,99 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
     }
 
+    public void insertBrands(SQLiteDatabase db) {
+        ContentValues values = new ContentValues();
 
+        // Marque Aldi
+        values.put(BRAND_NAME, "aldi");
+        db.insert(TABLE_BRANDS, null, values);
+
+        // Marque Auchan
+        values.clear(); // Effacer les valeurs précédentes
+        values.put(BRAND_NAME, "auchan");
+        db.insert(TABLE_BRANDS, null, values);
+
+        // Marque Carrefour
+        values.clear();
+        values.put(BRAND_NAME, "carrefour");
+        db.insert(TABLE_BRANDS, null, values);
+
+        // Marque Casino
+        values.clear();
+        values.put(BRAND_NAME, "casino");
+        db.insert(TABLE_BRANDS, null, values);
+
+        // Marque G20
+        values.clear();
+        values.put(BRAND_NAME, "g20");
+        db.insert(TABLE_BRANDS, null, values);
+
+        // Marque Leclerc
+        values.clear();
+        values.put(BRAND_NAME, "leclerc");
+        db.insert(TABLE_BRANDS, null, values);
+
+        // Marque Lidl
+        values.clear();
+        values.put(BRAND_NAME, "lidl");
+        db.insert(TABLE_BRANDS, null, values);
+
+        // Marque Mousquetaires
+        values.clear();
+        values.put(BRAND_NAME, "mousquetaires");
+        db.insert(TABLE_BRANDS, null, values);
+
+        // Marque Systeme U
+        values.clear();
+        values.put(BRAND_NAME, "systeme_u");
+        db.insert(TABLE_BRANDS, null, values);
+
+    }
+
+    @SuppressLint("Range")
+    // Méthode pour récupérer les marques depuis la table BRANDS
+    public List<String> getBrands() {
+        List<String> brandsList = new ArrayList<>();
+
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        // La requête SQL pour récupérer les marques distinctes de la table BRANDS
+        String query = "SELECT DISTINCT " + BRAND_NAME + " FROM " + TABLE_BRANDS;
+
+        Cursor cursor = db.rawQuery(query, null);
+
+        // Parcourir le curseur et ajouter les marques à la liste
+        if (cursor.moveToFirst()) {
+            do {
+                String brandName = cursor.getString(cursor.getColumnIndex(BRAND_NAME));
+                brandsList.add(brandName);
+            } while (cursor.moveToNext());
+        }
+
+        // Fermer le curseur et la base de données
+        cursor.close();
+        db.close();
+
+        return brandsList;
+    }
+
+    public int updateStore(Store store) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_STORE_NAME, store.getName());
+        values.put(KEY_STORE_LOCATION, store.getLocation());
+        values.put(KEY_STORE_LOGO, store.getLogo());
+
+        // Clause WHERE pour spécifier quel magasin mettre à jour en fonction de l'id
+        String whereClause = KEY_STORE_ID + " = ?";
+        String[] whereArgs = {Integer.toString(store.getId()) };
+
+        // Effectuer la mise à jour et obtenir le nombre de lignes affectées
+        int rowsAffected = db.update(TABLE_STORES, values, whereClause, whereArgs);
+
+        db.close();
+
+        return rowsAffected;
+    }
 }

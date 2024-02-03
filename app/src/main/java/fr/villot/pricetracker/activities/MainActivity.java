@@ -20,13 +20,15 @@ import fr.villot.pricetracker.adapters.PageAdapter;
 import fr.villot.pricetracker.fragments.ProductsFragment;
 import fr.villot.pricetracker.fragments.RecordSheetsFragment;
 import fr.villot.pricetracker.fragments.StoresFragment;
-import fr.villot.pricetracker.model.Store;
+import fr.villot.pricetracker.interfaces.OnSelectionChangedListener;
+import fr.villot.pricetracker.interfaces.OnStoreChangedListener;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements OnStoreChangedListener, OnSelectionChangedListener {
     //    DrawerLayout drawerLayout;
     private boolean isSelectionModeActive = false;
     private boolean showEditIcon = false;
     private Fragment currentFragment;
+    private PageAdapter pageAdapter;
 
 //    private static final Logger logger = Logger.getLogger(MainActivity.class.getName());
 
@@ -52,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
 //        }
 
         // Gestion de la navigation par onglets
-        PageAdapter pageAdapter = new PageAdapter(getSupportFragmentManager());
+        pageAdapter = new PageAdapter(getSupportFragmentManager());
         viewPager.setAdapter(pageAdapter);
         tabLayout.setupWithViewPager(viewPager);
         tabLayout.setTabMode(TabLayout.MODE_FIXED);
@@ -65,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onPageSelected(int position) {
-                setSelectionMode(currentFragment, false); // Quitter le mode de sélection
+                clearSelection();
             }
 
             @Override
@@ -81,15 +83,18 @@ public class MainActivity extends AppCompatActivity {
 //        inflater.inflate(R.menu.main_menu, menu);
         if (isSelectionModeActive) {
             inflater.inflate(R.menu.toolbar_selection_menu, menu);
+
+            // Icone de partage dans le fragment des Recordsheets
             if (currentFragment instanceof RecordSheetsFragment) {
-                MenuItem itemShare = menu.getItem(0);
+                MenuItem itemShare = menu.findItem(R.id.action_share);
                 itemShare.setVisible(true);
             }
 
-            // Icone d'edition du magasin
+            // Icone d'edition pour modifier un magasin ou un relevé de prix
             if (showEditIcon) {
-                if (currentFragment instanceof StoresFragment) {
-                    MenuItem itemEdit = menu.getItem(1);
+                if (currentFragment instanceof StoresFragment
+                        || currentFragment instanceof RecordSheetsFragment) {
+                    MenuItem itemEdit = menu.findItem(R.id.action_edit);
                     itemEdit.setVisible(true);
                 }
             }
@@ -105,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (itemId == android.R.id.home) {
             if (isSelectionModeActive) {
-                setSelectionMode(currentFragment, false);
+                clearSelection();
             }
 //          else {
 //                // Ouverture du menu déroulant hamburger
@@ -145,10 +150,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Gestion du mode de sélection
-    public void setSelectionMode(Fragment fragment, boolean isSelectionModeActive) {
-
-        //Sauvegarde le fragment en cours pour les actions de la toolbar
-        currentFragment = fragment;
+    public void setSelectionMode(boolean isSelectionModeActive) {
 
         // Rafraichissement de la toolbar si nécessaire
         if (this.isSelectionModeActive != isSelectionModeActive) {
@@ -158,19 +160,6 @@ public class MainActivity extends AppCompatActivity {
 //                getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_back);
                 getSupportActionBar().setTitle(R.string.app_name);
 
-                if (currentFragment instanceof ProductsFragment) {
-                    ProductsFragment productsFragment = (ProductsFragment) currentFragment;
-                    productsFragment.clearSelection();
-                }
-                else if (currentFragment instanceof StoresFragment) {
-                    StoresFragment storesFragment = (StoresFragment) currentFragment;
-                    storesFragment.clearSelection();
-                }
-                else if (currentFragment instanceof RecordSheetsFragment) {
-                    RecordSheetsFragment recordSheetsFragment = (RecordSheetsFragment) currentFragment;
-                    recordSheetsFragment.clearSelection();
-                }
-
             } else {
                 Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
                 getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_cancel);
@@ -179,18 +168,93 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void clearSelection() {
+        if (currentFragment instanceof ProductsFragment) {
+            ProductsFragment productsFragment = (ProductsFragment) currentFragment;
+            productsFragment.clearSelection();
+        }
+        else if (currentFragment instanceof StoresFragment) {
+            StoresFragment storesFragment = (StoresFragment) currentFragment;
+            storesFragment.clearSelection();
+        }
+        else if (currentFragment instanceof RecordSheetsFragment) {
+            RecordSheetsFragment recordSheetsFragment = (RecordSheetsFragment) currentFragment;
+            recordSheetsFragment.clearSelection();
+        }
+    }
+
     @SuppressLint("RestrictedApi")
     public void showEditIcon() {
-        showEditIcon = true;
-        //TODO: verifier si correct
-        getSupportActionBar().invalidateOptionsMenu();
+        if (!showEditIcon) {
+            showEditIcon = true;
+            getSupportActionBar().invalidateOptionsMenu();
+        }
     }
 
     @SuppressLint("RestrictedApi")
     public void hideEditIcon() {
-        showEditIcon = false;
-        //TODO: verifier si correct
-        getSupportActionBar().invalidateOptionsMenu();
+        if (showEditIcon) {
+            showEditIcon = false;
+            getSupportActionBar().invalidateOptionsMenu();
+        }
+    }
+
+    @Override
+    public void onStoreChanged(int storeId) {
+
+        // Récupération du fragment des relevés de prix
+        int recordSheetTabIndex = pageAdapter.getItemPositionFromTitle("Relevés de prix");
+        Fragment fragment = pageAdapter.getItem(recordSheetTabIndex);
+
+        if (fragment instanceof RecordSheetsFragment) {
+            RecordSheetsFragment recordSheetsFragment = (RecordSheetsFragment) fragment;
+
+            // Par simplicité on recharge toute la liste. Si problème de performances, recharger uniquement le nécessaire
+            recordSheetsFragment.updateRecordSheetListViewFromDatabase(false);
+        }
+    }
+
+    @Override
+    public void onSelectionChanged(Fragment fragment, int numSelectedItems) {
+
+        // Sauvegarde le fragment en cours pour les actions de la toolbar
+        currentFragment = fragment;
+
+        if (numSelectedItems == 0) {
+            hideEditIcon();
+            setSelectionMode(false);
+        }
+        else {
+
+            // Icone d'édition (pour modifier un magasin ou un relevé de prix) si uniquement un seul element sélectionné
+            if (numSelectedItems == 1)
+                showEditIcon();
+            else
+                hideEditIcon();
+
+            setSelectionMode(true);
+
+            // Modification du titre de la toolbar pour indiquer le nombre d'éléments sélectionnés.
+            String selectionCount = String.valueOf(numSelectedItems) ;
+            if (currentFragment instanceof ProductsFragment) {
+                selectionCount += " produit";
+            }
+            else if (currentFragment instanceof StoresFragment) {
+                selectionCount += " magasin";
+            }
+            else if (currentFragment instanceof RecordSheetsFragment) {
+                selectionCount += " relevé";
+            }
+            else {
+                selectionCount += " élément";
+            }
+
+            // Mise au pluriel si plusieurs elements sélectionnés
+            if (numSelectedItems > 1)
+                selectionCount += "s";
+
+            getSupportActionBar().setTitle(selectionCount);
+        }
     }
 
 }

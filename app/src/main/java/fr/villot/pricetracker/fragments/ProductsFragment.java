@@ -3,6 +3,7 @@ package fr.villot.pricetracker.fragments;
 import static android.app.ProgressDialog.show;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -43,10 +44,9 @@ import fr.villot.pricetracker.MyApplication;
 import fr.villot.pricetracker.activities.BarCodeScannerActivity;
 import fr.villot.pricetracker.activities.MainActivity;
 import fr.villot.pricetracker.activities.PriceRecordActivity;
-import fr.villot.pricetracker.activities.SelectProductsActivity;
 import fr.villot.pricetracker.adapters.MyDetailsLookup;
 import fr.villot.pricetracker.adapters.ProductAdapter;
-import fr.villot.pricetracker.model.Store;
+import fr.villot.pricetracker.interfaces.OnSelectionChangedListener;
 import fr.villot.pricetracker.utils.DatabaseHelper;
 import fr.villot.pricetracker.utils.OpenFoodFactsAPIManager;
 import fr.villot.pricetracker.R;
@@ -64,8 +64,11 @@ public class ProductsFragment extends Fragment {
     private FloatingActionButton fabAdd;
     private static final String PRODUCT_SELECTION_KEY = "product_selection";
 
+    private OnSelectionChangedListener mOnSelectionChangedListener;
+
+
     // Type de boite de dialogue
-    public enum DialogType {
+    public enum ProductsFragmentDialogType {
         DIALOG_TYPE_ADD,
         DIALOG_TYPE_UPDATE,
         DIALOG_TYPE_ALREADY_EXIST,
@@ -91,6 +94,18 @@ public class ProductsFragment extends Fragment {
                     handleBarcodeScanResult(result.getContents());
                 }
             });
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+
+        // Ajout du listener OnSelectionChangedListener
+        if (context instanceof OnSelectionChangedListener) {
+            mOnSelectionChangedListener = (OnSelectionChangedListener) context;
+        } else {
+            throw new RuntimeException(context.toString() + " doit implémenter OnSelectionChangedListener");
+        }
+    }
 
     @Nullable
     @Override
@@ -135,31 +150,21 @@ public class ProductsFragment extends Fragment {
             @Override
             public void onSelectionChanged() {
                 super.onSelectionChanged();
-                // Réagir aux changements de sélection ici
-                int numSelected = selectionTracker.getSelection().size();
-                FragmentActivity fragmentActivity = requireActivity();
-                if (numSelected == 0) {
-                    if (fragmentActivity instanceof MainActivity)
-                        ((MainActivity) fragmentActivity).setSelectionMode(getInstance(),false);
-                    else if (fragmentActivity instanceof PriceRecordActivity)
-                        ((PriceRecordActivity) fragmentActivity).setSelectionMode(false);
-                    fabAdd.setVisibility(View.VISIBLE);
-                }
-                else if (numSelected == 1) {
-                    if (fragmentActivity instanceof MainActivity)
-                        ((MainActivity) fragmentActivity).setSelectionMode(getInstance(),true);
-                    else if (fragmentActivity instanceof PriceRecordActivity)
-                        ((PriceRecordActivity) fragmentActivity).setSelectionMode(true);
 
-                    String selectionCount = String.valueOf(numSelected) + " produit";
-                    ((AppCompatActivity) requireActivity()).getSupportActionBar().setTitle(selectionCount);
+                int numSelected = selectionTracker.getSelection().size();
+
+                // On informe l'activité parente (MainActivity ou PriceRecordActivity) du changement de sélection
+                if (mOnSelectionChangedListener != null) {
+                    mOnSelectionChangedListener.onSelectionChanged(getInstance(), numSelected);
+                }
+
+                // On masque l'icone flottant si une selection est en cours.
+                if (numSelected == 0)
+                    fabAdd.setVisibility(View.VISIBLE);
+                else
                     fabAdd.setVisibility(View.INVISIBLE);
-                }
-                else {
-                    String selectionCount = String.valueOf(numSelected) + " produits";
-                    ((AppCompatActivity) requireActivity()).getSupportActionBar().setTitle(selectionCount);
-                }
             }
+
         });
 
         // Gestion du click sur un produit
@@ -192,7 +197,7 @@ public class ProductsFragment extends Fragment {
     }
 
     protected void handleClickOnProduct(Product product) {
-        showUserQueryDialogBox(product, DialogType.DIALOG_TYPE_INFO);
+        showUserQueryDialogBox(product, ProductsFragmentDialogType.DIALOG_TYPE_INFO);
 
     }
 
@@ -222,7 +227,7 @@ public class ProductsFragment extends Fragment {
         // Sinon on propose à l'utilisateur de créer le produit.
         Product product = databaseHelper.getProductFromBarCode(barcode);
         if (product != null) {
-            showUserQueryDialogBox(product,DialogType.DIALOG_TYPE_ALREADY_EXIST);
+            showUserQueryDialogBox(product, ProductsFragmentDialogType.DIALOG_TYPE_ALREADY_EXIST);
         }
         else {
             getProductDataFromOpenFoodFacts(barcode, false);
@@ -243,9 +248,9 @@ public class ProductsFragment extends Fragment {
                         if (product != null) {
                             progressDialog.dismiss();
                             if (productAlreadyExist)
-                                showUserQueryDialogBox(product, DialogType.DIALOG_TYPE_UPDATE);
+                                showUserQueryDialogBox(product, ProductsFragmentDialogType.DIALOG_TYPE_UPDATE);
                             else
-                                showUserQueryDialogBox(product, DialogType.DIALOG_TYPE_ADD);
+                                showUserQueryDialogBox(product, ProductsFragmentDialogType.DIALOG_TYPE_ADD);
 
                         }
                     }
@@ -295,14 +300,14 @@ public class ProductsFragment extends Fragment {
         return dialogView;
     }
 
-    protected void showUserQueryDialogBox(Product product, DialogType dialogType) {
+    protected void showUserQueryDialogBox(Product product, ProductsFragmentDialogType productsFragmentDialogType) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setView(getProductViewForDialog(product, R.layout.item_product));
 
         String title = null;
         String message = null;
-        switch (dialogType) {
+        switch (productsFragmentDialogType) {
             case DIALOG_TYPE_ADD:
                 title = "Ajouter le produit ?";
                 break;
@@ -328,7 +333,7 @@ public class ProductsFragment extends Fragment {
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
-                switch (dialogType) {
+                switch (productsFragmentDialogType) {
                     case DIALOG_TYPE_ADD:
                         // Ajouter le produit à la base de données et à la ListView
                         addOrUpdateProduct(product);

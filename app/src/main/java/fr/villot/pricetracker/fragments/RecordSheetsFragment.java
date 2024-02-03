@@ -1,6 +1,7 @@
 package fr.villot.pricetracker.fragments;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -38,9 +39,12 @@ import fr.villot.pricetracker.MyApplication;
 import fr.villot.pricetracker.R;
 import fr.villot.pricetracker.activities.MainActivity;
 import fr.villot.pricetracker.activities.PriceRecordActivity;
+import fr.villot.pricetracker.activities.RecordSheetActivity;
 import fr.villot.pricetracker.adapters.MyDetailsLookup;
 import fr.villot.pricetracker.adapters.RecordSheetAdapter;
 import fr.villot.pricetracker.adapters.SpinnerStoreAdapter;
+import fr.villot.pricetracker.interfaces.OnSelectionChangedListener;
+import fr.villot.pricetracker.interfaces.OnStoreChangedListener;
 import fr.villot.pricetracker.model.Product;
 import fr.villot.pricetracker.model.RecordSheet;
 import fr.villot.pricetracker.model.Store;
@@ -55,12 +59,25 @@ public class RecordSheetsFragment extends Fragment {
     private FloatingActionButton fabAdd;
     private static final String RECORDSHEET_SELECTION_KEY = "recordsheet_selection";
 
+    private OnSelectionChangedListener mOnSelectionChangedListener;
 
     public static RecordSheetsFragment getInstance() {
         if (instance == null) {
             instance = new RecordSheetsFragment();
         }
         return instance;
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+
+        // Ajout du listener OnSelectionChangedListener
+        if (context instanceof OnSelectionChangedListener) {
+            mOnSelectionChangedListener = (OnSelectionChangedListener) context;
+        } else {
+            throw new RuntimeException(context.toString() + " doit implémenter OnSelectionChangedListener");
+        }
     }
 
     @Nullable
@@ -103,22 +120,18 @@ public class RecordSheetsFragment extends Fragment {
             @Override
             public void onSelectionChanged() {
                 super.onSelectionChanged();
-                // Réagir aux changements de sélection ici
                 int numSelected = selectionTracker.getSelection().size();
-                if (numSelected == 0) {
-                    ((MainActivity) requireActivity()).setSelectionMode(getInstance(),false);
+
+                // On informe l'activité parente (MainActivity ou RecordSheetActivity) du changement de sélection
+                if (mOnSelectionChangedListener != null) {
+                    mOnSelectionChangedListener.onSelectionChanged(getInstance(), numSelected);
+                }
+
+                // On masque l'icone flottant si une selection est en cours.
+                if (numSelected == 0)
                     fabAdd.setVisibility(View.VISIBLE);
-                }
-                else if (numSelected == 1) {
-                    ((MainActivity) requireActivity()).setSelectionMode(getInstance(),true);
-                    String selectionCount = String.valueOf(numSelected) + " relevé";
-                    ((AppCompatActivity) requireActivity()).getSupportActionBar().setTitle(selectionCount);
+                else
                     fabAdd.setVisibility(View.INVISIBLE);
-                }
-                else {
-                    String selectionCount = String.valueOf(numSelected) + " relevés";
-                    ((AppCompatActivity) requireActivity()).getSupportActionBar().setTitle(selectionCount);
-                }
             }
         });
 
@@ -148,7 +161,7 @@ public class RecordSheetsFragment extends Fragment {
         return databaseHelper.getAllRecordSheets();
     }
 
-    private void updateRecordSheetListViewFromDatabase(boolean lastItemDisplayed) {
+    public void updateRecordSheetListViewFromDatabase(boolean lastItemDisplayed) {
         // Obtenir la liste des produits à partir de la base de données
         recordSheetList = databaseHelper.getAllRecordSheets();
 

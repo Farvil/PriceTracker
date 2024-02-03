@@ -1,27 +1,23 @@
 package fr.villot.pricetracker.fragments;
 
+import static fr.villot.pricetracker.fragments.StoresFragment.StoresFragmentDialogType.DIALOG_TYPE_ADD;
+import static fr.villot.pricetracker.fragments.StoresFragment.StoresFragmentDialogType.DIALOG_TYPE_UPDATE;
+
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.Spinner;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.selection.Selection;
-import androidx.recyclerview.selection.SelectionPredicates;
 import androidx.recyclerview.selection.SelectionTracker;
 import androidx.recyclerview.selection.StableIdKeyProvider;
 import androidx.recyclerview.selection.StorageStrategy;
@@ -31,22 +27,18 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.logging.Logger;
 
 import fr.villot.pricetracker.MyApplication;
-import fr.villot.pricetracker.activities.MainActivity;
-import fr.villot.pricetracker.activities.PriceRecordActivity;
 import fr.villot.pricetracker.activities.RecordSheetActivity;
 import fr.villot.pricetracker.adapters.LogoAdapter;
 import fr.villot.pricetracker.adapters.MyDetailsLookup;
-import fr.villot.pricetracker.adapters.RecordSheetAdapter;
+import fr.villot.pricetracker.interfaces.OnSelectionChangedListener;
+import fr.villot.pricetracker.interfaces.OnStoreChangedListener;
 import fr.villot.pricetracker.model.LogoItem;
-import fr.villot.pricetracker.model.RecordSheet;
 import fr.villot.pricetracker.utils.DatabaseHelper;
 import fr.villot.pricetracker.R;
 import fr.villot.pricetracker.adapters.StoreAdapter;
@@ -63,6 +55,15 @@ public class StoresFragment extends Fragment {
 
     private static final String STORE_SELECTION_KEY = "store_selection";
 
+    public enum StoresFragmentDialogType {
+        DIALOG_TYPE_ADD,
+        DIALOG_TYPE_UPDATE
+    }
+
+    private OnStoreChangedListener mOnStoreChangedListener;
+
+    private OnSelectionChangedListener mOnSelectionChangedListener;
+
 
 
 //    private static final Logger logger = Logger.getLogger(StoresFragment.class.getName());
@@ -72,6 +73,24 @@ public class StoresFragment extends Fragment {
             instance = new StoresFragment();
         }
         return instance;
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        // Verification que l'activité hôte implémente l'interface
+        if (context instanceof OnStoreChangedListener) {
+            mOnStoreChangedListener = (OnStoreChangedListener) context;
+        } else {
+            throw new RuntimeException(context.toString() + " doit implémenter OnStoreNameChangedListener");
+        }
+
+        // Ajout du listener OnSelectionChangedListener
+        if (context instanceof OnSelectionChangedListener) {
+            mOnSelectionChangedListener = (OnSelectionChangedListener) context;
+        } else {
+            throw new RuntimeException(context.toString() + " doit implémenter OnSelectionChangedListener");
+        }
     }
 
     @Nullable
@@ -109,25 +128,19 @@ public class StoresFragment extends Fragment {
             @Override
             public void onSelectionChanged() {
                 super.onSelectionChanged();
-                // Réagir aux changements de sélection ici
+
                 int numSelected = selectionTracker.getSelection().size();
-                if (numSelected == 0) {
-                    ((MainActivity) requireActivity()).setSelectionMode(getInstance(),false);
+
+                // On informe l'activité parente (MainActivity) du changement de sélection
+                if (mOnSelectionChangedListener != null) {
+                    mOnSelectionChangedListener.onSelectionChanged(getInstance(), numSelected);
+                }
+
+                // On masque l'icone flottant si une selection est en cours.
+                if (numSelected == 0)
                     fabAdd.setVisibility(View.VISIBLE);
-                    ((MainActivity) requireActivity()).hideEditIcon();
-                }
-                else if (numSelected == 1) {
-                    ((MainActivity) requireActivity()).setSelectionMode(getInstance(),true);
-                    String selectionCount = String.valueOf(numSelected) + " magasin";
-                    ((AppCompatActivity) requireActivity()).getSupportActionBar().setTitle(selectionCount);
-                    ((MainActivity) requireActivity()).showEditIcon();
+                else
                     fabAdd.setVisibility(View.INVISIBLE);
-                }
-                else {
-                    String selectionCount = String.valueOf(numSelected) + " magasins";
-                    ((AppCompatActivity) requireActivity()).getSupportActionBar().setTitle(selectionCount);
-                    ((MainActivity) requireActivity()).hideEditIcon();
-                }
             }
 
         });
@@ -147,7 +160,8 @@ public class StoresFragment extends Fragment {
         fabAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showAddStoreDialog(requireActivity());
+                showUserQueryDialogBox(new Store(),DIALOG_TYPE_ADD);
+//                showAddStoreDialog(requireActivity());
             }
         });
 
@@ -183,19 +197,12 @@ public class StoresFragment extends Fragment {
         EditText storeNameEditText = dialogView.findViewById(R.id.storeNameEditText);
         EditText storeLocationEditText = dialogView.findViewById(R.id.storeLocationEditText);
 
-        // Create a Spinner for choosing a logo
+        // Liste des logos des enseignes
         List<LogoItem> logoItems = new ArrayList<>();
-
-        // Ajout des logos des magasins
-        logoItems.add(new LogoItem("aldi"));
-        logoItems.add(new LogoItem("auchan"));
-        logoItems.add(new LogoItem("carrefour"));
-        logoItems.add(new LogoItem("casino"));
-        logoItems.add(new LogoItem("g20"));
-        logoItems.add(new LogoItem("leclerc"));
-        logoItems.add(new LogoItem("lidl"));
-        logoItems.add(new LogoItem("mousquetaires"));
-        logoItems.add(new LogoItem("systeme_u"));
+        List<String> brandsList = databaseHelper.getBrands();
+        for (String brand : brandsList) {
+            logoItems.add(new LogoItem(brand));
+        }
 
         // Gestion de l'adapter
         LogoAdapter logoAdapter = new LogoAdapter(context, logoItems);
@@ -237,6 +244,90 @@ public class StoresFragment extends Fragment {
         });
 
         builder.show();
+    }
+
+
+    protected void showUserQueryDialogBox(Store store, StoresFragmentDialogType storesFragmentDialogType) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        View dialogView = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_create_store, null);
+        builder.setView(dialogView);
+
+        // Références des vues dans le layout de la boîte de dialogue
+        Spinner storeLogoSpinner = dialogView.findViewById(R.id.storeLogoSpinner);
+        EditText storeNameEditText = dialogView.findViewById(R.id.storeNameEditText);
+        EditText storeLocationEditText = dialogView.findViewById(R.id.storeLocationEditText);
+
+        // Liste des logos des enseignes
+        List<LogoItem> logoItems = new ArrayList<>();
+        List<String> brandsList = databaseHelper.getBrands();
+        for (String brand : brandsList) {
+            logoItems.add(new LogoItem(brand));
+        }
+
+        // Gestion de l'adapter
+        LogoAdapter logoAdapter = new LogoAdapter(getActivity(), logoItems);
+        storeLogoSpinner.setAdapter(logoAdapter);
+
+        String title = null;
+        switch (storesFragmentDialogType) {
+            case DIALOG_TYPE_ADD:
+                title = "Ajouter un nouveau magasin";
+                break;
+            case DIALOG_TYPE_UPDATE:
+                title = "Modifier le magasin";
+
+                if (store != null) {
+                    storeNameEditText.setText(store.getName());
+                    storeLocationEditText.setText(store.getLocation());
+                    storeLogoSpinner.setSelection(brandsList.indexOf(store.getLogo()));
+                }
+                break;
+        }
+
+        builder.setTitle(title);
+        builder.setCancelable(false);
+
+        builder.setPositiveButton("Oui", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                // Récupération des informations saisies
+                String name = storeNameEditText.getText().toString().trim();
+                String location = storeLocationEditText.getText().toString().trim();
+                LogoItem selectedLogoItem = (LogoItem) storeLogoSpinner.getSelectedItem();
+                String selectedLogo = selectedLogoItem.getImageName();
+
+                if (!name.isEmpty() && !location.isEmpty()) {
+
+                    store.setName(name);
+                    store.setLocation(location);
+                    store.setLogo(selectedLogo);
+
+                    switch (storesFragmentDialogType) {
+                        case DIALOG_TYPE_ADD:
+                            // Ajout dans la base de données
+                            databaseHelper.addStore(store);
+                            break;
+                        case DIALOG_TYPE_UPDATE:
+                            databaseHelper.updateStore(store);
+                            notifyStoreChanged(store.getId());
+                            break;
+                    }
+
+                    updateStoreListViewFromDatabase(true);
+
+                } else {
+                    Snackbar.make(getView(),"Veuillez entrer un nom de magasin et un lieu", Snackbar.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        builder.setNegativeButton("Non", null);
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
     }
 
     public void clearSelection() {
@@ -305,6 +396,26 @@ public class StoresFragment extends Fragment {
 
     // Modification du magasin
     public void editStore() {
-        Snackbar.make(getView(), "TODO: Modification du magasin", Snackbar.LENGTH_SHORT).show();
+
+        if (storeAdapter != null && storeAdapter.getSelectionTracker() != null) {
+            Selection<Long> selection = storeAdapter.getSelectionTracker().getSelection();
+
+            // Récupération de l'élément sélectionné
+            Store store = null;
+            for (Long selectedItem : selection) {
+                store = storeList.get(selectedItem.intValue());
+                break;
+            }
+
+            showUserQueryDialogBox(store,DIALOG_TYPE_UPDATE);
+        }
     }
+
+    // Méthode appelée lors du changement sur un magasin
+    private void notifyStoreChanged(int storeId) {
+        if (mOnStoreChangedListener != null) {
+            mOnStoreChangedListener.onStoreChanged(storeId);
+        }
+    }
+
 }

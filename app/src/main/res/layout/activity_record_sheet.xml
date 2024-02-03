@@ -21,7 +21,7 @@
             android:elevation="4dp"
             android:theme="@style/Theme.PriceTracker.AppBarOverlay"
             app:popupTheme="@style/Theme.PriceTracker.PopupOverlay"
-            app:title="Relevés du magasin" />
+            app:title="@string/activity_record_sheet_title" />
 
     </com.google.android.material.appbar.AppBarLayout>
 

@@ -1,6 +1,6 @@
 package fr.villot.pricetracker.fragments;
 
-import static fr.villot.pricetracker.fragments.ProductsFragment.DialogType.DIALOG_TYPE_ALREADY_EXIST;
+import static fr.villot.pricetracker.fragments.ProductsFragment.ProductsFragmentDialogType.DIALOG_TYPE_ALREADY_EXIST;
 
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -78,10 +78,10 @@ public class ProductsOnRecordSheetFragment extends ProductsFragment {
         showPriceInputDialogAndUpdateDatabase(product);
     }
 
-    protected void showUserQueryDialogBox(Product product, DialogType dialogType) {
+    protected void showUserQueryDialogBox(Product product, ProductsFragmentDialogType productsFragmentDialogType) {
 
-        if (dialogType != DIALOG_TYPE_ALREADY_EXIST)
-            super.showUserQueryDialogBox(product,dialogType);
+        if (productsFragmentDialogType != DIALOG_TYPE_ALREADY_EXIST)
+            super.showUserQueryDialogBox(product, productsFragmentDialogType);
         else {
             showPriceInputDialogAndUpdateDatabase(product);
         }
