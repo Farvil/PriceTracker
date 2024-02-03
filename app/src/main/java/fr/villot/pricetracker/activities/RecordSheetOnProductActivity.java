@@ -35,7 +35,7 @@ import java.util.List;
 import fr.villot.pricetracker.MyApplication;
 import fr.villot.pricetracker.R;
 import fr.villot.pricetracker.adapters.MyDetailsLookup;
-import fr.villot.pricetracker.adapters.SimpleRecordSheetAdapter;
+import fr.villot.pricetracker.adapters.RecordSheetAdapter;
 import fr.villot.pricetracker.model.Product;
 import fr.villot.pricetracker.model.RecordSheet;
 import fr.villot.pricetracker.model.Store;
@@ -46,7 +46,7 @@ public class RecordSheetOnProductActivity extends AppCompatActivity {
     private String barcode;
     private DatabaseHelper databaseHelper;
     private RecyclerView recordSheetRecyclerView;
-    private SimpleRecordSheetAdapter simpleRecordSheetAdapter;
+    private RecordSheetAdapter recordSheetAdapter;
     private List<RecordSheet> recordSheetList;
     private static final String RECORDSHEET_ON_PRODUCT_ACTIVITY_SELECTION_KEY = "recordsheet_on_product_activity_selection";
 
@@ -101,8 +101,8 @@ public class RecordSheetOnProductActivity extends AppCompatActivity {
         recordSheetList = databaseHelper.getRecordSheetsOnProduct(barcode);
 
         // Adapter entre RecyclerView et Produit.
-        simpleRecordSheetAdapter = new SimpleRecordSheetAdapter(this, recordSheetList);
-        recordSheetRecyclerView.setAdapter(simpleRecordSheetAdapter);
+        recordSheetAdapter = new RecordSheetAdapter(this, recordSheetList);
+        recordSheetRecyclerView.setAdapter(recordSheetAdapter);
 
         // Gestion de la selection d'items
         SelectionTracker<Long> selectionTracker = new SelectionTracker.Builder<>(
@@ -112,7 +112,7 @@ public class RecordSheetOnProductActivity extends AppCompatActivity {
                 new MyDetailsLookup(recordSheetRecyclerView),
                 StorageStrategy.createLongStorage()
         ).build();
-        simpleRecordSheetAdapter.setSelectionTracker(selectionTracker);
+        recordSheetAdapter.setSelectionTracker(selectionTracker);
 
         selectionTracker.addObserver(new SelectionTracker.SelectionObserver<Long>() {
             @Override
@@ -140,7 +140,7 @@ public class RecordSheetOnProductActivity extends AppCompatActivity {
 
 
         //Lancement de l'activité PriceRecordActivity sur click d'un relevé de prix
-        simpleRecordSheetAdapter.setOnItemClickListener(new SimpleRecordSheetAdapter.OnItemClickListener<RecordSheet>() {
+        recordSheetAdapter.setOnItemClickListener(new RecordSheetAdapter.OnItemClickListener<RecordSheet>() {
             @Override
             public void onItemClick(RecordSheet recordSheet) {
                 Intent intent = new Intent(RecordSheetOnProductActivity.this,  PriceRecordActivity.class);
@@ -208,16 +208,16 @@ public class RecordSheetOnProductActivity extends AppCompatActivity {
 
     public void clearSelection() {
 
-        if (simpleRecordSheetAdapter != null && simpleRecordSheetAdapter.getSelectionTracker() != null) {
-            simpleRecordSheetAdapter.getSelectionTracker().clearSelection();
+        if (recordSheetAdapter != null && recordSheetAdapter.getSelectionTracker() != null) {
+            recordSheetAdapter.getSelectionTracker().clearSelection();
         }
 
     }
 
 
     public void shareRecordSheet() {
-        if (simpleRecordSheetAdapter != null && simpleRecordSheetAdapter.getSelectionTracker() != null) {
-            Selection<Long> selection = simpleRecordSheetAdapter.getSelectionTracker().getSelection();
+        if (recordSheetAdapter != null && recordSheetAdapter.getSelectionTracker() != null) {
+            Selection<Long> selection = recordSheetAdapter.getSelectionTracker().getSelection();
 
             // Vérifier s'il y a des éléments sélectionnés
             if (!selection.isEmpty()) {
