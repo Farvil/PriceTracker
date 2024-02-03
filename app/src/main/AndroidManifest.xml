@@ -48,7 +48,10 @@
             android:name=".activities.SelectProductsActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activities.RecordSheetActivity"
+            android:name=".activities.RecordSheetOnProductActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.RecordSheetOnStoreActivity"
             android:screenOrientation="portrait" />
     </application>
 

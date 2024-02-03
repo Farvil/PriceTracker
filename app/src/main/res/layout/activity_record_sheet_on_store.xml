@@ -21,7 +21,7 @@
             android:elevation="4dp"
             android:theme="@style/Theme.PriceTracker.AppBarOverlay"
             app:popupTheme="@style/Theme.PriceTracker.PopupOverlay"
-            app:title="@string/activity_record_sheet_title" />
+            app:title="@string/activity_record_sheet_on_store_title" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -35,10 +35,13 @@
         android:layout_height="2dp"
         android:background="@color/black" />
 
-    <!-- Conteneur de fragments -->
-    <FrameLayout
-        android:id="@+id/fragmentContainer"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recordSheetRecyclerView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteX="1dp"
+        android:scrollbars="vertical"
+        android:scrollbarStyle="outsideOverlay"/>
 
 </LinearLayout>

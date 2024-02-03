@@ -2,5 +2,6 @@
     <string name="app_name">PriceTracker</string>
     <string name="choose_store">Selectionner un magasin</string>
     <string name="action_settings">Action</string>
-    <string name="activity_record_sheet_title">Relevés du magasin</string>
+    <string name="activity_record_sheet_on_store_title">Relevés du magasin</string>
+    <string name="activity_record_sheet_on_product_title">Relevés du produit</string>
 </resources>

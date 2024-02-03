@@ -404,6 +404,43 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     @SuppressLint("Range")
+    public List<RecordSheet> getRecordSheetsOnProduct(String barcode) {
+        List<RecordSheet> recordSheetsList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        // Requête pour récupérer toutes les lignes de la table record_sheets associées à un produit donné
+        String selectQuery = "SELECT rs.* FROM " + TABLE_RECORD_SHEETS + " rs INNER JOIN " + TABLE_PRICE_RECORDS + " pr ON rs." +
+                KEY_RECORD_SHEET_ID + " = pr." + KEY_PRICE_RECORD_RECORD_SHEET_ID +
+                " WHERE pr." + KEY_PRICE_RECORD_PRODUCT_BARCODE + " = ?";
+
+        Cursor cursor = db.rawQuery(selectQuery, new String[]{barcode});
+
+        // Parcours du curseur pour récupérer les enregistrements
+        if (cursor.moveToFirst()) {
+            do {
+                RecordSheet recordSheet = new RecordSheet();
+                recordSheet.setId(cursor.getInt(cursor.getColumnIndex(KEY_RECORD_SHEET_ID)));
+                recordSheet.setName(cursor.getString(cursor.getColumnIndex(KEY_RECORD_SHEET_NAME)));
+                long dateMillis = cursor.getLong(cursor.getColumnIndex(KEY_RECORD_SHEET_DATE));
+                Date date = new Date(dateMillis);
+                recordSheet.setDate(date);
+
+                Store store = getStoreById(cursor.getInt(cursor.getColumnIndex(KEY_RECORD_SHEET_STORE_ID)));
+                recordSheet.setStore(store);
+
+                recordSheetsList.add(recordSheet);
+            } while (cursor.moveToNext());
+        }
+
+        // Fermeture du curseur et de la base de données
+        cursor.close();
+        db.close();
+
+        return recordSheetsList;
+    }
+
+
+    @SuppressLint("Range")
     public List<RecordSheet> getRecordSheetsOnStore(long storeId) {
         List<RecordSheet> recordSheets = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
@@ -666,4 +703,5 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return rowsAffected;
     }
+
 }

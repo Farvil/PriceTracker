@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Queue;
 
 import fr.villot.pricetracker.MyApplication;
-import fr.villot.pricetracker.activities.RecordSheetActivity;
+import fr.villot.pricetracker.activities.RecordSheetOnStoreActivity;
 import fr.villot.pricetracker.adapters.LogoAdapter;
 import fr.villot.pricetracker.adapters.MyDetailsLookup;
 import fr.villot.pricetracker.interfaces.OnSelectionChangedListener;
@@ -149,7 +149,7 @@ public class StoresFragment extends Fragment {
         storeAdapter.setOnItemClickListener(new StoreAdapter.OnItemClickListener<Store>() {
             @Override
             public void onItemClick(Store store) {
-                Intent intent = new Intent(getActivity(), RecordSheetActivity.class);
+                Intent intent = new Intent(getActivity(), RecordSheetOnStoreActivity.class);
                 intent.putExtra("store_id", store.getId());
                 startActivity(intent);
             }

@@ -29,6 +29,9 @@ public class MyDetailsLookup extends ItemDetailsLookup<Long> {
             else if (viewHolder instanceof RecordSheetViewHolder) {
                 return ((RecordSheetViewHolder) viewHolder).getItemDetails();
             }
+            else if (viewHolder instanceof SimpleRecordSheetViewHolder) {
+                return ((SimpleRecordSheetViewHolder) viewHolder).getItemDetails();
+            }
         }
         return null;
     }

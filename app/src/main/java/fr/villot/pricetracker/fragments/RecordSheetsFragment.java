@@ -1,12 +1,10 @@
 package fr.villot.pricetracker.fragments;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +14,6 @@ import android.widget.Spinner;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.selection.Selection;
@@ -37,14 +34,11 @@ import java.util.List;
 
 import fr.villot.pricetracker.MyApplication;
 import fr.villot.pricetracker.R;
-import fr.villot.pricetracker.activities.MainActivity;
 import fr.villot.pricetracker.activities.PriceRecordActivity;
-import fr.villot.pricetracker.activities.RecordSheetActivity;
 import fr.villot.pricetracker.adapters.MyDetailsLookup;
 import fr.villot.pricetracker.adapters.RecordSheetAdapter;
 import fr.villot.pricetracker.adapters.SpinnerStoreAdapter;
 import fr.villot.pricetracker.interfaces.OnSelectionChangedListener;
-import fr.villot.pricetracker.interfaces.OnStoreChangedListener;
 import fr.villot.pricetracker.model.Product;
 import fr.villot.pricetracker.model.RecordSheet;
 import fr.villot.pricetracker.model.Store;

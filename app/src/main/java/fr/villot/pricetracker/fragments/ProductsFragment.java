@@ -44,9 +44,13 @@ import fr.villot.pricetracker.MyApplication;
 import fr.villot.pricetracker.activities.BarCodeScannerActivity;
 import fr.villot.pricetracker.activities.MainActivity;
 import fr.villot.pricetracker.activities.PriceRecordActivity;
+import fr.villot.pricetracker.activities.RecordSheetOnProductActivity;
+import fr.villot.pricetracker.activities.RecordSheetOnStoreActivity;
 import fr.villot.pricetracker.adapters.MyDetailsLookup;
 import fr.villot.pricetracker.adapters.ProductAdapter;
+import fr.villot.pricetracker.adapters.StoreAdapter;
 import fr.villot.pricetracker.interfaces.OnSelectionChangedListener;
+import fr.villot.pricetracker.model.Store;
 import fr.villot.pricetracker.utils.DatabaseHelper;
 import fr.villot.pricetracker.utils.OpenFoodFactsAPIManager;
 import fr.villot.pricetracker.R;
@@ -171,13 +175,22 @@ public class ProductsFragment extends Fragment {
         productAdapter.setOnItemClickListener(new ProductAdapter.OnItemClickListener<Product>() {
             @Override
             public void onItemClick(Product product) {
-//                if (!selectionTracker.hasSelection())
-//                {
-//                    Snackbar.make(productRecyclerView,"TODO : Afficher la liste des relevés de prix associés au produit", Snackbar.LENGTH_SHORT).show();
-//                }
-                handleClickOnProduct(product);
+                Intent intent = new Intent(getActivity(), RecordSheetOnProductActivity.class);
+                intent.putExtra("barcode", product.getBarcode());
+                startActivity(intent);
             }
         });
+
+//        productAdapter.setOnItemClickListener(new ProductAdapter.OnItemClickListener<Product>() {
+//            @Override
+//            public void onItemClick(Product product) {
+////                if (!selectionTracker.hasSelection())
+////                {
+////                    Snackbar.make(productRecyclerView,"TODO : Afficher la liste des relevés de prix associés au produit", Snackbar.LENGTH_SHORT).show();
+////                }
+//                handleClickOnProduct(product);
+//            }
+//        });
 
         // Action du bouton flottant
         fabAdd.setOnClickListener(new View.OnClickListener() {
