@@ -27,7 +27,9 @@ import fr.villot.pricetracker.fragments.ProductsFragment;
 import fr.villot.pricetracker.fragments.ProductsOnRecordSheetFragment;
 import fr.villot.pricetracker.fragments.RecordSheetsFragment;
 import fr.villot.pricetracker.fragments.StoresFragment;
+//import fr.villot.pricetracker.interfaces.OnProductDeletedFromRecordSheetListener;
 import fr.villot.pricetracker.interfaces.OnSelectionChangedListener;
+import fr.villot.pricetracker.interfaces.OnStoreChangedListener;
 import fr.villot.pricetracker.model.Product;
 import fr.villot.pricetracker.model.RecordSheet;
 import fr.villot.pricetracker.model.Store;
@@ -38,11 +40,14 @@ public class PriceRecordActivity extends AppCompatActivity implements OnSelectio
 
     private static final int SELECT_PRODUCTS_REQUEST_CODE = 1;
 //    private List<Product> productList;
-    private long recordSheetId;
+    private int recordSheetId;
+    RecordSheet recordSheet;
 
     private TextView storeNameTextView;
     Toolbar toolbar;
     private boolean isSelectionModeActive = false;
+
+//    private OnProductDeletedFromRecordSheetListener onProductDeletedFromRecordSheetListener = null;
 
 
     @Override
@@ -86,8 +91,8 @@ public class PriceRecordActivity extends AppCompatActivity implements OnSelectio
         DatabaseHelper databaseHelper = MyApplication.getDatabaseHelper();
 
         // Récupération du nom de la fiche de relevé de prix en paramètre et mise à jour du titre.
-        recordSheetId = getIntent().getLongExtra("record_sheet_id", -1);
-        RecordSheet recordSheet = databaseHelper.getRecordSheetById(recordSheetId);
+        recordSheetId = getIntent().getIntExtra("record_sheet_id", -1);
+        recordSheet = databaseHelper.getRecordSheetById(recordSheetId);
 
         // Titre de la toolbar = nom de la RecordSheet
         toolbar.setTitle(recordSheet.getName());
@@ -116,6 +121,9 @@ public class PriceRecordActivity extends AppCompatActivity implements OnSelectio
                 .add(R.id.fragmentContainer, productsOnRecordSheetFragment)
                 .commit();
 
+
+        // Récupération de la référence de l'interface depuis les extras de l'intent
+//        onProductDeletedFromRecordSheetListener = (OnProductDeletedFromRecordSheetListener) getIntent().getSerializableExtra("listener");
     }
 
     @Override
@@ -178,7 +186,7 @@ public class PriceRecordActivity extends AppCompatActivity implements OnSelectio
             this.isSelectionModeActive = isSelectionModeActive;
             if (!isSelectionModeActive) {
                 Objects.requireNonNull(getSupportActionBar()).setHomeAsUpIndicator(R.drawable.ic_back);
-                getSupportActionBar().setTitle(R.string.app_name);
+                getSupportActionBar().setTitle(recordSheet.getName());
             } else {
                 Objects.requireNonNull(getSupportActionBar()).setHomeAsUpIndicator(R.drawable.ic_cancel);
             }
@@ -217,4 +225,12 @@ public class PriceRecordActivity extends AppCompatActivity implements OnSelectio
             getSupportActionBar().setTitle(selectionCount);
         }
     }
+
+    public void notifyProductDeletedFromRecordSheet(String barcode) {
+        // On informe l'activité appelante de la suppression du produit
+        Intent resultIntent = new Intent();
+        resultIntent.putExtra("update_required", true);
+        setResult(RESULT_OK, resultIntent);
+    }
+
 }

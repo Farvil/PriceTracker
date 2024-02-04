@@ -1,6 +1,7 @@
 package fr.villot.pricetracker.activities;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -80,7 +81,6 @@ public class MainActivity extends AppCompatActivity implements OnStoreChangedLis
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-//        inflater.inflate(R.menu.main_menu, menu);
         if (isSelectionModeActive) {
             inflater.inflate(R.menu.toolbar_selection_menu, menu);
 
@@ -99,6 +99,8 @@ public class MainActivity extends AppCompatActivity implements OnStoreChangedLis
                 }
             }
 
+        } else {
+            inflater.inflate(R.menu.main_menu, menu);
         }
 
         return true;
@@ -143,6 +145,10 @@ public class MainActivity extends AppCompatActivity implements OnStoreChangedLis
                 RecordSheetsFragment recordSheetsFragment = (RecordSheetsFragment) currentFragment;
                 recordSheetsFragment.deleteSelectedItems();
             }
+            return true;
+        } else if (itemId == R.id.menu_about) {
+            Intent intent = new Intent(this, AboutActivity.class);
+            startActivity(intent);
             return true;
         }
 

@@ -42,7 +42,7 @@ public class SelectProductsActivity extends AppCompatActivity {
     private Button confirmButton;
     SelectionTracker<Long> selectionTracker;
     private static final String PRODUCT_ACTIVITY_SELECTION_KEY = "product_activity_selection";
-    private long recordSheetId;
+    private int recordSheetId;
 
 
     @Override
@@ -59,7 +59,7 @@ public class SelectProductsActivity extends AppCompatActivity {
         productRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         // Recupération du recordsheetId
-        recordSheetId = getIntent().getLongExtra("record_sheet_id", -1);
+        recordSheetId = getIntent().getIntExtra("record_sheet_id", -1);
 
         // Récupération des produits dans la base de données.
         productList = databaseHelper.getProductsNotInRecordSheet(recordSheetId);

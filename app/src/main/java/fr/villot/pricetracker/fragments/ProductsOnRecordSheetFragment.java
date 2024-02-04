@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.List;
 
 import fr.villot.pricetracker.R;
+import fr.villot.pricetracker.activities.PriceRecordActivity;
 import fr.villot.pricetracker.model.PriceRecord;
 import fr.villot.pricetracker.model.Product;
 import fr.villot.pricetracker.model.RecordSheet;
@@ -32,14 +33,14 @@ import fr.villot.pricetracker.model.Store;
 
 public class ProductsOnRecordSheetFragment extends ProductsFragment {
 
-    private Long recordSheetId;
+    private int recordSheetId;
 
-    public static ProductsOnRecordSheetFragment newInstance(long recordSheetId) {
+    public static ProductsOnRecordSheetFragment newInstance(int recordSheetId) {
         Log.w("RecordSheetProductsFragment", "newInstance()");
 
         ProductsOnRecordSheetFragment fragment = new ProductsOnRecordSheetFragment();
         Bundle args = new Bundle();
-        args.putLong("record_sheet_id", recordSheetId);
+        args.putInt("record_sheet_id", recordSheetId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -53,14 +54,14 @@ public class ProductsOnRecordSheetFragment extends ProductsFragment {
         // Récupération des données du Bundle
         Bundle bundle = getArguments();
         if (bundle != null) {
-            recordSheetId = bundle.getLong("record_sheet_id",-1);
+            recordSheetId = bundle.getInt("record_sheet_id",-1);
         }
         return view;
     }
 
     protected List<Product> getProducts() {
         Log.w("RecordSheetProductsFragment", "getProducts(), recordSheetId : " + recordSheetId);
-        if (recordSheetId != null && recordSheetId != -1)
+        if (recordSheetId != -1)
             return databaseHelper.getProductsOnRecordSheet(recordSheetId);
         else
             return super.getProducts();
@@ -157,6 +158,11 @@ public class ProductsOnRecordSheetFragment extends ProductsFragment {
                         Product product = productList.get(selectedItem.intValue());
                         try {
                             databaseHelper.deleteProductOnRecordSheet(product.getBarcode(), recordSheetId);
+
+                            // On notifie l'activité parente (uniquement PriceRecordActivity) de la suppression du produit du relevé
+                            if (requireActivity() instanceof PriceRecordActivity) {
+                                ((PriceRecordActivity) requireActivity()).notifyProductDeletedFromRecordSheet(product.getBarcode());
+                            }
                         } catch (Exception e) {
                             Snackbar.make(getView(),"Erreur de suppression du produits dans le relevé " + recordSheetId + " !", Snackbar.LENGTH_SHORT).show();
                             break; // Ne tente pas d'autres suppressions en cas d'erreur

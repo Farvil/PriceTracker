@@ -42,32 +42,36 @@
 
         <TextView
             android:id="@+id/productMinPrice"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_margin="8dp"
             android:textAppearance="?android:textAppearanceSmall"
             android:text="Min : ??,?? €"
+            android:textAlignment="center"
             android:textColor="@android:color/holo_red_dark" />
 
         <TextView
             android:id="@+id/productMaxPrice"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_margin="8dp"
             android:textAppearance="?android:textAppearanceSmall"
             android:text="Max : ??,?? €"
+            android:textAlignment="center"
             android:textColor="@android:color/holo_green_dark" />
 
         <TextView
             android:id="@+id/productMoyPrice"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_margin="8dp"
             android:textAppearance="?android:textAppearanceSmall"
             android:text="Moy : ??,?? €"
+            android:textAlignment="center"
+
             android:textColor="@android:color/black" />
     </LinearLayout>
 

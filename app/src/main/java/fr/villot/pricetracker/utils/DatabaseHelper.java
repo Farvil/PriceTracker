@@ -256,7 +256,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 
     @SuppressLint("Range")
-    public List<Product> getProductsNotInRecordSheet(long recordSheetId) {
+    public List<Product> getProductsNotInRecordSheet(int recordSheetId) {
         List<Product> productList = new ArrayList<>();
 
         SQLiteDatabase db = this.getReadableDatabase();
@@ -348,7 +348,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     @SuppressLint("Range")
-    public List<Product> getProductsOnRecordSheet(long recordSheetId) {
+    public List<Product> getProductsOnRecordSheet(int recordSheetId) {
         List<Product> products = new ArrayList<>();
 
         SQLiteDatabase db = this.getReadableDatabase();
@@ -378,7 +378,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     @SuppressLint("Range")
-    public RecordSheet getRecordSheetById(long recordSheetId) {
+    public RecordSheet getRecordSheetById(int recordSheetId) {
         RecordSheet recordSheet = null;
         SQLiteDatabase db = this.getReadableDatabase();
 
@@ -574,7 +574,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    public void deleteRecordSheet(long recordSheetId) throws Exception {
+    public void deleteRecordSheet(int recordSheetId) throws Exception {
         SQLiteDatabase db = this.getWritableDatabase();
         db.beginTransaction();
 
@@ -597,7 +597,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
 
-    public void deleteProductOnRecordSheet(String barcode, Long recordSheetId) {
+    public void deleteProductOnRecordSheet(String barcode, int recordSheetId) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         // Supprimer les enregistrements dans TABLE_PRICE_RECORDS

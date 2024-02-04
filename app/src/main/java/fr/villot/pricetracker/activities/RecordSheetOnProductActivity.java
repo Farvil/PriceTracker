@@ -1,9 +1,11 @@
 package fr.villot.pricetracker.activities;
 
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -12,6 +14,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -36,12 +40,13 @@ import fr.villot.pricetracker.MyApplication;
 import fr.villot.pricetracker.R;
 import fr.villot.pricetracker.adapters.MyDetailsLookup;
 import fr.villot.pricetracker.adapters.RecordSheetAdapter;
+import fr.villot.pricetracker.interfaces.OnProductDeletedFromRecordSheetListener;
 import fr.villot.pricetracker.model.Product;
 import fr.villot.pricetracker.model.RecordSheet;
 import fr.villot.pricetracker.model.Store;
 import fr.villot.pricetracker.utils.DatabaseHelper;
 
-public class RecordSheetOnProductActivity extends AppCompatActivity {
+public class RecordSheetOnProductActivity extends AppCompatActivity implements OnProductDeletedFromRecordSheetListener {
 
     private String barcode;
     private DatabaseHelper databaseHelper;
@@ -51,6 +56,21 @@ public class RecordSheetOnProductActivity extends AppCompatActivity {
     private static final String RECORDSHEET_ON_PRODUCT_ACTIVITY_SELECTION_KEY = "recordsheet_on_product_activity_selection";
 
     private boolean isSelectionModeActive = false;
+
+    private final ActivityResultLauncher<Intent> priceRecordLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    Intent data = result.getData();
+                    if (data != null) {
+                        boolean updateRequired = data.getBooleanExtra("update_required", false);
+                        if (updateRequired) {
+                            updateRecordSheetListViewFromDatabase(false);
+                        }
+                    }
+                }
+            }
+    );
 
 
     @Override
@@ -146,7 +166,7 @@ public class RecordSheetOnProductActivity extends AppCompatActivity {
                 Intent intent = new Intent(RecordSheetOnProductActivity.this,  PriceRecordActivity.class);
                 intent.putExtra("record_sheet_name", recordSheet.getName());
                 intent.putExtra("record_sheet_id", recordSheet.getId());
-                startActivity(intent);
+                priceRecordLauncher.launch(intent);
             }
         });
 
@@ -346,5 +366,23 @@ public class RecordSheetOnProductActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onProductDeletedFromRecordSheet(String barcode, int recordSheetId) {
+        updateRecordSheetListViewFromDatabase(false);
+    }
+
+    public void updateRecordSheetListViewFromDatabase(boolean lastItemDisplayed) {
+        // Liste des recordsheets accociées au produit
+        recordSheetList = databaseHelper.getRecordSheetsOnProduct(barcode);
+
+        // Ajouter les produits à l'adaptateur
+        recordSheetAdapter.setItemList(recordSheetList);
+
+        if (lastItemDisplayed) {
+            // Positionnement de la ListView en dernier item pour voir le produit ajouté.
+            int dernierIndice = recordSheetAdapter.getItemCount() - 1;
+            recordSheetRecyclerView.smoothScrollToPosition(dernierIndice);
+        }
+    }
 
 }

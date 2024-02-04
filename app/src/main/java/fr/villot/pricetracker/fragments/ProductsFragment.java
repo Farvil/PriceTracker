@@ -175,22 +175,9 @@ public class ProductsFragment extends Fragment {
         productAdapter.setOnItemClickListener(new ProductAdapter.OnItemClickListener<Product>() {
             @Override
             public void onItemClick(Product product) {
-                Intent intent = new Intent(getActivity(), RecordSheetOnProductActivity.class);
-                intent.putExtra("barcode", product.getBarcode());
-                startActivity(intent);
+                handleClickOnProduct(product);
             }
         });
-
-//        productAdapter.setOnItemClickListener(new ProductAdapter.OnItemClickListener<Product>() {
-//            @Override
-//            public void onItemClick(Product product) {
-////                if (!selectionTracker.hasSelection())
-////                {
-////                    Snackbar.make(productRecyclerView,"TODO : Afficher la liste des relevés de prix associés au produit", Snackbar.LENGTH_SHORT).show();
-////                }
-//                handleClickOnProduct(product);
-//            }
-//        });
 
         // Action du bouton flottant
         fabAdd.setOnClickListener(new View.OnClickListener() {
@@ -210,8 +197,10 @@ public class ProductsFragment extends Fragment {
     }
 
     protected void handleClickOnProduct(Product product) {
-        showUserQueryDialogBox(product, ProductsFragmentDialogType.DIALOG_TYPE_INFO);
-
+        Intent intent = new Intent(getActivity(), RecordSheetOnProductActivity.class);
+        intent.putExtra("barcode", product.getBarcode());
+        startActivity(intent);
+//        showUserQueryDialogBox(product, ProductsFragmentDialogType.DIALOG_TYPE_INFO);
     }
 
     protected List<Product> getProducts() {

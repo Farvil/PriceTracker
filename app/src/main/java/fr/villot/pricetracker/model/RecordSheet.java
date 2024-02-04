@@ -49,7 +49,7 @@ public class RecordSheet {
         return priceRecords;
     }
 
-    public long getId() {
+    public int getId() {
         return id;
     }
 
