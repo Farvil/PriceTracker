@@ -29,6 +29,7 @@ import com.google.android.material.snackbar.Snackbar;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -42,6 +43,7 @@ import fr.villot.pricetracker.interfaces.OnSelectionChangedListener;
 import fr.villot.pricetracker.model.Product;
 import fr.villot.pricetracker.model.RecordSheet;
 import fr.villot.pricetracker.model.Store;
+import fr.villot.pricetracker.utils.CsvHelper;
 import fr.villot.pricetracker.utils.DatabaseHelper;
 
 public class RecordSheetsFragment extends Fragment {
@@ -272,75 +274,18 @@ public class RecordSheetsFragment extends Fragment {
 
             // Vérifier s'il y a des éléments sélectionnés
             if (!selection.isEmpty()) {
-                // Créer un fichier CSV
-                File csvFile = createCsvFile();
 
-                // Remplir le fichier CSV avec les données
-                fillCsvFile(csvFile, selection);
-
-                // Partager le fichier CSV
-                 shareCsvFile(csvFile);
-            }
-        }
-    }
-
-    private File createCsvFile() {
-        String fileName = "record_sheet_export.csv";
-
-        File privateRootDir = requireActivity().getFilesDir();
-        File exportDir = new File(privateRootDir, "export");
-
-        // Créer le répertoire s'il n'existe pas
-        if (!exportDir.exists()) {
-            exportDir.mkdirs();
-        }
-
-        return new File(exportDir, fileName);
-    }
-
-    private void fillCsvFile(File csvFile, Selection<Long> selection) {
-        try (FileWriter writer = new FileWriter(csvFile)) {
-            // En-têtes CSV
-            writer.append("Nom du relevé de Prix,Date,Nom du magasin,Localisation du magasin, Code barre,Nom du produit,Marque,Quantité,Image URL,Prix\n");
-
-            for (Long selectedItem : selection) {
-                RecordSheet recordSheet = recordSheetList.get(selectedItem.intValue());
-
-                // Récupérer les produits et magasin associés à la RecordSheet
-                List<Product> products = databaseHelper.getProductsOnRecordSheet(recordSheet.getId());
-                Store store = databaseHelper.getStoreById(recordSheet.getStoreId());
-
-                // Remplir le fichier CSV avec les données de chaque produit
-                for (Product product : products) {
-                    writer.append(String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n",
-                            recordSheet.getName(),
-                            recordSheet.getDate(),
-                            store.getName(),
-                            store.getLocation(),
-                            product.getBarcode(),
-                            product.getName(),
-                            product.getBrand(),
-                            product.getQuantity(),
-                            product.getImageUrl(),
-                            product.getPrice()));
+                // Création de la liste des recordsheets à partager
+                List<RecordSheet> recordSheetsToShare = new ArrayList<>();
+                for (Long selectedItem : selection) {
+                    recordSheetsToShare.add(recordSheetList.get(selectedItem.intValue()));
                 }
+
+                CsvHelper csvHelper = new CsvHelper(requireActivity(), "record_sheet_export.csv");
+                csvHelper.fillCsvFileWithRecordSheets(recordSheetsToShare);
+                csvHelper.shareCsvFile();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
-
-    private void shareCsvFile(File csvFile) {
-
-        // Uri du fichier à partager via le FileProvider defini dans le manifest.
-        Uri fileUri = FileProvider.getUriForFile(requireActivity(), getContext().getPackageName() + ".provider", csvFile);
-
-        // Intent de partage en ajoutant les droits temporaires d'accès au fichier
-        Intent shareIntent = new Intent(Intent.ACTION_SEND);
-        shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        shareIntent.setType("text/csv");
-        shareIntent.putExtra(Intent.EXTRA_STREAM, fileUri);
-        startActivity(Intent.createChooser(shareIntent, "Partager via"));
-    }
 }
