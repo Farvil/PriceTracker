@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
@@ -14,6 +15,7 @@ import java.util.Date;
 import java.util.List;
 
 import fr.villot.pricetracker.model.PriceRecord;
+import fr.villot.pricetracker.model.PriceStats;
 import fr.villot.pricetracker.model.RecordSheet;
 import fr.villot.pricetracker.model.Product;
 import fr.villot.pricetracker.model.Store;
@@ -703,5 +705,31 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return rowsAffected;
     }
+
+        public PriceStats getMinMaxAvgPriceForProduct(String productBarcode) {
+            SQLiteDatabase db = this.getReadableDatabase();
+
+            // Requête pour obtenir le prix minimum, maximum et moyen
+            String query = "SELECT MIN(" + KEY_PRICE_RECORD_PRICE + ") AS min_price, " +
+                    "MAX(" + KEY_PRICE_RECORD_PRICE + ") AS max_price, " +
+                    "AVG(" + KEY_PRICE_RECORD_PRICE + ") AS avg_price " +
+                    "FROM " + TABLE_PRICE_RECORDS + " " +
+                    "WHERE " + KEY_PRICE_RECORD_PRODUCT_BARCODE + " = ?";
+
+            try (Cursor cursor = db.rawQuery(query, new String[]{productBarcode})) {
+                if (cursor.moveToFirst()) {
+                    @SuppressLint("Range") double minPrice = cursor.getDouble(cursor.getColumnIndex("min_price"));
+                    @SuppressLint("Range") double maxPrice = cursor.getDouble(cursor.getColumnIndex("max_price"));
+                    @SuppressLint("Range") double avgPrice = cursor.getDouble(cursor.getColumnIndex("avg_price"));
+
+                    return new PriceStats(minPrice, maxPrice, avgPrice);
+                }
+            } catch (SQLiteException e) {
+                e.printStackTrace();
+            }
+
+            // En cas d'erreur ou si aucune donnée n'est trouvée
+            return null;
+        }
 
 }

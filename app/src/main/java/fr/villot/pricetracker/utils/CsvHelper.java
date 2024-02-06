@@ -4,7 +4,11 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Looper;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.selection.Selection;
 
@@ -13,6 +17,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import fr.villot.pricetracker.MyApplication;
 import fr.villot.pricetracker.model.Product;
@@ -26,7 +32,22 @@ public class CsvHelper {
     private File csvFile;
     private DatabaseHelper databaseHelper;
 
-    public static final int EXPORT_CSV_REQUEST_CODE = 123;
+//    private static final int EXPORT_CSV_REQUEST_CODE = 123;
+//    private final Handler handler = new Handler(Looper.getMainLooper());
+//    private final Executor executor = Executors.newSingleThreadExecutor();
+//
+//    private final ActivityResultLauncher<Intent> launcher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+//            result -> {
+//                if (result.getResultCode() == Activity.RESULT_OK) {
+//                    Intent data = result.getData();
+//                    if (data != null) {
+//                        Uri uri = data.getData();
+//
+//                        // Écrire les données dans le fichier à l'emplacement choisi
+//                        executor.execute(() -> writeCsvFile(uri));
+//                    }
+//                }
+//            });
 
     public CsvHelper(Context context, String fileName) {
         this.context = context;
@@ -105,7 +126,7 @@ public class CsvHelper {
 //        intent.setType("text/csv");
 //        intent.putExtra(Intent.EXTRA_TITLE, fileName);
 //
-//        ((Activity) context).startActivityForResult(intent, EXPORT_CSV_REQUEST_CODE);
+//        launcher.launch(intent);
 //    }
 
 }

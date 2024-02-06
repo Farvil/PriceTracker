@@ -5,7 +5,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -21,7 +20,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
-import androidx.core.content.FileProvider;
 import androidx.recyclerview.selection.Selection;
 import androidx.recyclerview.selection.SelectionTracker;
 import androidx.recyclerview.selection.StableIdKeyProvider;
@@ -31,9 +29,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.squareup.picasso.Picasso;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,9 +37,9 @@ import fr.villot.pricetracker.R;
 import fr.villot.pricetracker.adapters.MyDetailsLookup;
 import fr.villot.pricetracker.adapters.RecordSheetAdapter;
 import fr.villot.pricetracker.interfaces.OnProductDeletedFromRecordSheetListener;
+import fr.villot.pricetracker.model.PriceStats;
 import fr.villot.pricetracker.model.Product;
 import fr.villot.pricetracker.model.RecordSheet;
-import fr.villot.pricetracker.model.Store;
 import fr.villot.pricetracker.utils.CsvHelper;
 import fr.villot.pricetracker.utils.DatabaseHelper;
 
@@ -90,6 +85,10 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
         TextView productQuantityTextView = findViewById(R.id.productQuantityTextView);
         ImageView productImageView = findViewById(R.id.productImageView);
         recordSheetRecyclerView = findViewById(R.id.recordSheetRecyclerView);
+        TextView productMinPrice = findViewById(R.id.productMinPrice);
+        TextView productMaxPrice = findViewById(R.id.productMaxPrice);
+        TextView productMoyPrice = findViewById(R.id.productMoyPrice);
+
 
         // Initialisation du DatabaseHelper
         databaseHelper = MyApplication.getDatabaseHelper();
@@ -111,6 +110,13 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
             productNameTextView.setText(product.getName());
             productBrandTextView.setText(product.getBrand());
             productQuantityTextView.setText(product.getQuantity());
+
+            PriceStats priceStats = databaseHelper.getMinMaxAvgPriceForProduct(barcode);
+            if (priceStats != null) {
+                productMinPrice.setText("Min : " + priceStats.getMinPrice() + " €");
+                productMaxPrice.setText("Max : " + priceStats.getMaxPrice() + " €");
+                productMoyPrice.setText("Moy : " + priceStats.getAvgPrice() + " €");
+            }
 
             // Utiliser Picasso pour charger l'image à partir de l'URL et l'afficher dans ImageView
             Picasso.get().load(product.getImageUrl()).into(productImageView);

@@ -1,11 +1,7 @@
 package fr.villot.pricetracker.activities;
 
-import static fr.villot.pricetracker.utils.CsvHelper.EXPORT_CSV_REQUEST_CODE;
-
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
