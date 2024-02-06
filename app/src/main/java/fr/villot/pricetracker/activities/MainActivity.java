@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity implements OnStoreChangedLis
 
 //    private static final Logger logger = Logger.getLogger(MainActivity.class.getName());
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -16,11 +16,23 @@ public class PriceStats {
         return minPrice;
     }
 
+    public String getMinPriceFormated() {
+        return "Min : " + String.format("%.2f", minPrice) + " €";
+    }
+
     public double getMaxPrice() {
         return maxPrice;
     }
 
+    public String getMaxPriceFormated() {
+        return "Max : " + String.format("%.2f", maxPrice) + " €";
+    }
+
     public double getAvgPrice() {
         return avgPrice;
+    }
+
+    public String getAvgPriceFormated() {
+        return "Moy : " + String.format("%.2f", avgPrice) + " €";
     }
 }

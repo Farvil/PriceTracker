@@ -3,8 +3,6 @@ package fr.villot.pricetracker.fragments;
 import static fr.villot.pricetracker.fragments.ProductsFragment.ProductsFragmentDialogType.DIALOG_TYPE_ALREADY_EXIST;
 
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -14,15 +12,10 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 
 import androidx.appcompat.app.AlertDialog;
-import androidx.core.content.FileProvider;
 import androidx.recyclerview.selection.Selection;
 
 import com.google.android.material.snackbar.Snackbar;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import fr.villot.pricetracker.R;
@@ -30,7 +23,6 @@ import fr.villot.pricetracker.activities.PriceRecordActivity;
 import fr.villot.pricetracker.model.PriceRecord;
 import fr.villot.pricetracker.model.Product;
 import fr.villot.pricetracker.model.RecordSheet;
-import fr.villot.pricetracker.model.Store;
 import fr.villot.pricetracker.utils.CsvHelper;
 
 public class ProductsOnRecordSheetFragment extends ProductsFragment {
@@ -119,7 +111,13 @@ public class ProductsOnRecordSheetFragment extends ProductsFragment {
                         // Ajoutez ou mettez à jour le PriceRecord dans la base de données
                         databaseHelper.addOrUpdatePriceRecord(priceRecord);
 
+                        // Rafraichissement de la recyclerview aves les nouvelles données
                         updateProductListViewFromDatabase(true);
+
+                        // Mise à jour des prix Min, Max et Moy dans l'activité RecordSheetOnProductActivity
+                        if (requireActivity() instanceof PriceRecordActivity) {
+                            ((PriceRecordActivity) requireActivity()).notifyProductModifiedFromRecordSheet(product.getBarcode());
+                        }
 
                         // Mettez à jour la liste des produits ou effectuez d'autres actions si nécessaires
                         // par exemple, rafraîchir l'interface utilisateur
@@ -163,7 +161,7 @@ public class ProductsOnRecordSheetFragment extends ProductsFragment {
 
                             // On notifie l'activité parente (uniquement PriceRecordActivity) de la suppression du produit du relevé
                             if (requireActivity() instanceof PriceRecordActivity) {
-                                ((PriceRecordActivity) requireActivity()).notifyProductDeletedFromRecordSheet(product.getBarcode());
+                                ((PriceRecordActivity) requireActivity()).notifyProductModifiedFromRecordSheet(product.getBarcode());
                             }
                         } catch (Exception e) {
                             Snackbar.make(getView(),"Erreur de suppression du produits dans le relevé " + recordSheetId + " !", Snackbar.LENGTH_SHORT).show();

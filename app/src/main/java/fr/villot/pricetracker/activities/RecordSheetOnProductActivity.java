@@ -54,6 +54,10 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
 
     private boolean isSelectionModeActive = false;
 
+    TextView productMinPrice;
+    TextView productMaxPrice;
+    TextView productMoyPrice;
+
     private final ActivityResultLauncher<Intent> priceRecordLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
@@ -63,6 +67,7 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
                         boolean updateRequired = data.getBooleanExtra("update_required", false);
                         if (updateRequired) {
                             updateRecordSheetListViewFromDatabase(false);
+                            updatePriceStats();
                         }
                     }
                 }
@@ -85,9 +90,9 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
         TextView productQuantityTextView = findViewById(R.id.productQuantityTextView);
         ImageView productImageView = findViewById(R.id.productImageView);
         recordSheetRecyclerView = findViewById(R.id.recordSheetRecyclerView);
-        TextView productMinPrice = findViewById(R.id.productMinPrice);
-        TextView productMaxPrice = findViewById(R.id.productMaxPrice);
-        TextView productMoyPrice = findViewById(R.id.productMoyPrice);
+        productMinPrice = findViewById(R.id.productMinPrice);
+        productMaxPrice = findViewById(R.id.productMaxPrice);
+        productMoyPrice = findViewById(R.id.productMoyPrice);
 
 
         // Initialisation du DatabaseHelper
@@ -111,12 +116,8 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
             productBrandTextView.setText(product.getBrand());
             productQuantityTextView.setText(product.getQuantity());
 
-            PriceStats priceStats = databaseHelper.getMinMaxAvgPriceForProduct(barcode);
-            if (priceStats != null) {
-                productMinPrice.setText("Min : " + priceStats.getMinPrice() + " €");
-                productMaxPrice.setText("Max : " + priceStats.getMaxPrice() + " €");
-                productMoyPrice.setText("Moy : " + priceStats.getAvgPrice() + " €");
-            }
+            // Min, Max, Moy
+            updatePriceStats();
 
             // Utiliser Picasso pour charger l'image à partir de l'URL et l'afficher dans ImageView
             Picasso.get().load(product.getImageUrl()).into(productImageView);
@@ -331,6 +332,15 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
             // Positionnement de la ListView en dernier item pour voir le produit ajouté.
             int dernierIndice = recordSheetAdapter.getItemCount() - 1;
             recordSheetRecyclerView.smoothScrollToPosition(dernierIndice);
+        }
+    }
+
+    private void updatePriceStats() {
+        PriceStats priceStats = databaseHelper.getMinMaxAvgPriceForProduct(barcode);
+        if (priceStats != null) {
+            productMinPrice.setText(priceStats.getMinPriceFormated());
+            productMaxPrice.setText(priceStats.getMaxPriceFormated());
+            productMoyPrice.setText(priceStats.getAvgPriceFormated());
         }
     }
 

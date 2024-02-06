@@ -8,10 +8,13 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -21,6 +24,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.selection.Selection;
@@ -179,21 +183,34 @@ public class ProductsFragment extends Fragment {
             }
         });
 
-        // Action du bouton flottant
+        // Click bouton flottant
         fabAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ScanOptions options = new ScanOptions();
-                options.setCaptureActivity(BarCodeScannerActivity.class);
-                options.setDesiredBarcodeFormats(ScanOptions.ONE_D_CODE_TYPES);
-                options.setPrompt("Scanner un code barre");
-                options.setOrientationLocked(false);
-                options.setBeepEnabled(true);
-                options.setBarcodeImageEnabled(false);
-                barcodeScannerLauncher.launch(options);
+                launchScanActivity();
             }
         });
 
+        // Long Click bouton flottant
+        fabAdd.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                showFabAddContextMenu(view);
+                return true;
+            }
+        });
+
+    }
+
+    private void launchScanActivity() {
+        ScanOptions options = new ScanOptions();
+        options.setCaptureActivity(BarCodeScannerActivity.class);
+        options.setDesiredBarcodeFormats(ScanOptions.ONE_D_CODE_TYPES);
+        options.setPrompt("Scanner un code barre");
+        options.setOrientationLocked(false);
+        options.setBeepEnabled(true);
+        options.setBarcodeImageEnabled(false);
+        barcodeScannerLauncher.launch(options);
     }
 
     protected void handleClickOnProduct(Product product) {
@@ -449,4 +466,72 @@ public class ProductsFragment extends Fragment {
             dialog.show();
         }
     }
+
+
+    private void showFabAddContextMenu(View view) {
+        PopupMenu popupMenu = new PopupMenu(requireContext(), view);
+        popupMenu.getMenuInflater().inflate(R.menu.fab_add_context_menu, popupMenu.getMenu());
+
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.menu_scan_barcode:
+                        launchScanActivity();
+                        return true;
+                    case R.id.menu_manual_entry:
+                        showManualBarcodeInputDialog();
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+        });
+
+        popupMenu.show();
+    }
+
+    private void showManualBarcodeInputDialog() {
+        // Création boite de dialogue
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("Saisir un code-barres");
+
+        // Ajout d'un un champ de texte pour la saisie manuelle
+        final EditText input = new EditText(getActivity());
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        builder.setView(input);
+
+        // Configuration des boutons de la boîte de dialogue
+        builder.setPositiveButton("Valider", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String barcode = input.getText().toString().trim();
+
+                // Vérification de la validité du code barre et ajout du produit
+                if (isValidBarcode(barcode)) {
+                    handleBarcodeScanResult(barcode);
+                } else {
+                    // Affiche un message d'erreur si le code-barres n'est pas valide
+                    Toast.makeText(getActivity(), "Code-barres non valide", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        builder.setNegativeButton("Annuler", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        // Affiche la boîte de dialogue
+        builder.show();
+    }
+
+    private boolean isValidBarcode(String barcode) {
+        // Ajoutez votre logique de validation ici, par exemple, utilisez une expression régulière
+        // Retournez true si le code-barres est valide, sinon false
+        return barcode.matches("^[0-9]{12,}$");
+    }
+
 }

@@ -23,13 +23,9 @@ import java.util.Objects;
 
 import fr.villot.pricetracker.MyApplication;
 import fr.villot.pricetracker.R;
-import fr.villot.pricetracker.fragments.ProductsFragment;
 import fr.villot.pricetracker.fragments.ProductsOnRecordSheetFragment;
-import fr.villot.pricetracker.fragments.RecordSheetsFragment;
-import fr.villot.pricetracker.fragments.StoresFragment;
 //import fr.villot.pricetracker.interfaces.OnProductDeletedFromRecordSheetListener;
 import fr.villot.pricetracker.interfaces.OnSelectionChangedListener;
-import fr.villot.pricetracker.interfaces.OnStoreChangedListener;
 import fr.villot.pricetracker.model.Product;
 import fr.villot.pricetracker.model.RecordSheet;
 import fr.villot.pricetracker.model.Store;
@@ -226,7 +222,7 @@ public class PriceRecordActivity extends AppCompatActivity implements OnSelectio
         }
     }
 
-    public void notifyProductDeletedFromRecordSheet(String barcode) {
+    public void notifyProductModifiedFromRecordSheet(String barcode) {
         // On informe l'activité appelante de la suppression du produit
         Intent resultIntent = new Intent();
         resultIntent.putExtra("update_required", true);
