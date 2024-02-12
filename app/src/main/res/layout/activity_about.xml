@@ -20,7 +20,7 @@
             android:scaleType="centerInside"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="16dp"
-            android:contentDescription="Essai" />
+            android:contentDescription="Logo de l'application" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -32,6 +32,7 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="8dp" />
         <TextView
+            android:id="@+id/app_version"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/app_version"

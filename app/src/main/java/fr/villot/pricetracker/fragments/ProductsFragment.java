@@ -203,14 +203,16 @@ public class ProductsFragment extends Fragment {
     }
 
     private void launchScanActivity() {
-        ScanOptions options = new ScanOptions();
-        options.setCaptureActivity(BarCodeScannerActivity.class);
-        options.setDesiredBarcodeFormats(ScanOptions.ONE_D_CODE_TYPES);
-        options.setPrompt("Scanner un code barre");
-        options.setOrientationLocked(false);
-        options.setBeepEnabled(true);
-        options.setBarcodeImageEnabled(false);
-        barcodeScannerLauncher.launch(options);
+        if (barcodeScannerLauncher != null && barcodeScannerLauncher.getContract() != null) {
+            ScanOptions options = new ScanOptions();
+            options.setCaptureActivity(BarCodeScannerActivity.class);
+            options.setDesiredBarcodeFormats(ScanOptions.ONE_D_CODE_TYPES);
+            options.setPrompt("Scanner un code barre");
+            options.setOrientationLocked(false);
+            options.setBeepEnabled(true);
+            options.setBarcodeImageEnabled(false);
+            barcodeScannerLauncher.launch(options);
+        }
     }
 
     protected void handleClickOnProduct(Product product) {
@@ -235,8 +237,7 @@ public class ProductsFragment extends Fragment {
 
         if (lastItemDisplayed) {
             // Positionnement de la ListView en dernier item pour voir le produit ajouté.
-            int dernierIndice = productAdapter.getItemCount() - 1;
-            productRecyclerView.smoothScrollToPosition(dernierIndice);
+            productRecyclerView.smoothScrollToPosition(productAdapter.getLastItemPosition());
         }
     }
 

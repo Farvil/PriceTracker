@@ -179,10 +179,10 @@ public class StoresFragment extends Fragment {
         storeAdapter.setItemList(storeList);
 
         if (lastItemDisplayed) {
-            // Positionnement de la ListView en dernier item pour voir le produit ajouté.
-            int dernierIndice = storeAdapter.getItemCount() - 1;
-            storeRecyclerView.smoothScrollToPosition(dernierIndice);
+            // Positionnement de la ListView en dernier item pour voir le magasin ajouté.
+            storeRecyclerView.smoothScrollToPosition(storeAdapter.getLastItemPosition());
         }
+
     }
 
     private void showAddStoreDialog(Context context) {

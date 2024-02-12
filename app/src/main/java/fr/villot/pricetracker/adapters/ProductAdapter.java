@@ -75,6 +75,17 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductViewHolder> {
         return productList.size();
     }
 
+    public int getLastItemPosition() {
+        int itemCount = getItemCount();
+        int lastPosition = 0;
+
+        if (itemCount > 0) {
+            lastPosition = itemCount - 1;
+        }
+
+        return lastPosition;
+    }
+
     public void setItemList(List<Product> itemList) {
         this.productList = itemList;
         notifyDataSetChanged();

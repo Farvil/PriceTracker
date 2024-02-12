@@ -329,10 +329,10 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
         recordSheetAdapter.setItemList(recordSheetList);
 
         if (lastItemDisplayed) {
-            // Positionnement de la ListView en dernier item pour voir le produit ajouté.
-            int dernierIndice = recordSheetAdapter.getItemCount() - 1;
-            recordSheetRecyclerView.smoothScrollToPosition(dernierIndice);
+            // Positionnement de la ListView en dernier item pour voir la recordsheet ajoutée.
+            recordSheetRecyclerView.smoothScrollToPosition(recordSheetAdapter.getLastItemPosition());
         }
+
     }
 
     private void updatePriceStats() {

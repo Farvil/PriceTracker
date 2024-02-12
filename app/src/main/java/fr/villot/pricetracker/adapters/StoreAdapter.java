@@ -75,6 +75,17 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreViewHolder> {
         return storeList.size();
     }
 
+    public int getLastItemPosition() {
+        int itemCount = getItemCount();
+        int lastPosition = 0;
+
+        if (itemCount > 0) {
+            lastPosition = itemCount - 1;
+        }
+
+        return lastPosition;
+    }
+
     public void setItemList(List<Store> itemList) {
         this.storeList = itemList;
         notifyDataSetChanged();

@@ -165,10 +165,10 @@ public class RecordSheetsFragment extends Fragment {
         recordSheetAdapter.setItemList(recordSheetList);
 
         if (lastItemDisplayed) {
-            // Positionnement de la ListView en dernier item pour voir le produit ajouté.
-            int dernierIndice = recordSheetAdapter.getItemCount() - 1;
-            recordSheetRecyclerView.smoothScrollToPosition(dernierIndice);
+            // Positionnement de la ListView en dernier item pour voir la recordsheet ajoutée.
+            recordSheetRecyclerView.smoothScrollToPosition(recordSheetAdapter.getLastItemPosition());
         }
+
     }
 
 

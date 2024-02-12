@@ -1,19 +1,29 @@
 package fr.villot.pricetracker.activities;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Objects;
 
 import fr.villot.pricetracker.R;
@@ -30,9 +40,22 @@ public class MainActivity extends AppCompatActivity implements OnStoreChangedLis
     private boolean showEditIcon = false;
     private Fragment currentFragment;
     private PageAdapter pageAdapter;
+    private TabLayout tabLayout;
 
 //    private static final Logger logger = Logger.getLogger(MainActivity.class.getName());
 
+//    private final ActivityResultLauncher<Intent> filePickerLauncher = registerForActivityResult(
+//            new ActivityResultContracts.StartActivityForResult(),
+//            result -> {
+//                if (result.getResultCode() == Activity.RESULT_OK) {
+//                    if (result.getData() != null) {
+//                        Uri uri = result.getData().getData();
+//                        String fileContent = readFileFromUri(uri);
+//                        processProductCodes(fileContent);
+//                    }
+//                }
+//            }
+//    );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements OnStoreChangedLis
         setContentView(R.layout.activity_main);
 
         // Recuperation des vues
-        TabLayout tabLayout = findViewById(R.id.tabLayout);
+        tabLayout = findViewById(R.id.tabLayout);
         ViewPager viewPager = findViewById(R.id.viewPager);
         Toolbar toolbar = findViewById(R.id.toolbar);
 //        drawerLayout = findViewById(R.id.drawerLayout);
@@ -263,6 +286,56 @@ public class MainActivity extends AppCompatActivity implements OnStoreChangedLis
             getSupportActionBar().setTitle(selectionCount);
         }
     }
+//
+//    private void importProductsFromFile() {
+//        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+//        intent.addCategory(Intent.CATEGORY_OPENABLE);
+//        intent.setType("text/plain");
+//
+//        filePickerLauncher.launch(intent);
+//    }
+//
+//
+//    private String readFileFromUri(Uri uri) {
+//        StringBuilder content = new StringBuilder();
+//
+//        try (InputStream inputStream = getContentResolver().openInputStream(uri);
+//             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+//
+//            String line;
+//            while ((line = reader.readLine()) != null) {
+//                content.append(line).append("\n");
+//            }
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        } catch (FileNotFoundException e) {
+//            throw new RuntimeException(e);
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+//
+//        return content.toString();
+//    }
+//
+//    private void processProductCodes(String fileContent) {
+//        // Divisez le contenu du fichier en lignes
+//        String[] lines = fileContent.split("\n");
+//
+//        // Traitez chaque code-barres
+//        for (String barcode : lines) {
+//            // Assurez-vous que le code-barres est valide avant de l'ajouter à la base de données
+//            if (isValidBarcode(barcode.trim())) {
+//                Snackbar.make(tabLayout, barcode.trim(), Snackbar.LENGTH_SHORT).show();
+//
+//            }
+//        }
+//    }
+//
+//    private boolean isValidBarcode(String trim) {
+//        return true
+//    }
+
 
 }
 
