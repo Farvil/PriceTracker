@@ -3,7 +3,6 @@ package fr.villot.pricetracker.fragments;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,7 +13,6 @@ import android.widget.Spinner;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.selection.Selection;
 import androidx.recyclerview.selection.SelectionTracker;
@@ -26,11 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import fr.villot.pricetracker.MyApplication;
@@ -40,7 +34,6 @@ import fr.villot.pricetracker.adapters.MyDetailsLookup;
 import fr.villot.pricetracker.adapters.RecordSheetAdapter;
 import fr.villot.pricetracker.adapters.SpinnerStoreAdapter;
 import fr.villot.pricetracker.interfaces.OnSelectionChangedListener;
-import fr.villot.pricetracker.model.Product;
 import fr.villot.pricetracker.model.RecordSheet;
 import fr.villot.pricetracker.model.Store;
 import fr.villot.pricetracker.utils.CsvHelper;
@@ -56,6 +49,12 @@ public class RecordSheetsFragment extends Fragment {
     private static final String RECORDSHEET_SELECTION_KEY = "recordsheet_selection";
 
     private OnSelectionChangedListener mOnSelectionChangedListener;
+
+    public enum RecordSheetsFragmentDialogType {
+        DIALOG_TYPE_ADD,
+        DIALOG_TYPE_UPDATE
+    }
+
 
     public static RecordSheetsFragment getInstance() {
         if (instance == null) {
@@ -146,7 +145,8 @@ public class RecordSheetsFragment extends Fragment {
         fabAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showCreateRecordSheetDialog();
+                showUserQueryDialogBox(new RecordSheet(), RecordSheetsFragmentDialogType.DIALOG_TYPE_ADD);
+                // showCreateRecordSheetDialog();
             }
         });
 
@@ -171,55 +171,124 @@ public class RecordSheetsFragment extends Fragment {
 
     }
 
+//
+//    public void showCreateRecordSheetDialog() {
+//        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+//        View dialogView = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_create_recordsheet, null);
+//        builder.setView(dialogView);
+//        builder.setTitle("Créer un nouveau relevé de prix");
+//        builder.setCancelable(false);
+//
+//        Spinner storeSpinner = dialogView.findViewById(R.id.storeSpinner);
+//        EditText recordsheetNameEditText = dialogView.findViewById(R.id.recordsheetNameEditText);
+//
+//        // Créez un ArrayAdapter pour afficher la liste des magasins dans le Spinner
+//        List<Store> storeList = databaseHelper.getAllStores();
+//        SpinnerStoreAdapter spinnerStoreAdapter = new SpinnerStoreAdapter(getContext(), storeList);
+//        storeSpinner.setAdapter(spinnerStoreAdapter);
+//
+//        builder.setPositiveButton("Créer", new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialog, int which) {
+//                // Récupérez le nom de la recordsheet saisi par l'utilisateur
+//                String recordSheetName = recordsheetNameEditText.getText().toString();
+//
+//                if (!recordSheetName.isEmpty()) {
+//
+//                    // Recuperation du magasin selectionné
+//                    Store selectedStore = (Store) storeSpinner.getSelectedItem();
+//                    if (selectedStore != null) {
+//                        // Création d'un RecordSheet
+//                        RecordSheet newRecordSheet = new RecordSheet(recordSheetName, new Date(),selectedStore);
+//
+//                        // Ajoute la fiche d'enregistrements à la base de données
+//                        databaseHelper.addRecordSheet(newRecordSheet);
+//
+//                        // Update the store list and refresh the spinner
+//                        updateRecordSheetListViewFromDatabase(true);
+//                    }
+//
+//                }
+//
+//            }
+//        });
+//
+//        builder.setNegativeButton("Annuler", null);
+//
+//        AlertDialog dialog = builder.create();
+//        dialog.show();
+//    }
 
-    public void showCreateRecordSheetDialog() {
+    protected void showUserQueryDialogBox(RecordSheet recordSheet, RecordSheetsFragmentDialogType recordSheetsFragmentDialogType) {
+
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         View dialogView = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_create_recordsheet, null);
         builder.setView(dialogView);
-        builder.setTitle("Créer un nouveau relevé de prix");
-        builder.setCancelable(false);
 
+        // Références des vues dans le layout de la boîte de dialogue
         Spinner storeSpinner = dialogView.findViewById(R.id.storeSpinner);
         EditText recordsheetNameEditText = dialogView.findViewById(R.id.recordsheetNameEditText);
 
-        // Obtenez la liste des magasins à partir de votre base de données (par exemple, dans une liste storesList)
-
-        // Créez un ArrayAdapter pour afficher la liste des magasins dans le Spinner
+        //  Affichage de la liste des magasins dans le Spinner via l'adapter
         List<Store> storeList = databaseHelper.getAllStores();
         SpinnerStoreAdapter spinnerStoreAdapter = new SpinnerStoreAdapter(getContext(), storeList);
         storeSpinner.setAdapter(spinnerStoreAdapter);
 
-        builder.setPositiveButton("Créer", new DialogInterface.OnClickListener() {
+        String title = null;
+        switch (recordSheetsFragmentDialogType) {
+            case DIALOG_TYPE_ADD:
+                title = "Créer un nouveau relevé de prix";
+                break;
+            case DIALOG_TYPE_UPDATE:
+                title = "Modifier le relevé de prix";
+
+                if (recordSheet != null) {
+                    storeSpinner.setSelection(storeList.indexOf(recordSheet.getStore()));
+                    recordsheetNameEditText.setText(recordSheet.getName());
+                }
+                break;
+        }
+
+        builder.setTitle(title);
+        builder.setCancelable(false);
+
+        builder.setPositiveButton("Oui", new DialogInterface.OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialog, int which) {
-                // Récupérez le nom de la recordsheet saisi par l'utilisateur
-                String recordSheetName = recordsheetNameEditText.getText().toString();
+            public void onClick(DialogInterface dialogInterface, int i) {
 
-                if (!recordSheetName.isEmpty()) {
+                // Récupération des informations saisies
+                String recordSheetName = recordsheetNameEditText.getText().toString().trim();
+                Store selectedStore = (Store) storeSpinner.getSelectedItem();
 
-                    // Recuperation du magasin selectionné
-                    Store selectedStore = (Store) storeSpinner.getSelectedItem();
-                    if (selectedStore != null) {
-                        // Création d'un RecordSheet
-                        RecordSheet newRecordSheet = new RecordSheet(recordSheetName, new Date(),selectedStore);
+                if (!recordSheetName.isEmpty() && selectedStore != null) {
 
-                        // Ajoute la fiche d'enregistrements à la base de données
-                        databaseHelper.addRecordSheet(newRecordSheet);
+                    recordSheet.setName(recordSheetName);
+                    recordSheet.setStore(selectedStore);
 
-                        // Update the store list and refresh the spinner
-                        updateRecordSheetListViewFromDatabase(true);
+                    switch (recordSheetsFragmentDialogType) {
+                        case DIALOG_TYPE_ADD:
+                            databaseHelper.addRecordSheet(recordSheet);
+                            break;
+                        case DIALOG_TYPE_UPDATE:
+                            databaseHelper.updateRecordSheet(recordSheet);
+                            break;
                     }
 
+                    // Rafraichissement de la liste de recordsheets
+                    updateRecordSheetListViewFromDatabase(true);
                 }
 
             }
+
         });
 
-        builder.setNegativeButton("Annuler", null);
+        builder.setNegativeButton("Non", null);
 
         AlertDialog dialog = builder.create();
         dialog.show();
+
     }
+
 
     public void clearSelection() {
         // Logique pour effacer la sélection
@@ -285,6 +354,23 @@ public class RecordSheetsFragment extends Fragment {
                 csvHelper.fillCsvFileWithRecordSheets(recordSheetsToShare);
                 csvHelper.shareCsvFile();
             }
+        }
+    }
+
+    // Modification du magasin
+    public void editRecordSheet() {
+
+        if (recordSheetAdapter != null && recordSheetAdapter.getSelectionTracker() != null) {
+            Selection<Long> selection = recordSheetAdapter.getSelectionTracker().getSelection();
+
+            // Récupération de l'élément sélectionné
+            RecordSheet recordSheet = null;
+            for (Long selectedItem : selection) {
+                recordSheet = recordSheetList.get(selectedItem.intValue());
+                break;
+            }
+
+            showUserQueryDialogBox(recordSheet,RecordSheetsFragmentDialogType.DIALOG_TYPE_UPDATE);
         }
     }
 

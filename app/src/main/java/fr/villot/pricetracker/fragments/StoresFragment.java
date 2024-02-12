@@ -185,68 +185,6 @@ public class StoresFragment extends Fragment {
 
     }
 
-    private void showAddStoreDialog(Context context) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-
-        View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_create_store, null);
-        builder.setView(dialogView);
-        builder.setTitle("Ajouter un nouveau magasin");
-        builder.setCancelable(false);
-
-        Spinner storeLogoSpinner = dialogView.findViewById(R.id.storeLogoSpinner);
-        EditText storeNameEditText = dialogView.findViewById(R.id.storeNameEditText);
-        EditText storeLocationEditText = dialogView.findViewById(R.id.storeLocationEditText);
-
-        // Liste des logos des enseignes
-        List<LogoItem> logoItems = new ArrayList<>();
-        List<String> brandsList = databaseHelper.getBrands();
-        for (String brand : brandsList) {
-            logoItems.add(new LogoItem(brand));
-        }
-
-        // Gestion de l'adapter
-        LogoAdapter logoAdapter = new LogoAdapter(context, logoItems);
-        storeLogoSpinner.setAdapter(logoAdapter);
-
-        // Set up the buttons for Save and Cancel
-        builder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                String name = storeNameEditText.getText().toString().trim();
-                String location = storeLocationEditText.getText().toString().trim();
-                // Récupérer l'objet LogoItem sélectionné
-                LogoItem selectedLogoItem = (LogoItem) storeLogoSpinner.getSelectedItem();
-                String selectedLogo = selectedLogoItem.getImageName();
-
-                if (!name.isEmpty() && !location.isEmpty()) {
-                    // Create a new Store object
-                    Store newStore = new Store();
-                    newStore.setName(name);
-                    newStore.setLocation(location);
-                    newStore.setLogo(selectedLogo);
-
-                    // Add the store to the database
-                    databaseHelper.addStore(newStore);
-
-                    updateStoreListViewFromDatabase(true);
-
-                } else {
-                    Snackbar.make(getView(),"Veuillez entrer un nom de magasin et un lieu", Snackbar.LENGTH_SHORT).show();
-                }
-            }
-        });
-
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-
-        builder.show();
-    }
-
-
     protected void showUserQueryDialogBox(Store store, StoresFragmentDialogType storesFragmentDialogType) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());

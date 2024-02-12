@@ -732,4 +732,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             return null;
         }
 
+    public void updateRecordSheet(RecordSheet recordSheet) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_RECORD_SHEET_NAME, recordSheet.getName());
+        values.put(KEY_RECORD_SHEET_STORE_ID, recordSheet.getStoreId());
+
+        // Clause WHERE pour spécifier quelle liste de relevés de prix mettre à jour en fonction de l'ID
+        String whereClause = KEY_RECORD_SHEET_ID + " = ?";
+        String[] whereArgs = {String.valueOf(recordSheet.getId())};
+
+        // Effectuer la mise à jour
+        db.update(TABLE_RECORD_SHEETS, values, whereClause, whereArgs);
+
+        db.close();
+    }
+
 }

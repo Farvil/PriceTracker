@@ -46,4 +46,16 @@ public class Store {
         return logo;
     }
     public void setLogo(String logo) { this.logo = logo; }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        Store other = (Store) obj;
+        return id == other.id; // Comparaison basée sur l'ID
+    }
 }
