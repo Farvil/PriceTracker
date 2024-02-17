@@ -161,7 +161,6 @@ public class StoresFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 showUserQueryDialogBox(new Store(),DIALOG_TYPE_ADD);
-//                showAddStoreDialog(requireActivity());
             }
         });
 
@@ -346,6 +345,8 @@ public class StoresFragment extends Fragment {
             }
 
             showUserQueryDialogBox(store,DIALOG_TYPE_UPDATE);
+            clearSelection();
+
         }
     }
 

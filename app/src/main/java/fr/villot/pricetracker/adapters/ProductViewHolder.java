@@ -23,6 +23,7 @@ public class ProductViewHolder extends RecyclerView.ViewHolder {
     private TextView productNameTextView;
     private TextView productBrandTextView;
     private TextView productQuantityTextView;
+    private TextView productOriginTextView;
     private TextView productPriceTextView;
     private LinearLayout productPriceZone;
     private ImageView productImageView;
@@ -43,6 +44,7 @@ public class ProductViewHolder extends RecyclerView.ViewHolder {
         productNameTextView = itemView.findViewById(R.id.productNameTextView);
         productBrandTextView = itemView.findViewById(R.id.productBrandTextView);
         productQuantityTextView = itemView.findViewById(R.id.productQuantityTextView);
+        productOriginTextView = itemView.findViewById(R.id.productOriginTextView);
         productPriceTextView = itemView.findViewById(R.id.productPriceTextView);
         productPriceZone = itemView.findViewById(R.id.productPriceZone);
         productImageView = itemView.findViewById(R.id.productImageView);
@@ -53,9 +55,41 @@ public class ProductViewHolder extends RecyclerView.ViewHolder {
     public void bind(Product product, boolean isSelected) {
         // Mettre à jour les vues avec les données du produit
         productBarcodeTextView.setText(product.getBarcode());
-        productNameTextView.setText(product.getName());
-        productBrandTextView.setText(product.getBrand());
-        productQuantityTextView.setText(product.getQuantity());
+
+        // Affichage du nom du produit s'il existe
+        String productName = product.getName();
+        if (productName != null && !(productName.isEmpty())) {
+            productNameTextView.setText(product.getName());
+        }
+        else {
+            productNameTextView.setVisibility(View.GONE);
+        }
+
+        // Affichage de la marque du produit si elle existe
+        String productBrand = product.getBrand();
+        if (productBrand != null && !(productBrand.isEmpty())) {
+            productBrandTextView.setText(product.getBrand());
+        }
+        else {
+            productBrandTextView.setVisibility(View.GONE);
+        }
+
+        // Affichage de la quantité du produit si elle existe
+        String productQuantity = product.getQuantity();
+        if (productQuantity != null && !(productQuantity.isEmpty())) {
+            productQuantityTextView.setText(product.getQuantity());
+        }
+        else {
+            productQuantityTextView.setVisibility(View.GONE);
+        }
+
+        // Affichage de l'origine du produit si elle existe
+        String productOrigin = product.getOrigin();
+        if (productOrigin != null && !(productOrigin.isEmpty())) {
+            productOriginTextView.setText(product.getOrigin());
+        } else {
+            productOriginTextView.setVisibility(View.GONE);
+        }
 
         // Gestion de la zone de prix
         Double price = product.getPrice();

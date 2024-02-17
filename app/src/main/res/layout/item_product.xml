@@ -20,6 +20,23 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+        <TextView
+            android:id="@+id/productNameTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:textAppearanceMedium"
+            android:text="Product Name"
+            android:textStyle="bold"
+            android:textAlignment="center"
+            android:textColor="@android:color/black" />
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:padding="16dp">
 
@@ -38,14 +55,6 @@
                 android:orientation="vertical"
                 android:paddingStart="8dp">
 
-                <TextView
-                    android:id="@+id/productNameTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:textAppearanceMedium"
-                    android:text="Product Name"
-                    android:textColor="@android:color/black" />
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -58,29 +67,104 @@
                         android:layout_weight="1"
                         android:orientation="vertical">
 
-                        <TextView
-                            android:id="@+id/productBrandTextView"
+                        <LinearLayout
+                            android:id="@+id/productBrandZone"
+                            android:orientation="horizontal"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textAppearance="?android:textAppearanceSmall"
-                            android:text="Marque"
-                            android:textColor="@android:color/black" />
+                            android:layout_height="wrap_content">
+                            <ImageView
+                                android:id="@+id/productBrandIcon"
+                                android:scaleType="centerInside"
+                                android:layout_height="16dp"
+                                android:layout_width="16dp"
+                                android:layout_marginLeft="10dp"
+                                android:layout_marginRight="5dp"
+                                android:layout_gravity="center_vertical"
+                                android:src="@drawable/ic_brand" />
 
-                        <TextView
-                            android:id="@+id/productQuantityTextView"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textAppearance="?android:textAppearanceSmall"
-                            android:text="Quantité"
-                            android:textColor="@android:color/black" />
+                            <TextView
+                                android:id="@+id/productBrandTextView"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAppearance="?android:textAppearanceSmall"
+                                android:textStyle="bold"
+                                android:text="Marque"
+                                android:textColor="@android:color/black" />
+                        </LinearLayout>
 
-                        <TextView
-                            android:id="@+id/productBarcodeTextView"
+                        <LinearLayout
+                            android:id="@+id/productQuantityZone"
+                            android:orientation="horizontal"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textAppearance="?android:textAppearanceSmall"
-                            android:text="Code Barre"
-                            android:textColor="@android:color/darker_gray" />
+                            android:layout_height="wrap_content">
+                            <ImageView
+                                android:id="@+id/productQuantityIcon"
+                                android:scaleType="centerInside"
+                                android:layout_height="16dp"
+                                android:layout_width="16dp"
+                                android:layout_marginLeft="10dp"
+                                android:layout_marginRight="5dp"
+                                android:layout_gravity="center_vertical"
+                                android:src="@drawable/ic_quantity" />
+
+                            <TextView
+                                android:id="@+id/productQuantityTextView"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAppearance="?android:textAppearanceSmall"
+                                android:text="Quantité"
+                                android:textStyle="italic"
+                                android:textColor="@android:color/black" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:orientation="horizontal"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content">
+                            <ImageView
+                                android:id="@+id/productBarCodeIcon"
+                                android:scaleType="centerInside"
+                                android:layout_height="16dp"
+                                android:layout_width="16dp"
+                                android:layout_marginLeft="10dp"
+                                android:layout_marginRight="5dp"
+                                android:layout_gravity="center_vertical"
+                                android:src="@drawable/ic_barcode" />
+
+                            <TextView
+                                android:id="@+id/productBarcodeTextView"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAppearance="?android:textAppearanceSmall"
+                                android:text="Code Barre"
+                                android:textStyle="italic"
+                                android:textColor="@android:color/darker_gray" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/productOriginZone"
+                            android:orientation="horizontal"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content">
+                            <ImageView
+                                android:id="@+id/productOriginIcon"
+                                android:scaleType="centerInside"
+                                android:layout_height="16dp"
+                                android:layout_width="16dp"
+                                android:layout_marginLeft="10dp"
+                                android:layout_marginRight="5dp"
+                                android:layout_gravity="center_vertical"
+                                android:src="@drawable/ic_origin" />
+
+                            <TextView
+                                android:id="@+id/productOriginTextView"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAppearance="?android:textAppearanceSmall"
+                                android:text="Origine"
+                                android:textColor="@android:color/darker_gray" />
+                        </LinearLayout>
 
                     </LinearLayout>
 
@@ -122,6 +206,7 @@
                 android:layout_gravity="center_vertical"
                 android:src="@drawable/ic_check" />
 
+        </LinearLayout>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 </LinearLayout>

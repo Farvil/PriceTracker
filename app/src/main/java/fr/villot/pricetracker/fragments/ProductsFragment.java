@@ -307,12 +307,45 @@ public class ProductsFragment extends Fragment {
         TextView productNameTextView = dialogView.findViewById(R.id.productNameTextView);
         TextView productBrandTextView = dialogView.findViewById(R.id.productBrandTextView);
         TextView productQuantityTextView = dialogView.findViewById(R.id.productQuantityTextView);
+        TextView productOriginTextView = dialogView.findViewById(R.id.productOriginTextView);
 
-        // Afficher les détails du produit dans les vues
+        // Affichage du barcode
         productBarcodeTextView.setText(product.getBarcode());
-        productNameTextView.setText(product.getName());
-        productBrandTextView.setText(product.getBrand());
-        productQuantityTextView.setText(product.getQuantity());
+
+        // Affichage du nom du produit s'il existe
+        String productName = product.getName();
+        if (productName != null && !(productName.isEmpty())) {
+            productNameTextView.setText(product.getName());
+        }
+        else {
+            productNameTextView.setVisibility(View.GONE);
+        }
+
+        // Affichage de la marque du produit si elle existe
+        String productBrand = product.getBrand();
+        if (productBrand != null && !(productBrand.isEmpty())) {
+            productBrandTextView.setText(product.getBrand());
+        }
+        else {
+            productBrandTextView.setVisibility(View.GONE);
+        }
+
+        // Affichage de la quantité du produit si elle existe
+        String productQuantity = product.getQuantity();
+        if (productQuantity != null && !(productQuantity.isEmpty())) {
+            productQuantityTextView.setText(product.getQuantity());
+        }
+        else {
+            productQuantityTextView.setVisibility(View.GONE);
+        }
+
+        // Affichage de l'origine du produit si elle existe
+        String productOrigin = product.getOrigin();
+        if (productOrigin != null && !(productOrigin.isEmpty())) {
+            productOriginTextView.setText(product.getOrigin());
+        } else {
+            productOriginTextView.setVisibility(View.GONE);
+        }
 
         // Afficher l'image
         Picasso.get().load(product.getImageUrl()).into(productImageView);

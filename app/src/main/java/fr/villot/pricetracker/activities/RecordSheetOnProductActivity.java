@@ -88,6 +88,7 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
         TextView productNameTextView = findViewById(R.id.productNameTextView);
         TextView productBrandTextView = findViewById(R.id.productBrandTextView);
         TextView productQuantityTextView = findViewById(R.id.productQuantityTextView);
+        TextView productOriginTextView = findViewById(R.id.productOriginTextView);
         ImageView productImageView = findViewById(R.id.productImageView);
         recordSheetRecyclerView = findViewById(R.id.recordSheetRecyclerView);
         productMinPrice = findViewById(R.id.productMinPrice);
@@ -111,10 +112,44 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
         Product product = databaseHelper.getProductFromBarCode(barcode);
 
         if (product != null) {
+
+            // Affochage du barcode
             productBarcodeTextView.setText(product.getBarcode());
-            productNameTextView.setText(product.getName());
-            productBrandTextView.setText(product.getBrand());
-            productQuantityTextView.setText(product.getQuantity());
+
+            // Affichage du nom du produit s'il existe
+            String productName = product.getName();
+            if (productName != null && !(productName.isEmpty())) {
+                productNameTextView.setText(product.getName());
+            }
+            else {
+                productNameTextView.setVisibility(View.GONE);
+            }
+
+            // Affichage de la marque du produit si elle existe
+            String productBrand = product.getBrand();
+            if (productBrand != null && !(productBrand.isEmpty())) {
+                productBrandTextView.setText(product.getBrand());
+            }
+            else {
+                productBrandTextView.setVisibility(View.GONE);
+            }
+
+            // Affichage de la quantité du produit si elle existe
+            String productQuantity = product.getQuantity();
+            if (productQuantity != null && !(productQuantity.isEmpty())) {
+                productQuantityTextView.setText(product.getQuantity());
+            }
+            else {
+                productQuantityTextView.setVisibility(View.GONE);
+            }
+
+            // Affichage de l'origine du produit si elle existe
+            String productOrigin = product.getOrigin();
+            if (productOrigin != null && !(productOrigin.isEmpty())) {
+                productOriginTextView.setText(product.getOrigin());
+            } else {
+                productOriginTextView.setVisibility(View.GONE);
+            }
 
             // Min, Max, Moy
             updatePriceStats();

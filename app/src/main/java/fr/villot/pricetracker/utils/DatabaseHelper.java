@@ -26,7 +26,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private Context context;
 
     private static final String DATABASE_NAME = "database";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     // Table des produits
     private static final String TABLE_PRODUCTS = "products";
@@ -34,6 +34,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String KEY_PRODUCT_NAME = "product_name";
     private static final String KEY_PRODUCT_BRAND = "product_brand";
     private static final String KEY_PRODUCT_QUANTITY = "product_quantity";
+    private static final String KEY_PRODUCT_ORIGIN = "product_origin";
     private static final String KEY_PRODUCT_IMAGE_URL = "product_image_url";
 
     // Table des magasins
@@ -86,6 +87,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + KEY_PRODUCT_NAME + " TEXT,"
                 + KEY_PRODUCT_BRAND + " TEXT,"
                 + KEY_PRODUCT_QUANTITY + " TEXT,"
+                + KEY_PRODUCT_ORIGIN + " TEXT,"
                 + KEY_PRODUCT_IMAGE_URL + " TEXT" + ")";
         db.execSQL(createProductsTableQuery);
 
@@ -148,6 +150,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(KEY_PRODUCT_NAME, product.getName());
         values.put(KEY_PRODUCT_BRAND, product.getBrand());
         values.put(KEY_PRODUCT_QUANTITY, product.getQuantity());
+        values.put(KEY_PRODUCT_ORIGIN, product.getOrigin());
         values.put(KEY_PRODUCT_IMAGE_URL, product.getImageUrl());
 
         // Ajoute ou et a jour le produit s'il existe déjà.
@@ -164,6 +167,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(KEY_PRODUCT_NAME, product.getName());
         values.put(KEY_PRODUCT_BRAND, product.getBrand());
         values.put(KEY_PRODUCT_QUANTITY, product.getQuantity());
+        values.put(KEY_PRODUCT_ORIGIN, product.getOrigin());
         values.put(KEY_PRODUCT_IMAGE_URL, product.getImageUrl());
 
         // Clause WHERE pour spécifier quel produit mettre à jour en fonction du code-barres
@@ -245,6 +249,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 product.setName(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_NAME)));
                 product.setBrand(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_BRAND)));
                 product.setQuantity(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_QUANTITY)));
+                product.setOrigin(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_ORIGIN)));
                 product.setImageUrl(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_IMAGE_URL)));
                 productList.add(product);
             } while (cursor.moveToNext());
@@ -278,6 +283,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 product.setName(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_NAME)));
                 product.setBrand(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_BRAND)));
                 product.setQuantity(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_QUANTITY)));
+                product.setOrigin(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_ORIGIN)));
                 product.setImageUrl(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_IMAGE_URL)));
                 productList.add(product);
             } while (cursor.moveToNext());
@@ -367,6 +373,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 product.setName(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_NAME)));
                 product.setBrand(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_BRAND)));
                 product.setQuantity(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_QUANTITY)));
+                product.setOrigin(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_ORIGIN)));
                 product.setImageUrl(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_IMAGE_URL)));
                 product.setPrice(cursor.getDouble(cursor.getColumnIndex(KEY_PRICE_RECORD_PRICE)));
                 products.add(product);
@@ -545,6 +552,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             product.setName(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_NAME)));
             product.setBrand(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_BRAND)));
             product.setQuantity(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_QUANTITY)));
+            product.setOrigin(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_ORIGIN)));
             product.setImageUrl(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_IMAGE_URL)));
         }
 

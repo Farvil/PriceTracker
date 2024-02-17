@@ -7,14 +7,16 @@ public class Product implements Serializable {
     private String name;
     private String brand;
     private String quantity;
+    private String origin;
     private String imageUrl;
     private Double price;
 
-    public Product(String barcode, String name, String brand, String quantity, String imageUrl) {
+    public Product(String barcode, String name, String brand, String quantity, String origin, String imageUrl) {
         this.barcode = barcode;
         this.name = name;
         this.brand = brand;
         this.quantity = quantity;
+        this.origin = origin;
         this.imageUrl = imageUrl;
     }
 
@@ -51,6 +53,14 @@ public class Product implements Serializable {
 
     public void setQuantity(String quantity) {
         this.quantity = quantity;
+    }
+
+    public String getOrigin() {
+        return origin;
+    }
+
+    public void setOrigin(String origin) {
+        this.origin = origin;
     }
 
     public String getImageUrl() {

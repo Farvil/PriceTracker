@@ -371,6 +371,7 @@ public class RecordSheetsFragment extends Fragment {
             }
 
             showUserQueryDialogBox(recordSheet,RecordSheetsFragmentDialogType.DIALOG_TYPE_UPDATE);
+            clearSelection();
         }
     }
 
