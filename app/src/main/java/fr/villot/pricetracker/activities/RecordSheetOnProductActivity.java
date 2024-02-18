@@ -11,6 +11,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -86,10 +87,14 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
         productCardView.setRadius(0);
         TextView productBarcodeTextView = findViewById(R.id.productBarcodeTextView);
         TextView productNameTextView = findViewById(R.id.productNameTextView);
+        LinearLayout productBrandZone = findViewById(R.id.productBrandZone);
         TextView productBrandTextView = findViewById(R.id.productBrandTextView);
+        LinearLayout productQuantityZone = findViewById(R.id.productQuantityZone);
         TextView productQuantityTextView = findViewById(R.id.productQuantityTextView);
+        LinearLayout productOriginZone = findViewById(R.id.productOriginZone);
         TextView productOriginTextView = findViewById(R.id.productOriginTextView);
         ImageView productImageView = findViewById(R.id.productImageView);
+        LinearLayout productPriceZone = findViewById(R.id.productPriceZone);
         recordSheetRecyclerView = findViewById(R.id.recordSheetRecyclerView);
         productMinPrice = findViewById(R.id.productMinPrice);
         productMaxPrice = findViewById(R.id.productMaxPrice);
@@ -121,9 +126,6 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
             if (productName != null && !(productName.isEmpty())) {
                 productNameTextView.setText(product.getName());
             }
-            else {
-                productNameTextView.setVisibility(View.GONE);
-            }
 
             // Affichage de la marque du produit si elle existe
             String productBrand = product.getBrand();
@@ -131,7 +133,7 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
                 productBrandTextView.setText(product.getBrand());
             }
             else {
-                productBrandTextView.setVisibility(View.GONE);
+                productBrandZone.setVisibility(View.GONE);
             }
 
             // Affichage de la quantité du produit si elle existe
@@ -140,7 +142,7 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
                 productQuantityTextView.setText(product.getQuantity());
             }
             else {
-                productQuantityTextView.setVisibility(View.GONE);
+                productQuantityZone.setVisibility(View.GONE);
             }
 
             // Affichage de l'origine du produit si elle existe
@@ -148,14 +150,20 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
             if (productOrigin != null && !(productOrigin.isEmpty())) {
                 productOriginTextView.setText(product.getOrigin());
             } else {
-                productOriginTextView.setVisibility(View.GONE);
+                productOriginZone.setVisibility(View.GONE);
             }
+
+            // On masque le prix
+            productPriceZone.setVisibility(View.GONE);
 
             // Min, Max, Moy
             updatePriceStats();
 
-            // Utiliser Picasso pour charger l'image à partir de l'URL et l'afficher dans ImageView
-            Picasso.get().load(product.getImageUrl()).into(productImageView);
+            // Afficher l'image
+            String imageUrl = product.getImageUrl();
+            if (imageUrl != null && !(imageUrl.isEmpty())) {
+                Picasso.get().load(imageUrl).into(productImageView);
+            }
         }
 
         // Recyclerview
@@ -309,15 +317,22 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
         TextView productNameTextView = dialogView.findViewById(R.id.productNameTextView);
         TextView productBrandTextView = dialogView.findViewById(R.id.productBrandTextView);
         TextView productQuantityTextView = dialogView.findViewById(R.id.productQuantityTextView);
+        LinearLayout productPriceZone = dialogView.findViewById(R.id.productPriceZone);
 
-        // Afficher les détails du produit dans les vues
+        // On affiche les détails du produit dans les vues
         productBarcodeTextView.setText(product.getBarcode());
         productNameTextView.setText(product.getName());
         productBrandTextView.setText(product.getBrand());
         productQuantityTextView.setText(product.getQuantity());
 
-        // Afficher l'image
-        Picasso.get().load(product.getImageUrl()).into(productImageView);
+        // On masque le prix
+        productPriceZone.setVisibility(View.GONE);
+
+        // On affiche l'image
+        String imageUrl = product.getImageUrl();
+        if (imageUrl != null && !(imageUrl.isEmpty())) {
+            Picasso.get().load(imageUrl).into(productImageView);
+        }
 
         return dialogView;
     }

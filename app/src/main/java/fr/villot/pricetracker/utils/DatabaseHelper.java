@@ -26,7 +26,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private Context context;
 
     private static final String DATABASE_NAME = "database";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
 
     // Table des produits
     private static final String TABLE_PRODUCTS = "products";
@@ -640,9 +640,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(BRAND_NAME, "casino");
         db.insert(TABLE_BRANDS, null, values);
 
+        // Marque Cora
+        values.clear();
+        values.put(BRAND_NAME, "cora");
+        db.insert(TABLE_BRANDS, null, values);
+
+        // Marque Dia
+        values.clear();
+        values.put(BRAND_NAME, "dia");
+        db.insert(TABLE_BRANDS, null, values);
+
         // Marque G20
         values.clear();
         values.put(BRAND_NAME, "g20");
+        db.insert(TABLE_BRANDS, null, values);
+
+        // Marque Grand Frais
+        values.clear();
+        values.put(BRAND_NAME, "grand_frais");
         db.insert(TABLE_BRANDS, null, values);
 
         // Marque Leclerc

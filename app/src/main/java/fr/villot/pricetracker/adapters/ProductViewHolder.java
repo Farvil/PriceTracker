@@ -21,8 +21,12 @@ public class ProductViewHolder extends RecyclerView.ViewHolder {
     private TextView productBarcodeTextView;
     private CardView productCardView;
     private TextView productNameTextView;
+    private LinearLayout productBrandZone;
     private TextView productBrandTextView;
+    private LinearLayout productQuantityZone;
     private TextView productQuantityTextView;
+    private LinearLayout productOriginZone;
+
     private TextView productOriginTextView;
     private TextView productPriceTextView;
     private LinearLayout productPriceZone;
@@ -42,8 +46,11 @@ public class ProductViewHolder extends RecyclerView.ViewHolder {
         productCardView = itemView.findViewById(R.id.productCardView);
         productBarcodeTextView = itemView.findViewById(R.id.productBarcodeTextView);
         productNameTextView = itemView.findViewById(R.id.productNameTextView);
+        productBrandZone = itemView.findViewById(R.id.productBrandZone);
         productBrandTextView = itemView.findViewById(R.id.productBrandTextView);
+        productQuantityZone = itemView.findViewById(R.id.productQuantityZone);
         productQuantityTextView = itemView.findViewById(R.id.productQuantityTextView);
+        productOriginZone = itemView.findViewById(R.id.productOriginZone);
         productOriginTextView = itemView.findViewById(R.id.productOriginTextView);
         productPriceTextView = itemView.findViewById(R.id.productPriceTextView);
         productPriceZone = itemView.findViewById(R.id.productPriceZone);
@@ -61,9 +68,6 @@ public class ProductViewHolder extends RecyclerView.ViewHolder {
         if (productName != null && !(productName.isEmpty())) {
             productNameTextView.setText(product.getName());
         }
-        else {
-            productNameTextView.setVisibility(View.GONE);
-        }
 
         // Affichage de la marque du produit si elle existe
         String productBrand = product.getBrand();
@@ -71,7 +75,7 @@ public class ProductViewHolder extends RecyclerView.ViewHolder {
             productBrandTextView.setText(product.getBrand());
         }
         else {
-            productBrandTextView.setVisibility(View.GONE);
+            productBrandZone.setVisibility(View.GONE);
         }
 
         // Affichage de la quantité du produit si elle existe
@@ -80,7 +84,7 @@ public class ProductViewHolder extends RecyclerView.ViewHolder {
             productQuantityTextView.setText(product.getQuantity());
         }
         else {
-            productQuantityTextView.setVisibility(View.GONE);
+            productQuantityZone.setVisibility(View.GONE);
         }
 
         // Affichage de l'origine du produit si elle existe
@@ -88,7 +92,7 @@ public class ProductViewHolder extends RecyclerView.ViewHolder {
         if (productOrigin != null && !(productOrigin.isEmpty())) {
             productOriginTextView.setText(product.getOrigin());
         } else {
-            productOriginTextView.setVisibility(View.GONE);
+            productOriginZone.setVisibility(View.GONE);
         }
 
         // Gestion de la zone de prix
@@ -101,8 +105,11 @@ public class ProductViewHolder extends RecyclerView.ViewHolder {
             productPriceZone.setVisibility(View.GONE);
         }
 
-        // Utiliser Picasso pour charger l'image à partir de l'URL et l'afficher dans ImageView
-        Picasso.get().load(product.getImageUrl()).into(productImageView);
+        // Afficher l'image
+        String imageUrl = product.getImageUrl();
+        if (imageUrl != null && !(imageUrl.isEmpty())) {
+            Picasso.get().load(imageUrl).into(productImageView);
+        }
 
         // Gestion de la selection
         if (isSelected) {

@@ -10,4 +10,5 @@
     <color name="white">#FFFFFFFF</color>
     <color name="item_product_pressed_background">#FFCFCFCF</color>
     <color name="item_product_normal_background">#FFFFFFFF</color>
+    <color name="grey_black">#555555</color>
 </resources>

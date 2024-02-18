@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -305,9 +306,14 @@ public class ProductsFragment extends Fragment {
         TextView productBarcodeTextView = dialogView.findViewById(R.id.productBarcodeTextView);
         ImageView productImageView = dialogView.findViewById(R.id.productImageView);
         TextView productNameTextView = dialogView.findViewById(R.id.productNameTextView);
+        LinearLayout productBrandZone = dialogView.findViewById(R.id.productBrandZone);
         TextView productBrandTextView = dialogView.findViewById(R.id.productBrandTextView);
+        LinearLayout productQuantityZone = dialogView.findViewById(R.id.productQuantityZone);
         TextView productQuantityTextView = dialogView.findViewById(R.id.productQuantityTextView);
+        LinearLayout productOriginZone = dialogView.findViewById(R.id.productOriginZone);
         TextView productOriginTextView = dialogView.findViewById(R.id.productOriginTextView);
+        LinearLayout productPriceZone = dialogView.findViewById(R.id.productPriceZone);
+
 
         // Affichage du barcode
         productBarcodeTextView.setText(product.getBarcode());
@@ -317,9 +323,6 @@ public class ProductsFragment extends Fragment {
         if (productName != null && !(productName.isEmpty())) {
             productNameTextView.setText(product.getName());
         }
-        else {
-            productNameTextView.setVisibility(View.GONE);
-        }
 
         // Affichage de la marque du produit si elle existe
         String productBrand = product.getBrand();
@@ -327,7 +330,7 @@ public class ProductsFragment extends Fragment {
             productBrandTextView.setText(product.getBrand());
         }
         else {
-            productBrandTextView.setVisibility(View.GONE);
+            productBrandZone.setVisibility(View.GONE);
         }
 
         // Affichage de la quantité du produit si elle existe
@@ -336,7 +339,7 @@ public class ProductsFragment extends Fragment {
             productQuantityTextView.setText(product.getQuantity());
         }
         else {
-            productQuantityTextView.setVisibility(View.GONE);
+            productQuantityZone.setVisibility(View.GONE);
         }
 
         // Affichage de l'origine du produit si elle existe
@@ -344,11 +347,17 @@ public class ProductsFragment extends Fragment {
         if (productOrigin != null && !(productOrigin.isEmpty())) {
             productOriginTextView.setText(product.getOrigin());
         } else {
-            productOriginTextView.setVisibility(View.GONE);
+            productOriginZone.setVisibility(View.GONE);
         }
 
+        // Masquage du prix
+        productPriceZone.setVisibility(View.GONE);
+
         // Afficher l'image
-        Picasso.get().load(product.getImageUrl()).into(productImageView);
+        String imageUrl = product.getImageUrl();
+        if (imageUrl != null && !(imageUrl.isEmpty())) {
+            Picasso.get().load(imageUrl).into(productImageView);
+        }
 
         return dialogView;
     }
