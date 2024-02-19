@@ -55,6 +55,15 @@ public class StoresFragment extends Fragment {
 
     private static final String STORE_SELECTION_KEY = "store_selection";
 
+    public void selectAllItems() {
+        if (storeAdapter != null && storeAdapter.getSelectionTracker() != null) {
+            List<Long> selectedItems = new ArrayList<>();
+            for (int i = 0; i < storeAdapter.getItemCount(); i++) {
+                selectedItems.add((long) i);
+            }
+            storeAdapter.getSelectionTracker().setItemsSelected(selectedItems, true);
+        }
+    }
     public enum StoresFragmentDialogType {
         DIALOG_TYPE_ADD,
         DIALOG_TYPE_UPDATE

@@ -51,6 +51,16 @@ public class RecordSheetsFragment extends Fragment {
 
     private OnSelectionChangedListener mOnSelectionChangedListener;
 
+    public void selectAllItems() {
+        if (recordSheetAdapter != null && recordSheetAdapter.getSelectionTracker() != null) {
+            List<Long> selectedItems = new ArrayList<>();
+            for (int i = 0; i < recordSheetAdapter.getItemCount(); i++) {
+                selectedItems.add((long) i);
+            }
+            recordSheetAdapter.getSelectionTracker().setItemsSelected(selectedItems, true);
+        }
+    }
+
     public enum RecordSheetsFragmentDialogType {
         DIALOG_TYPE_ADD,
         DIALOG_TYPE_UPDATE

@@ -200,7 +200,22 @@ public class MainActivity extends AppCompatActivity implements OnStoreChangedLis
             Intent intent = new Intent(this, AboutActivity.class);
             startActivity(intent);
             return true;
-        }
+        } else if (itemId == R.id.menu_select_all) {
+            Fragment fragment = pageAdapter.getItem(tabLayout.getSelectedTabPosition());
+
+            if (fragment instanceof ProductsFragment) {
+                ProductsFragment productsFragment = (ProductsFragment) fragment;
+                productsFragment.selectAllItems();
+            } else if (fragment instanceof StoresFragment) {
+                StoresFragment storesFragment = (StoresFragment) fragment;
+                storesFragment.selectAllItems();
+            } else if (fragment instanceof RecordSheetsFragment) {
+                RecordSheetsFragment recordSheetsFragment = (RecordSheetsFragment) fragment;
+                recordSheetsFragment.selectAllItems();
+            }
+
+            return true;
+    }
 
         return super.onOptionsItemSelected(item);
     }

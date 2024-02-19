@@ -41,6 +41,7 @@ import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -74,6 +75,16 @@ public class ProductsFragment extends Fragment {
     private static final String PRODUCT_SELECTION_KEY = "product_selection";
 
     private OnSelectionChangedListener mOnSelectionChangedListener;
+
+    public void selectAllItems() {
+        if (productAdapter != null && productAdapter.getSelectionTracker() != null) {
+            List<Long> selectedItems = new ArrayList<>();
+            for (int i = 0; i < productAdapter.getItemCount(); i++) {
+                selectedItems.add((long) i);
+            }
+            productAdapter.getSelectionTracker().setItemsSelected(selectedItems, true);
+        }
+    }
 
 
     // Type de boite de dialogue
