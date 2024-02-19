@@ -8,6 +8,11 @@
         android:title="Ajouter depuis la bibliothèque"
         app:showAsAction="never" />
     <item
+        android:id="@+id/action_export"
+        android:icon="@drawable/ic_export"
+        android:title="Exporter le relevé de prix"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/action_share"
         android:icon="@drawable/ic_share"
         android:title="Partager"

@@ -105,7 +105,12 @@ public class SelectProductsActivity extends AppCompatActivity {
         productAdapter.setOnItemClickListener(new ProductAdapter.OnItemClickListener<Product>() {
             @Override
             public void onItemClick(Product product) {
-                    Snackbar.make(productRecyclerView, "Faire un appui long pour entrer dans le mode de sélection", Snackbar.LENGTH_SHORT).show();
+                if (!selectionTracker.hasSelection()) {
+                    Long position = productAdapter.getPosition(product);
+                    if (position.intValue() != RecyclerView.NO_POSITION) {
+                        selectionTracker.select(position);
+                    }
+                }
             }
         });
 

@@ -1,24 +1,18 @@
 package fr.villot.pricetracker.utils;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Handler;
-import android.os.Looper;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.core.content.FileProvider;
-import androidx.recyclerview.selection.Selection;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 import fr.villot.pricetracker.MyApplication;
 import fr.villot.pricetracker.model.Product;
@@ -32,22 +26,7 @@ public class CsvHelper {
     private File csvFile;
     private DatabaseHelper databaseHelper;
 
-//    private static final int EXPORT_CSV_REQUEST_CODE = 123;
-//    private final Handler handler = new Handler(Looper.getMainLooper());
-//    private final Executor executor = Executors.newSingleThreadExecutor();
-//
-//    private final ActivityResultLauncher<Intent> launcher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-//            result -> {
-//                if (result.getResultCode() == Activity.RESULT_OK) {
-//                    Intent data = result.getData();
-//                    if (data != null) {
-//                        Uri uri = data.getData();
-//
-//                        // Écrire les données dans le fichier à l'emplacement choisi
-//                        executor.execute(() -> writeCsvFile(uri));
-//                    }
-//                }
-//            });
+//    private final ActivityResultLauncher<Intent> createDocumentLauncher;
 
     public CsvHelper(Context context, String fileName) {
         this.context = context;
@@ -55,6 +34,28 @@ public class CsvHelper {
         databaseHelper = MyApplication.getDatabaseHelper();
 
         createCsvFile();
+
+//        // On verifie si le contexte est une activité pour utiliser registerForActivityResult
+//        if (context instanceof AppCompatActivity) {
+//            createDocumentLauncher = ((AppCompatActivity) context).registerForActivityResult(
+//                    new ActivityResultContracts.StartActivityForResult(),
+//                    result -> {
+//                        if (result.getResultCode() == Activity.RESULT_OK) {
+//                            Intent data = result.getData();
+//                            if (data != null) {
+//                                Uri uri = data.getData();
+//                                if (uri != null) {
+//                                    // Écrire les données dans le fichier à l'emplacement choisi
+//                                    writeCsvFile(uri);
+//                                }
+//                            }
+//                        }
+//                    });
+//        } else {
+//            // Gérer le cas où le contexte n'est pas une activité
+//            createDocumentLauncher = null;
+//        }
+
     }
 
     private void createCsvFile() {
@@ -120,13 +121,40 @@ public class CsvHelper {
         context.startActivity(Intent.createChooser(shareIntent, "Partager via"));
     }
 
-//    public void exportCsvFile() {
-//        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
-//        intent.addCategory(Intent.CATEGORY_OPENABLE);
-//        intent.setType("text/csv");
-//        intent.putExtra(Intent.EXTRA_TITLE, fileName);
+    public void exportCsvFile() {
+//        if (createDocumentLauncher != null) {
+//            Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+//            intent.addCategory(Intent.CATEGORY_OPENABLE);
+//            intent.setType("text/csv");
+//            intent.putExtra(Intent.EXTRA_TITLE, fileName);
 //
-//        launcher.launch(intent);
-//    }
+//            createDocumentLauncher.launch(intent);
+//        }
+    }
+
+    public boolean writeCsvFileToUri(Uri uri) {
+        boolean result = false;
+
+        try {
+            // Open an OutputStream to the document, overwriting any existing content.
+            try (OutputStream outputStream = context.getContentResolver().openOutputStream(uri)) {
+                if (outputStream != null) {
+                    FileInputStream fis = new FileInputStream(csvFile);
+                    byte[] buffer = new byte[4096];
+                    int bytesRead;
+                    while ((bytesRead = fis.read(buffer)) != -1) {
+                        outputStream.write(buffer, 0, bytesRead);
+                    }
+                    fis.close();
+                    outputStream.close();
+                    result = true;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
 
 }

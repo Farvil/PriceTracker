@@ -29,6 +29,8 @@ public class ProductsOnRecordSheetFragment extends ProductsFragment {
 
     private int recordSheetId;
 
+    private CsvHelper csvHelper;
+
     public static ProductsOnRecordSheetFragment newInstance(int recordSheetId) {
         Log.w("RecordSheetProductsFragment", "newInstance()");
 
@@ -44,6 +46,9 @@ public class ProductsOnRecordSheetFragment extends ProductsFragment {
         Log.w("RecordSheetProductsFragment", "onCreateView()");
 
         View view = super.onCreateView(inflater, container, savedInstanceState);
+
+        // Initialisation du csvHelper
+        csvHelper = new CsvHelper(requireActivity(), "record_sheet_export.csv");
 
         // Récupération des données du Bundle
         Bundle bundle = getArguments();
@@ -188,9 +193,15 @@ public class ProductsOnRecordSheetFragment extends ProductsFragment {
     public void shareRecordSheet() {
         RecordSheet recordSheetToShare = databaseHelper.getRecordSheetById(recordSheetId);
 
-        CsvHelper csvHelper = new CsvHelper(requireActivity(), "record_sheet_export.csv");
         csvHelper.fillCsvFileWithRecordSheet(recordSheetToShare);
         csvHelper.shareCsvFile();
+    }
+
+    public void exportRecordSheet() {
+        RecordSheet recordSheetToExport = databaseHelper.getRecordSheetById(recordSheetId);
+
+        csvHelper.fillCsvFileWithRecordSheet(recordSheetToExport);
+        csvHelper.exportCsvFile();
     }
 
 }

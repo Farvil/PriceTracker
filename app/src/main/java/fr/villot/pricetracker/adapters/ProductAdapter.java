@@ -21,6 +21,10 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductViewHolder> {
 
     private ProductAdapter.OnItemClickListener<Product> onItemClickListener;
 
+    public Long getPosition(Product product) {
+        return new Long (productList.indexOf(product));
+    }
+
     public interface OnItemClickListener<Product> {
         void onItemClick(Product product);
     }

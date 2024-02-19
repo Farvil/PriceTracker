@@ -166,6 +166,13 @@ public class PriceRecordActivity extends AppCompatActivity implements OnSelectio
             }
             return true;
         }
+        else if (itemId == R.id.action_export) {
+            ProductsOnRecordSheetFragment productsOnRecordSheetFragment = (ProductsOnRecordSheetFragment) getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
+            if (productsOnRecordSheetFragment != null) {
+                productsOnRecordSheetFragment.exportRecordSheet();
+            }
+            return true;
+        }
         return super.onOptionsItemSelected(item);
     }
 

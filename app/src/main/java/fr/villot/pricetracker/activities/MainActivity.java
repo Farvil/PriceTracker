@@ -1,17 +1,23 @@
 package fr.villot.pricetracker.activities;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 
 import java.util.Objects;
@@ -34,18 +40,30 @@ public class MainActivity extends AppCompatActivity implements OnStoreChangedLis
 
 //    private static final Logger logger = Logger.getLogger(MainActivity.class.getName());
 
-//    private final ActivityResultLauncher<Intent> filePickerLauncher = registerForActivityResult(
-//            new ActivityResultContracts.StartActivityForResult(),
-//            result -> {
-//                if (result.getResultCode() == Activity.RESULT_OK) {
-//                    if (result.getData() != null) {
-//                        Uri uri = result.getData().getData();
-//                        String fileContent = readFileFromUri(uri);
-//                        processProductCodes(fileContent);
-//                    }
-//                }
-//            }
-//    );
+    private final ActivityResultLauncher<Intent> createDocumentLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    Intent data = result.getData();
+                    if (data != null) {
+                        Uri uri = data.getData();
+                        if (uri != null) {
+                            if (currentFragment instanceof RecordSheetsFragment) {
+                                RecordSheetsFragment recordSheetsFragment = (RecordSheetsFragment) currentFragment;
+                                View fragmentView = recordSheetsFragment.getView();
+
+                                if (recordSheetsFragment.exportRecordSheet(uri)) {
+                                    Snackbar.make(fragmentView, "Le fichier CSV est enregistré.", Snackbar.LENGTH_SHORT).show();
+                                }
+                                else {
+                                    Snackbar.make(fragmentView, "Erreur d'enregistrement du fichier CSV !", Snackbar.LENGTH_SHORT).show();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,6 +120,8 @@ public class MainActivity extends AppCompatActivity implements OnStoreChangedLis
             if (currentFragment instanceof RecordSheetsFragment) {
                 MenuItem itemShare = menu.findItem(R.id.action_share);
                 itemShare.setVisible(true);
+                MenuItem itemExport = menu.findItem(R.id.action_export);
+                itemExport.setVisible(true);
             }
 
             // Icone d'edition pour modifier un magasin ou un relevé de prix
@@ -139,6 +159,19 @@ public class MainActivity extends AppCompatActivity implements OnStoreChangedLis
                 RecordSheetsFragment recordSheetsFragment = (RecordSheetsFragment) currentFragment;
                 recordSheetsFragment.shareRecordSheet();
             }
+            return true;
+        } else if (itemId == R.id.action_export) {
+
+                // On vérifie que les relevés de prix sont exportables
+
+                // Demande le nom du fichier à l'utilisateur
+                Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("text/csv");
+                intent.putExtra(Intent.EXTRA_TITLE, "export_releve_de_prix.csv");
+
+                createDocumentLauncher.launch(intent);
+
             return true;
         } else if (itemId == R.id.action_edit) {
 
@@ -279,56 +312,6 @@ public class MainActivity extends AppCompatActivity implements OnStoreChangedLis
             getSupportActionBar().setTitle(selectionCount);
         }
     }
-//
-//    private void importProductsFromFile() {
-//        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-//        intent.addCategory(Intent.CATEGORY_OPENABLE);
-//        intent.setType("text/plain");
-//
-//        filePickerLauncher.launch(intent);
-//    }
-//
-//
-//    private String readFileFromUri(Uri uri) {
-//        StringBuilder content = new StringBuilder();
-//
-//        try (InputStream inputStream = getContentResolver().openInputStream(uri);
-//             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-//
-//            String line;
-//            while ((line = reader.readLine()) != null) {
-//                content.append(line).append("\n");
-//            }
-//
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        } catch (FileNotFoundException e) {
-//            throw new RuntimeException(e);
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//
-//        return content.toString();
-//    }
-//
-//    private void processProductCodes(String fileContent) {
-//        // Divisez le contenu du fichier en lignes
-//        String[] lines = fileContent.split("\n");
-//
-//        // Traitez chaque code-barres
-//        for (String barcode : lines) {
-//            // Assurez-vous que le code-barres est valide avant de l'ajouter à la base de données
-//            if (isValidBarcode(barcode.trim())) {
-//                Snackbar.make(tabLayout, barcode.trim(), Snackbar.LENGTH_SHORT).show();
-//
-//            }
-//        }
-//    }
-//
-//    private boolean isValidBarcode(String trim) {
-//        return true
-//    }
-
 
 }
 

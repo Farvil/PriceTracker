@@ -3,6 +3,7 @@ package fr.villot.pricetracker.fragments;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -56,12 +57,17 @@ public class RecordSheetsFragment extends Fragment {
     }
 
 
+    /**
+     * Retourne l'instance du singleton
+     * @return L'instance du fragment
+     */
     public static RecordSheetsFragment getInstance() {
         if (instance == null) {
             instance = new RecordSheetsFragment();
         }
         return instance;
     }
+
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -75,11 +81,13 @@ public class RecordSheetsFragment extends Fragment {
         }
     }
 
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_record_sheet, container, false);
     }
+
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -153,6 +161,13 @@ public class RecordSheetsFragment extends Fragment {
     }
 
 
+    /**
+     * Récupère les relevés de prix
+     *
+     * <p>Cette méthode est protected et sera redéfinie par la classe fille RecordSheetsOnStoreFragment </p>
+     *
+     * @return les relevés de prix
+     */
     protected List<RecordSheet> getRecordSheets() {
         return databaseHelper.getAllRecordSheets();
     }
@@ -171,54 +186,12 @@ public class RecordSheetsFragment extends Fragment {
 
     }
 
-//
-//    public void showCreateRecordSheetDialog() {
-//        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-//        View dialogView = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_create_recordsheet, null);
-//        builder.setView(dialogView);
-//        builder.setTitle("Créer un nouveau relevé de prix");
-//        builder.setCancelable(false);
-//
-//        Spinner storeSpinner = dialogView.findViewById(R.id.storeSpinner);
-//        EditText recordsheetNameEditText = dialogView.findViewById(R.id.recordsheetNameEditText);
-//
-//        // Créez un ArrayAdapter pour afficher la liste des magasins dans le Spinner
-//        List<Store> storeList = databaseHelper.getAllStores();
-//        SpinnerStoreAdapter spinnerStoreAdapter = new SpinnerStoreAdapter(getContext(), storeList);
-//        storeSpinner.setAdapter(spinnerStoreAdapter);
-//
-//        builder.setPositiveButton("Créer", new DialogInterface.OnClickListener() {
-//            @Override
-//            public void onClick(DialogInterface dialog, int which) {
-//                // Récupérez le nom de la recordsheet saisi par l'utilisateur
-//                String recordSheetName = recordsheetNameEditText.getText().toString();
-//
-//                if (!recordSheetName.isEmpty()) {
-//
-//                    // Recuperation du magasin selectionné
-//                    Store selectedStore = (Store) storeSpinner.getSelectedItem();
-//                    if (selectedStore != null) {
-//                        // Création d'un RecordSheet
-//                        RecordSheet newRecordSheet = new RecordSheet(recordSheetName, new Date(),selectedStore);
-//
-//                        // Ajoute la fiche d'enregistrements à la base de données
-//                        databaseHelper.addRecordSheet(newRecordSheet);
-//
-//                        // Update the store list and refresh the spinner
-//                        updateRecordSheetListViewFromDatabase(true);
-//                    }
-//
-//                }
-//
-//            }
-//        });
-//
-//        builder.setNegativeButton("Annuler", null);
-//
-//        AlertDialog dialog = builder.create();
-//        dialog.show();
-//    }
-
+    /**
+     * Popup pour créer ou modifier un relevé de prix
+     *
+     * @param recordSheet le relevé de prix à modifier
+     * @param recordSheetsFragmentDialogType Le type de popup (ajout ou modification)
+     */
     protected void showUserQueryDialogBox(RecordSheet recordSheet, RecordSheetsFragmentDialogType recordSheetsFragmentDialogType) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -290,6 +263,11 @@ public class RecordSheetsFragment extends Fragment {
     }
 
 
+    /**
+     * Annule le mode de sélection
+     *
+     * <p>Cette méthode est publique est peut être appelée depuis l'activité parente </p>
+     */
     public void clearSelection() {
         // Logique pour effacer la sélection
         if (recordSheetAdapter != null && recordSheetAdapter.getSelectionTracker() != null) {
@@ -298,6 +276,9 @@ public class RecordSheetsFragment extends Fragment {
         }
     }
 
+    /**
+     * Supprime les relevés de prix sélectionnés
+     */
     public void deleteSelectedItems() {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -337,7 +318,16 @@ public class RecordSheetsFragment extends Fragment {
 
     }
 
-    public void shareRecordSheet() {
+
+    /**
+     * Recupère la liste des relevés de prix sélectionnés
+     *
+     * @return La liste des relevés sélectionnés
+     */
+    private List<RecordSheet> getSelectedRecordSheets() {
+
+        List<RecordSheet> selectedRecordSheets = null;
+
         if (recordSheetAdapter != null && recordSheetAdapter.getSelectionTracker() != null) {
             Selection<Long> selection = recordSheetAdapter.getSelectionTracker().getSelection();
 
@@ -345,34 +335,59 @@ public class RecordSheetsFragment extends Fragment {
             if (!selection.isEmpty()) {
 
                 // Création de la liste des recordsheets à partager
-                List<RecordSheet> recordSheetsToShare = new ArrayList<>();
+                selectedRecordSheets = new ArrayList<>();
                 for (Long selectedItem : selection) {
-                    recordSheetsToShare.add(recordSheetList.get(selectedItem.intValue()));
+                    selectedRecordSheets.add(recordSheetList.get(selectedItem.intValue()));
                 }
-
-                CsvHelper csvHelper = new CsvHelper(requireActivity(), "record_sheet_export.csv");
-                csvHelper.fillCsvFileWithRecordSheets(recordSheetsToShare);
-                csvHelper.shareCsvFile();
             }
         }
+
+        return selectedRecordSheets;
     }
 
-    // Modification du magasin
+    /**
+     * Partage d'un relevé de prix
+     */
+    public void shareRecordSheet() {
+
+        List<RecordSheet> selectedRecordSheets = getSelectedRecordSheets();
+        if (selectedRecordSheets != null) {
+            // Initialisation du csvHelper
+            CsvHelper csvHelper = new CsvHelper(requireActivity(), "export_releve_de_prix.csv");
+            csvHelper.fillCsvFileWithRecordSheets(selectedRecordSheets);
+            csvHelper.shareCsvFile();
+        }
+
+    }
+
+    /**
+     * Export d'un relevé de prix
+     */
+    public boolean exportRecordSheet(Uri uri) {
+
+        List<RecordSheet> selectedRecordSheets = getSelectedRecordSheets();
+        if (selectedRecordSheets != null) {
+            // Initialisation du csvHelper
+            CsvHelper csvHelper = new CsvHelper(requireActivity(), "export_releve_de_prix.csv");
+            csvHelper.fillCsvFileWithRecordSheets(selectedRecordSheets);
+            return csvHelper.writeCsvFileToUri(uri);
+        }
+
+        return false;
+    }
+
+
+    /**
+     * Modification d'un relevé de prix
+     */
     public void editRecordSheet() {
 
-        if (recordSheetAdapter != null && recordSheetAdapter.getSelectionTracker() != null) {
-            Selection<Long> selection = recordSheetAdapter.getSelectionTracker().getSelection();
-
-            // Récupération de l'élément sélectionné
-            RecordSheet recordSheet = null;
-            for (Long selectedItem : selection) {
-                recordSheet = recordSheetList.get(selectedItem.intValue());
-                break;
-            }
-
-            showUserQueryDialogBox(recordSheet,RecordSheetsFragmentDialogType.DIALOG_TYPE_UPDATE);
+        // L'activité appelle cette méthode uniquement si une seule recordsheet sélectionnée.
+        List<RecordSheet> selectedRecordSheets = getSelectedRecordSheets();
+        if (selectedRecordSheets != null) {
+            showUserQueryDialogBox(selectedRecordSheets.get(0),RecordSheetsFragmentDialogType.DIALOG_TYPE_UPDATE);
             clearSelection();
         }
-    }
 
+    }
 }
