@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import fr.villot.pricetracker.MyApplication;
@@ -207,7 +208,7 @@ public class RecordSheetOnStoreActivity extends AppCompatActivity {
                 // Création de la liste des recordsheets à partager
                 List<RecordSheet> recordSheetsToShare = new ArrayList<>();
                 for (Long selectedItem : selection) {
-                    recordSheetsToShare.add(recordSheetList.get(selectedItem.intValue()));
+                    recordSheetsToShare.add(0, recordSheetList.get(selectedItem.intValue())); // Ajout en première position pour inverser l'ordre
                 }
 
                 CsvHelper csvHelper = new CsvHelper(this, "record_sheet_export.csv");

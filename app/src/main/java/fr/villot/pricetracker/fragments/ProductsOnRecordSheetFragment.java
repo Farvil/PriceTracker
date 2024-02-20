@@ -3,6 +3,7 @@ package fr.villot.pricetracker.fragments;
 import static fr.villot.pricetracker.fragments.ProductsFragment.ProductsFragmentDialogType.DIALOG_TYPE_ALREADY_EXIST;
 
 import android.content.DialogInterface;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -197,11 +198,17 @@ public class ProductsOnRecordSheetFragment extends ProductsFragment {
         csvHelper.shareCsvFile();
     }
 
-    public void exportRecordSheet() {
+    public boolean exportRecordSheet(Uri uri) {
+
         RecordSheet recordSheetToExport = databaseHelper.getRecordSheetById(recordSheetId);
 
+        // Initialisation du csvHelper
+        CsvHelper csvHelper = new CsvHelper(requireActivity(), "export_releve_de_prix.csv");
         csvHelper.fillCsvFileWithRecordSheet(recordSheetToExport);
-        csvHelper.exportCsvFile();
+        return csvHelper.writeCsvFileToUri(uri);
+
     }
+
+
 
 }

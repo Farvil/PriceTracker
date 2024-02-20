@@ -1,14 +1,19 @@
 package fr.villot.pricetracker.activities;
 
 
+import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,8 +28,11 @@ import java.util.Objects;
 
 import fr.villot.pricetracker.MyApplication;
 import fr.villot.pricetracker.R;
+import fr.villot.pricetracker.fragments.ProductsFragment;
 import fr.villot.pricetracker.fragments.ProductsOnRecordSheetFragment;
 //import fr.villot.pricetracker.interfaces.OnProductDeletedFromRecordSheetListener;
+import fr.villot.pricetracker.fragments.RecordSheetsFragment;
+import fr.villot.pricetracker.fragments.StoresFragment;
 import fr.villot.pricetracker.interfaces.OnSelectionChangedListener;
 import fr.villot.pricetracker.model.Product;
 import fr.villot.pricetracker.model.RecordSheet;
@@ -45,6 +53,33 @@ public class PriceRecordActivity extends AppCompatActivity implements OnSelectio
 
 //    private OnProductDeletedFromRecordSheetListener onProductDeletedFromRecordSheetListener = null;
 
+    private final ActivityResultLauncher<Intent> createDocumentLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    Intent data = result.getData();
+                    if (data != null) {
+                        Uri uri = data.getData();
+                        if (uri != null) {
+                            // Référence du fragment
+                            ProductsOnRecordSheetFragment fragment = (ProductsOnRecordSheetFragment) getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
+                            if (fragment != null) {
+                                View fragmentView = fragment.getView();
+
+                                if (fragment.exportRecordSheet(uri)) {
+                                    Snackbar.make(fragmentView, "Le fichier CSV est enregistré.", Snackbar.LENGTH_SHORT).show();
+                                }
+                                else {
+                                    Snackbar.make(fragmentView, "Erreur d'enregistrement du fichier CSV !", Snackbar.LENGTH_SHORT).show();
+                                }
+
+
+
+                            }
+                        }
+                    }
+                }
+            });
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -169,10 +204,26 @@ public class PriceRecordActivity extends AppCompatActivity implements OnSelectio
         else if (itemId == R.id.action_export) {
             ProductsOnRecordSheetFragment productsOnRecordSheetFragment = (ProductsOnRecordSheetFragment) getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
             if (productsOnRecordSheetFragment != null) {
-                productsOnRecordSheetFragment.exportRecordSheet();
+
+                // Demande le nom du fichier à l'utilisateur
+                Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("text/csv");
+                intent.putExtra(Intent.EXTRA_TITLE, "export_releve_de_prix.csv");
+
+                createDocumentLauncher.launch(intent);
             }
             return true;
+        } else if (itemId == R.id.menu_select_all) {
+            ProductsOnRecordSheetFragment productsOnRecordSheetFragment = (ProductsOnRecordSheetFragment) getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
+            if (productsOnRecordSheetFragment != null) {
+                productsOnRecordSheetFragment.selectAllItems();
+            }
+
+            return true;
         }
+
+
         return super.onOptionsItemSelected(item);
     }
 

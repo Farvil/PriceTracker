@@ -79,7 +79,7 @@ public class ProductsFragment extends Fragment {
     public void selectAllItems() {
         if (productAdapter != null && productAdapter.getSelectionTracker() != null) {
             List<Long> selectedItems = new ArrayList<>();
-            for (int i = 0; i < productAdapter.getItemCount(); i++) {
+            for (int i = 0 ; i < productAdapter.getItemCount() ; i++) {
                 selectedItems.add((long) i);
             }
             productAdapter.getSelectionTracker().setItemsSelected(selectedItems, true);

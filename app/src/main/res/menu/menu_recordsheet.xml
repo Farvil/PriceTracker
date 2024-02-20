@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-
+    <item
+        android:id="@+id/action_share"
+        android:icon="@drawable/ic_share"
+        android:title="Partager"
+        app:showAsAction="ifRoom" />
     <item
         android:id="@+id/action_add_from_database"
         android:icon="@drawable/ic_add_product"
@@ -10,11 +14,10 @@
     <item
         android:id="@+id/action_export"
         android:icon="@drawable/ic_export"
-        android:title="Exporter le relevé de prix"
+        android:title="Enregistrer sous"
         app:showAsAction="never" />
     <item
-        android:id="@+id/action_share"
-        android:icon="@drawable/ic_share"
-        android:title="Partager"
-        app:showAsAction="ifRoom" />
+        android:id="@+id/menu_select_all"
+        android:title="Tout sélectionner"
+        app:showAsAction="never" />
 </menu>

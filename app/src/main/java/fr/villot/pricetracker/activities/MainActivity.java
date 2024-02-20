@@ -162,8 +162,6 @@ public class MainActivity extends AppCompatActivity implements OnStoreChangedLis
             return true;
         } else if (itemId == R.id.action_export) {
 
-                // On vérifie que les relevés de prix sont exportables
-
                 // Demande le nom du fichier à l'utilisateur
                 Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
                 intent.addCategory(Intent.CATEGORY_OPENABLE);

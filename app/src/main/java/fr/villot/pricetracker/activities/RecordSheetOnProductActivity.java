@@ -296,7 +296,7 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
                 // Création de la liste des recordsheets à partager
                 List<RecordSheet> recordSheetsToShare = new ArrayList<>();
                 for (Long selectedItem : selection) {
-                    recordSheetsToShare.add(recordSheetList.get(selectedItem.intValue()));
+                    recordSheetsToShare.add(0, recordSheetList.get(selectedItem.intValue())); // Ajout en première position pour inverser l'ordre
                 }
 
                 CsvHelper csvHelper = new CsvHelper(this, "record_sheet_export.csv");

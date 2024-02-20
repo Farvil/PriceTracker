@@ -20,7 +20,7 @@
             android:elevation="4dp"
             android:theme="@style/Theme.PriceTracker.AppBarOverlay"
             app:popupTheme="@style/Theme.PriceTracker.PopupOverlay"
-            app:title="Selectionner des produits" />
+            app:title="@string/select_products_activity_title" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
