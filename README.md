@@ -10,3 +10,5 @@ Voici quelques captures d'écran de l'application :
 ![Application PriceTracker](readme/magasins.png "Application PriceTracker")
 ![Application PriceTracker](readme/releves.png "Application PriceTracker")
 ![Application PriceTracker](readme/releve_details.png "Application PriceTracker")
+
+Les fonctionalités sont détaillées dans l'item du menu "A propos" de l'application.
