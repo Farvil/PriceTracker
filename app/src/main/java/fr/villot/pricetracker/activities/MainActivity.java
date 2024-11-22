@@ -12,6 +12,7 @@ import android.view.View;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
@@ -49,14 +50,17 @@ public class MainActivity extends AppCompatActivity implements OnStoreChangedLis
                         Uri uri = data.getData();
                         if (uri != null) {
                             if (currentFragment instanceof RecordSheetsFragment) {
-                                RecordSheetsFragment recordSheetsFragment = (RecordSheetsFragment) currentFragment;
-                                View fragmentView = recordSheetsFragment.getView();
 
-                                if (recordSheetsFragment.exportRecordSheet(uri)) {
-                                    Snackbar.make(fragmentView, "Le fichier CSV est enregistré.", Snackbar.LENGTH_SHORT).show();
-                                }
-                                else {
-                                    Snackbar.make(fragmentView, "Erreur d'enregistrement du fichier CSV !", Snackbar.LENGTH_SHORT).show();
+                                RecordSheetsFragment recordSheetsFragment = (RecordSheetsFragment) currentFragment;
+
+                                View fragmentView = recordSheetsFragment.getView();
+                                if (fragmentView != null) {
+                                    if (recordSheetsFragment.exportRecordSheet(uri)) {
+                                        Snackbar.make(fragmentView, "Le fichier CSV est enregistré.", Snackbar.LENGTH_SHORT).show();
+                                    }
+                                    else {
+                                        Snackbar.make(fragmentView, "Erreur d'enregistrement du fichier CSV !", Snackbar.LENGTH_SHORT).show();
+                                    }
                                 }
                             }
                         }
@@ -256,7 +260,11 @@ public class MainActivity extends AppCompatActivity implements OnStoreChangedLis
     public void showEditIcon() {
         if (!showEditIcon) {
             showEditIcon = true;
-            getSupportActionBar().invalidateOptionsMenu();
+
+            ActionBar actionBar = getSupportActionBar();
+            if (actionBar != null) {
+                actionBar.invalidateOptionsMenu();
+            }
         }
     }
 
@@ -264,7 +272,11 @@ public class MainActivity extends AppCompatActivity implements OnStoreChangedLis
     public void hideEditIcon() {
         if (showEditIcon) {
             showEditIcon = false;
-            getSupportActionBar().invalidateOptionsMenu();
+
+            ActionBar actionBar = getSupportActionBar();
+            if (actionBar != null) {
+                actionBar.invalidateOptionsMenu();
+            }
         }
     }
 
@@ -322,7 +334,11 @@ public class MainActivity extends AppCompatActivity implements OnStoreChangedLis
             if (numSelectedItems > 1)
                 selectionCount += "s";
 
-            getSupportActionBar().setTitle(selectionCount);
+            ActionBar actionBar = getSupportActionBar();
+            if (actionBar != null) {
+                actionBar.setTitle(selectionCount);
+            }
+
         }
     }
 

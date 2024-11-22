@@ -23,16 +23,14 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.snackbar.Snackbar;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 import fr.villot.pricetracker.MyApplication;
 import fr.villot.pricetracker.R;
-import fr.villot.pricetracker.fragments.ProductsFragment;
 import fr.villot.pricetracker.fragments.ProductsOnRecordSheetFragment;
-//import fr.villot.pricetracker.interfaces.OnProductDeletedFromRecordSheetListener;
-import fr.villot.pricetracker.fragments.RecordSheetsFragment;
-import fr.villot.pricetracker.fragments.StoresFragment;
 import fr.villot.pricetracker.interfaces.OnSelectionChangedListener;
 import fr.villot.pricetracker.model.Product;
 import fr.villot.pricetracker.model.RecordSheet;
@@ -65,40 +63,52 @@ public class PriceRecordActivity extends AppCompatActivity implements OnSelectio
                             ProductsOnRecordSheetFragment fragment = (ProductsOnRecordSheetFragment) getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
                             if (fragment != null) {
                                 View fragmentView = fragment.getView();
-
-                                if (fragment.exportRecordSheet(uri)) {
-                                    Snackbar.make(fragmentView, "Le fichier CSV est enregistré.", Snackbar.LENGTH_SHORT).show();
+                                if (fragmentView != null) {
+                                    if (fragment.exportRecordSheet(uri)) {
+                                        Snackbar.make(fragmentView, "Le fichier CSV est enregistré.", Snackbar.LENGTH_SHORT).show();
+                                    } else {
+                                        Snackbar.make(fragmentView, "Erreur d'enregistrement du fichier CSV !", Snackbar.LENGTH_SHORT).show();
+                                    }
                                 }
-                                else {
-                                    Snackbar.make(fragmentView, "Erreur d'enregistrement du fichier CSV !", Snackbar.LENGTH_SHORT).show();
-                                }
-
-
-
                             }
                         }
                     }
                 }
             });
 
+    /**
+     * Callback pour le resultat correspondant aux produits sélectionnés depuis la bibliothèque de produits
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == SELECT_PRODUCTS_REQUEST_CODE && resultCode == RESULT_OK) {
-            // Récupérer la liste des produits sélectionnés
             assert data != null;
-            List<Product> selectedProducts = (List<Product>) data.getSerializableExtra("selected_products");
 
-            // Obtenez une référence au fragment
+            List<Product> selectedProducts = new ArrayList<>();
+
+            // On récupère la liste des produits sérialisés
+            Serializable serializableData = data.getSerializableExtra("selected_products");
+            if (serializableData instanceof List<?>) {
+                List<?> rawList = (List<?>) serializableData;
+
+                // On vérifie individuellement que chaque élément soit de type Product
+                for (Object item : rawList) {
+                    if (item instanceof Product) {
+                        selectedProducts.add((Product) item);
+                    }
+                }
+            }
+
+            // Ajout ou mise à jour du produit depuis depuis le fragment
             ProductsOnRecordSheetFragment fragment = (ProductsOnRecordSheetFragment) getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
-
-            // Appelez la méthode addOrUpdateProduct du fragment
             if (fragment != null) {
                 for (Product selectedProduct : selectedProducts) {
                     fragment.addOrUpdateProduct(selectedProduct);
                 }
             }
+
         } else if (requestCode == SELECT_PRODUCTS_REQUEST_CODE && resultCode == RESULT_CANCELED) {
             Snackbar.make(storeNameTextView, "Aucun produit supplémentaire disponible dans la bibliothèque", Snackbar.LENGTH_SHORT).show();
         }
@@ -270,13 +280,17 @@ public class PriceRecordActivity extends AppCompatActivity implements OnSelectio
             setSelectionMode(true);
 
             // Modification du titre de la toolbar pour indiquer le nombre d'éléments sélectionnés.
-            String selectionCount = String.valueOf(numSelectedItems) + " relevé";
+            String selectionCount = numSelectedItems + " relevé";
 
             // Mise au pluriel de "relevé" si plusieurs elements sélectionnés
             if (numSelectedItems > 1)
                 selectionCount += "s";
 
-            getSupportActionBar().setTitle(selectionCount);
+            // Titre de ma toolbar
+            ActionBar actionBar = getSupportActionBar();
+            if (actionBar != null) {
+                actionBar.setTitle(selectionCount);
+            }
         }
     }
 
@@ -284,6 +298,7 @@ public class PriceRecordActivity extends AppCompatActivity implements OnSelectio
         // On informe l'activité appelante de la suppression du produit
         Intent resultIntent = new Intent();
         resultIntent.putExtra("update_required", true);
+        resultIntent.putExtra("barcode", barcode);
         setResult(RESULT_OK, resultIntent);
     }
 

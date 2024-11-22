@@ -4,7 +4,6 @@ import static fr.villot.pricetracker.fragments.StoresFragment.StoresFragmentDial
 import static fr.villot.pricetracker.fragments.StoresFragment.StoresFragmentDialogType.DIALOG_TYPE_UPDATE;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -91,14 +90,14 @@ public class StoresFragment extends Fragment {
         if (context instanceof OnStoreChangedListener) {
             mOnStoreChangedListener = (OnStoreChangedListener) context;
         } else {
-            throw new RuntimeException(context.toString() + " doit implémenter OnStoreNameChangedListener");
+            throw new RuntimeException(context + " doit implémenter OnStoreNameChangedListener");
         }
 
         // Ajout du listener OnSelectionChangedListener
         if (context instanceof OnSelectionChangedListener) {
             mOnSelectionChangedListener = (OnSelectionChangedListener) context;
         } else {
-            throw new RuntimeException(context.toString() + " doit implémenter OnSelectionChangedListener");
+            throw new RuntimeException(context + " doit implémenter OnSelectionChangedListener");
         }
     }
 
@@ -155,23 +154,15 @@ public class StoresFragment extends Fragment {
         });
 
         // Lancement de l'activité RecordSheetActivity sur click d'un magasin
-        storeAdapter.setOnItemClickListener(new StoreAdapter.OnItemClickListener<Store>() {
-            @Override
-            public void onItemClick(Store store) {
-                Intent intent = new Intent(getActivity(), RecordSheetOnStoreActivity.class);
-                intent.putExtra("store_id", store.getId());
-                startActivity(intent);
-            }
+        storeAdapter.setOnItemClickListener(store -> {
+            Intent intent = new Intent(getActivity(), RecordSheetOnStoreActivity.class);
+            intent.putExtra("store_id", store.getId());
+            startActivity(intent);
         });
 
 
         fabAdd = view.findViewById(R.id.fabAdd);
-        fabAdd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showUserQueryDialogBox(new Store(),DIALOG_TYPE_ADD);
-            }
-        });
+        fabAdd.setOnClickListener(v -> showUserQueryDialogBox(new Store(),DIALOG_TYPE_ADD));
 
     }
 
@@ -195,7 +186,7 @@ public class StoresFragment extends Fragment {
 
     protected void showUserQueryDialogBox(Store store, StoresFragmentDialogType storesFragmentDialogType) {
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
         View dialogView = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_create_store, null);
         builder.setView(dialogView);
 
@@ -234,38 +225,35 @@ public class StoresFragment extends Fragment {
         builder.setTitle(title);
         builder.setCancelable(false);
 
-        builder.setPositiveButton("Oui", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
+        builder.setPositiveButton("Oui", (dialog, which) -> {
 
-                // Récupération des informations saisies
-                String name = storeNameEditText.getText().toString().trim();
-                String location = storeLocationEditText.getText().toString().trim();
-                LogoItem selectedLogoItem = (LogoItem) storeLogoSpinner.getSelectedItem();
-                String selectedLogo = selectedLogoItem.getImageName();
+            // Récupération des informations saisies
+            String name = storeNameEditText.getText().toString().trim();
+            String location = storeLocationEditText.getText().toString().trim();
+            LogoItem selectedLogoItem = (LogoItem) storeLogoSpinner.getSelectedItem();
+            String selectedLogo = selectedLogoItem.getImageName();
 
-                if (!name.isEmpty() && !location.isEmpty()) {
+            if (store != null && !name.isEmpty() && !location.isEmpty()) {
 
-                    store.setName(name);
-                    store.setLocation(location);
-                    store.setLogo(selectedLogo);
+                store.setName(name);
+                store.setLocation(location);
+                store.setLogo(selectedLogo);
 
-                    switch (storesFragmentDialogType) {
-                        case DIALOG_TYPE_ADD:
-                            // Ajout dans la base de données
-                            databaseHelper.addStore(store);
-                            break;
-                        case DIALOG_TYPE_UPDATE:
-                            databaseHelper.updateStore(store);
-                            notifyStoreChanged(store.getId());
-                            break;
-                    }
-
-                    updateStoreListViewFromDatabase(true);
-
-                } else {
-                    Snackbar.make(getView(),"Veuillez entrer un nom de magasin et un lieu", Snackbar.LENGTH_SHORT).show();
+                switch (storesFragmentDialogType) {
+                    case DIALOG_TYPE_ADD:
+                        // Ajout dans la base de données
+                        databaseHelper.addStore(store);
+                        break;
+                    case DIALOG_TYPE_UPDATE:
+                        databaseHelper.updateStore(store);
+                        notifyStoreChanged(store.getId());
+                        break;
                 }
+
+                updateStoreListViewFromDatabase(true);
+
+            } else {
+                Snackbar.make(requireView(), "Veuillez entrer un nom de magasin et un lieu", Snackbar.LENGTH_SHORT).show();
             }
         });
 
@@ -304,39 +292,37 @@ public class StoresFragment extends Fragment {
     }
 
     private void deleteStoresInQueue(Queue<Store> storesToDelete) {
+
         if (!storesToDelete.isEmpty()) {
+
             Store store = storesToDelete.poll();
+            if (store != null) {
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-            builder.setMessage("Voulez-vous vraiment supprimer le magasin " + store.getName() + " ?");
-            builder.setCancelable(false);
+                AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
+                builder.setMessage("Voulez-vous vraiment supprimer le magasin " + store.getName() + " ?");
+                builder.setCancelable(false);
 
-            builder.setPositiveButton("Oui", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
+                builder.setPositiveButton("Oui", (dialog, which) -> {
                     // Suppression uniquement si pas de dépendances avec des recordsheets.
                     if (!databaseHelper.hasRecordSheetsOnStore(store.getId())) {
                         databaseHelper.deleteStore(store.getId());
                         updateStoreListViewFromDatabase(false);
                     } else {
-                        Snackbar.make(getView(), "Suppression impossible car au moins une feuille de relevé de prix associée au magasin", Snackbar.LENGTH_SHORT).show();
+                        Snackbar.make(requireView(), "Suppression impossible car au moins une feuille de relevé de prix associée au magasin", Snackbar.LENGTH_SHORT).show();
                     }
 
                     // Appeler la suppression des magasins restants dans la file d'attente
                     deleteStoresInQueue(storesToDelete);
-                }
-            });
+                });
 
-            builder.setNegativeButton("Non", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
+                builder.setNegativeButton("Non", (dialog, which) -> {
                     // Si l'utilisateur clique sur "Non", passage au magasin suivant dans la file d'attente
                     deleteStoresInQueue(storesToDelete);
-                }
-            });
+                });
 
-            AlertDialog dialog = builder.create();
-            dialog.show();
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
         }
     }
 

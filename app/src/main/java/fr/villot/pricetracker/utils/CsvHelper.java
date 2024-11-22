@@ -79,7 +79,7 @@ public class CsvHelper {
     public void fillCsvFileWithRecordSheets(List<RecordSheet> recordSheetList) {
         try (FileWriter writer = new FileWriter(csvFile)) {
             // En-têtes CSV
-            writer.append("Nom du relevé de Prix,Date,Nom du magasin,Localisation du magasin, Code barre,Nom du produit,Marque,Quantité,Image URL,Prix\n");
+            writer.append("Nom du releve de prix;Date;Nom du magasin;Localisation du magasin;Code barre;Nom du produit;Marque;Quantite;Image URL;Prix en Euros\n");
 
             for (RecordSheet recordSheet : recordSheetList) {
 
@@ -89,7 +89,7 @@ public class CsvHelper {
 
                 // Remplir le fichier CSV avec les données de chaque produit
                 for (Product product : products) {
-                    writer.append(String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n",
+                    writer.append(String.format("%s;%s;%s;%s;%s;%s;%s;%s;%s;%s\n",
                             recordSheet.getName(),
                             recordSheet.getDate(),
                             store.getName(),

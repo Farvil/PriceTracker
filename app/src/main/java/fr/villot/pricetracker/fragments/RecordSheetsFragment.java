@@ -1,7 +1,6 @@
 package fr.villot.pricetracker.fragments;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -87,7 +86,7 @@ public class RecordSheetsFragment extends Fragment {
         if (context instanceof OnSelectionChangedListener) {
             mOnSelectionChangedListener = (OnSelectionChangedListener) context;
         } else {
-            throw new RuntimeException(context.toString() + " doit implémenter OnSelectionChangedListener");
+            throw new RuntimeException(context + " doit implémenter OnSelectionChangedListener");
         }
     }
 
@@ -149,22 +148,20 @@ public class RecordSheetsFragment extends Fragment {
         });
 
         //Lancement de l'activité PriceRecordActivity sur click d'un relevé de prix
-        recordSheetAdapter.setOnItemClickListener(new RecordSheetAdapter.OnItemClickListener<RecordSheet>() {
-            @Override
-            public void onItemClick(RecordSheet recordSheet) {
-                Intent intent = new Intent(getActivity(), PriceRecordActivity.class);
-                intent.putExtra("record_sheet_name", recordSheet.getName());
-                intent.putExtra("record_sheet_id", recordSheet.getId());
-                startActivity(intent);
-            }
+        recordSheetAdapter.setOnItemClickListener(recordSheet -> {
+            Intent intent = new Intent(getActivity(), PriceRecordActivity.class);
+            intent.putExtra("record_sheet_name", recordSheet.getName());
+            intent.putExtra("record_sheet_id", recordSheet.getId());
+            startActivity(intent);
         });
 
         // Action du bouton flottant
-        fabAdd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        fabAdd.setOnClickListener(v -> {
+            if (databaseHelper.getAllStores().stream().count() != 0) {
                 showUserQueryDialogBox(new RecordSheet(), RecordSheetsFragmentDialogType.DIALOG_TYPE_ADD);
-                // showCreateRecordSheetDialog();
+            }
+            else {
+                Snackbar.make(requireView(),"Il faut au minimum un magasin pour y associer un relevé de prix !", Snackbar.LENGTH_SHORT).show();
             }
         });
 
@@ -204,7 +201,7 @@ public class RecordSheetsFragment extends Fragment {
      */
     protected void showUserQueryDialogBox(RecordSheet recordSheet, RecordSheetsFragmentDialogType recordSheetsFragmentDialogType) {
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
         View dialogView = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_create_recordsheet, null);
         builder.setView(dialogView);
 
@@ -235,32 +232,28 @@ public class RecordSheetsFragment extends Fragment {
         builder.setTitle(title);
         builder.setCancelable(false);
 
-        builder.setPositiveButton("Oui", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
+        builder.setPositiveButton("Oui", (dialogInterface, i) -> {
 
-                // Récupération des informations saisies
-                String recordSheetName = recordsheetNameEditText.getText().toString().trim();
-                Store selectedStore = (Store) storeSpinner.getSelectedItem();
+            // Récupération des informations saisies
+            String recordSheetName = recordsheetNameEditText.getText().toString().trim();
+            Store selectedStore = (Store) storeSpinner.getSelectedItem();
 
-                if (!recordSheetName.isEmpty() && selectedStore != null) {
+            if (recordSheet != null && !recordSheetName.isEmpty() && selectedStore != null) {
 
-                    recordSheet.setName(recordSheetName);
-                    recordSheet.setStore(selectedStore);
+                recordSheet.setName(recordSheetName);
+                recordSheet.setStore(selectedStore);
 
-                    switch (recordSheetsFragmentDialogType) {
-                        case DIALOG_TYPE_ADD:
-                            databaseHelper.addRecordSheet(recordSheet);
-                            break;
-                        case DIALOG_TYPE_UPDATE:
-                            databaseHelper.updateRecordSheet(recordSheet);
-                            break;
-                    }
-
-                    // Rafraichissement de la liste de recordsheets
-                    updateRecordSheetListViewFromDatabase(true);
+                switch (recordSheetsFragmentDialogType) {
+                    case DIALOG_TYPE_ADD:
+                        databaseHelper.addRecordSheet(recordSheet);
+                        break;
+                    case DIALOG_TYPE_UPDATE:
+                        databaseHelper.updateRecordSheet(recordSheet);
+                        break;
                 }
 
+                // Rafraichissement de la liste de recordsheets
+                updateRecordSheetListViewFromDatabase(true);
             }
 
         });
@@ -291,34 +284,31 @@ public class RecordSheetsFragment extends Fragment {
      */
     public void deleteSelectedItems() {
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
         builder.setMessage("Voulez-vous vraiment supprimer les feuilles de relevés de prix sélectionnées ?");
         builder.setCancelable(false);
 
-        builder.setPositiveButton("Oui", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
+        builder.setPositiveButton("Oui", (dialog, which) -> {
 
-                if (recordSheetAdapter != null && recordSheetAdapter.getSelectionTracker() != null) {
+            if (recordSheetAdapter != null && recordSheetAdapter.getSelectionTracker() != null) {
 
-                    Selection<Long> selection = recordSheetAdapter.getSelectionTracker().getSelection();
+                Selection<Long> selection = recordSheetAdapter.getSelectionTracker().getSelection();
 
-                    for (Long selectedItem : selection) {
-                        RecordSheet recordSheet = recordSheetList.get(selectedItem.intValue());
-                        try {
-                            databaseHelper.deleteRecordSheet(recordSheet.getId());
-                        } catch (Exception e) {
-                            Snackbar.make(getView(),"Erreur lors de la suppression de " + recordSheet.getName() + " !", Snackbar.LENGTH_SHORT).show();
-                            break; // Ne tente pas d'autres suppressions en cas d'erreur
-                        }
+                for (Long selectedItem : selection) {
+                    RecordSheet recordSheet = recordSheetList.get(selectedItem.intValue());
+                    try {
+                        databaseHelper.deleteRecordSheet(recordSheet.getId());
+                    } catch (Exception e) {
+                        Snackbar.make(requireView(),"Erreur lors de la suppression de " + recordSheet.getName() + " !", Snackbar.LENGTH_SHORT).show();
+                        break; // Ne tente pas d'autres suppressions en cas d'erreur
                     }
-
-                    // Mettre à jour la liste après la suppression
-                    updateRecordSheetListViewFromDatabase(false);
-                    clearSelection();
                 }
 
+                // Mettre à jour la liste après la suppression
+                updateRecordSheetListViewFromDatabase(false);
+                clearSelection();
             }
+
         });
 
         builder.setNegativeButton("Non", null);
