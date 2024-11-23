@@ -21,7 +21,7 @@ L'onglet ***RELEVES DE PRIX*** permet de visualiser et créer des relevés de pr
 
 L'écran du ***détail d'un relevé de prix*** permet d'afficher et modifier les prix de produits. Il est possible d'ajouter un produit de la bibliothèque par le menu ou par un scan de code barre. Le scan permet également de créer un nouveau produit si celui-ci n'existe pas. Il est possible de faire un export ou un partage au format CSV depuis cet écran."
 
-Pour visualiser un fichier CSV, vous pouvez utiliser par exemple l'applicaion ***"Microsoft Excel: Spreadsheets"***.
+Pour visualiser un fichier CSV, vous pouvez utiliser par exemple l'application ***"Microsoft Excel: Spreadsheets"***.
 
 ## Licence
 
