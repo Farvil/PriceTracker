@@ -87,6 +87,17 @@
 
             </LinearLayout>
 
+            <TextView
+                android:id="@+id/productPriceTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                android:text="0.00 €"
+                android:textAppearance="?android:textAppearanceMedium"
+                android:textColor="@color/purple_700"
+                android:textStyle="bold" />
+
             <ImageView
                 android:id="@+id/recordSheetSelectionImage"
                 android:layout_width="40dp"
@@ -95,7 +106,6 @@
                 android:layout_gravity="center"
                 android:visibility="visible"
                 android:src="@drawable/ic_check" />
-
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 

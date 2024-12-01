@@ -515,6 +515,38 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     @SuppressLint("Range")
+    public List<PriceRecord> getPriceRecordsOnRecordSheet(long recordSheetId) {
+        List<PriceRecord> priceRecords = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        // Requête SQL pour récupérer les enregistrements liés à un RecordSheet spécifique
+        String selectQuery = "SELECT * FROM " + TABLE_PRICE_RECORDS +
+                " WHERE " + KEY_PRICE_RECORD_RECORD_SHEET_ID + " = ?";
+
+        Cursor cursor = db.rawQuery(selectQuery, new String[]{String.valueOf(recordSheetId)});
+
+        if (cursor.moveToFirst()) {
+            do {
+                // Créer un nouvel objet PriceRecord et renseigner ses champs
+                PriceRecord priceRecord = new PriceRecord();
+                priceRecord.setId(cursor.getInt(cursor.getColumnIndex(KEY_PRICE_RECORD_ID)));
+                priceRecord.setPrice(cursor.getDouble(cursor.getColumnIndex(KEY_PRICE_RECORD_PRICE)));
+                priceRecord.setRecordSheetId(cursor.getInt(cursor.getColumnIndex(KEY_PRICE_RECORD_RECORD_SHEET_ID)));
+                priceRecord.setProductBarcode(cursor.getString(cursor.getColumnIndex(KEY_PRICE_RECORD_PRODUCT_BARCODE)));
+
+                // Ajouter l'objet à la liste
+                priceRecords.add(priceRecord);
+            } while (cursor.moveToNext());
+        }
+
+        // Fermer le curseur et la connexion à la base de données
+        cursor.close();
+        db.close();
+
+        return priceRecords;
+    }
+
+    @SuppressLint("Range")
     public Store getStoreById(int storeId) {
         Store store = null;
         SQLiteDatabase db = this.getReadableDatabase();

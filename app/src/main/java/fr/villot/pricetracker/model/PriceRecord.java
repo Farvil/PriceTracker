@@ -4,17 +4,11 @@ public class PriceRecord {
     private int id;
     private double price;
     private long recordSheetId;
-    private int storeId;
     private String productBarcode;
 
     public PriceRecord() {
     }
 
-    public PriceRecord(String date, double price, int storeId, String productBarcode) {
-        this.price = price;
-        this.storeId = storeId;
-        this.productBarcode = productBarcode;
-    }
 
     public int getId() {
         return id;
@@ -31,14 +25,6 @@ public class PriceRecord {
 
     public void setPrice(double price) {
         this.price = price;
-    }
-
-    public int getStoreId() {
-        return storeId;
-    }
-
-    public void setStoreId(int storeId) {
-        this.storeId = storeId;
     }
 
     public String getProductBarcode() {

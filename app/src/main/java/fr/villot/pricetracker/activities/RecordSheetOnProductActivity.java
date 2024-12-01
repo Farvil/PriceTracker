@@ -38,6 +38,7 @@ import fr.villot.pricetracker.R;
 import fr.villot.pricetracker.adapters.MyDetailsLookup;
 import fr.villot.pricetracker.adapters.RecordSheetAdapter;
 import fr.villot.pricetracker.interfaces.OnProductDeletedFromRecordSheetListener;
+import fr.villot.pricetracker.model.PriceRecord;
 import fr.villot.pricetracker.model.PriceStats;
 import fr.villot.pricetracker.model.Product;
 import fr.villot.pricetracker.model.RecordSheet;
@@ -100,7 +101,6 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
         productMaxPrice = findViewById(R.id.productMaxPrice);
         productMoyPrice = findViewById(R.id.productMoyPrice);
 
-
         // Initialisation du DatabaseHelper
         databaseHelper = MyApplication.getDatabaseHelper();
 
@@ -112,7 +112,7 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
             actionBar.setHomeAsUpIndicator(R.drawable.ic_back);
         }
 
-        // Récupération du magasin en fonction de l'identifiant passé en paramètre de l'activité
+        // Récupération du produit en fonction de l'identifiant passé en paramètre de l'activité
         barcode = getIntent().getStringExtra("barcode");
         Product product = databaseHelper.getProductFromBarCode(barcode);
 
@@ -164,6 +164,7 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
             if (imageUrl != null && !(imageUrl.isEmpty())) {
                 Picasso.get().load(imageUrl).into(productImageView);
             }
+
         }
 
         // Recyclerview
@@ -171,9 +172,11 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
 
         // Récupération des feuilles de relevés de prix dans la base de données.
         recordSheetList = databaseHelper.getRecordSheetsOnProduct(barcode);
+        setPriceForRecordSheets(recordSheetList);
 
         // Adapter entre RecyclerView et Produit.
         recordSheetAdapter = new RecordSheetAdapter(this, recordSheetList);
+        recordSheetAdapter.setProductPrice(true); // Pour l'affichage du prix
         recordSheetRecyclerView.setAdapter(recordSheetAdapter);
 
         // Gestion de la selection d'items
@@ -374,6 +377,7 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
     public void updateRecordSheetListViewFromDatabase(boolean lastItemDisplayed) {
         // Liste des recordsheets accociées au produit
         recordSheetList = databaseHelper.getRecordSheetsOnProduct(barcode);
+        setPriceForRecordSheets(recordSheetList);
 
         // Ajouter les produits à l'adaptateur
         recordSheetAdapter.setItemList(recordSheetList);
@@ -383,6 +387,23 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
             recordSheetRecyclerView.smoothScrollToPosition(recordSheetAdapter.getLastItemPosition());
         }
 
+    }
+
+    private void setPriceForRecordSheets(List<RecordSheet> recordSheetList) {
+        for (RecordSheet recordSheet : recordSheetList) {
+            List<PriceRecord> allPriceRecords = databaseHelper.getPriceRecordsOnRecordSheet(recordSheet.getId());
+
+            // Filtrer les PriceRecords pour ne conserver que ceux correspondant au produit (barcode)
+            List<PriceRecord> filteredPriceRecords = new ArrayList<>();
+            for (PriceRecord priceRecord : allPriceRecords) {
+                if (priceRecord.getProductBarcode().equals(barcode)) {
+                    filteredPriceRecords.add(priceRecord);
+                }
+            }
+
+            // Assigner uniquement les PriceRecords filtrés au RecordSheet
+            recordSheet.setPriceRecords(filteredPriceRecords);
+        }
     }
 
     private void updatePriceStats() {

@@ -65,6 +65,16 @@ public class RecordSheet {
         priceRecords.remove(priceRecord);
     }
 
+    public void setPriceRecords(List<PriceRecord> priceRecords) {
+        this.priceRecords = priceRecords;
+    }
+
+    public double getLastPrice() {
+        if (priceRecords != null && !priceRecords.isEmpty()) {
+            return priceRecords.get(priceRecords.size() - 1).getPrice(); // Dernier prix enregistré
+        }
+        return 0.0; // Aucun prix disponible
+    }
     public int getStoreId() {
         return store.getId();
     }

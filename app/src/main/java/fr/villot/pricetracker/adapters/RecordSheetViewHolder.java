@@ -31,6 +31,8 @@ public class RecordSheetViewHolder extends RecyclerView.ViewHolder {
     private TextView storeNameTextView;
     private TextView storeLocationTextView;
 
+    private TextView productPriceTextView;
+
 
     public RecordSheetViewHolder(@NonNull View itemView) {
         super(itemView);
@@ -41,9 +43,10 @@ public class RecordSheetViewHolder extends RecyclerView.ViewHolder {
         recordSheetSelectionImage = itemView.findViewById(R.id.recordSheetSelectionImage);
         storeNameTextView = itemView.findViewById(R.id.storeNameTextView);
         storeLocationTextView = itemView.findViewById(R.id.storeLocationTextView);
+        productPriceTextView = itemView.findViewById(R.id.productPriceTextView);
     }
 
-    public void bind(RecordSheet recordSheet, boolean isSelected) {
+    public void bind(RecordSheet recordSheet, boolean isSelected, boolean isProductPrice) {
         nameTextView.setText(recordSheet.getName());
         storeNameTextView.setText(recordSheet.getStore().getName());
         storeLocationTextView.setText(recordSheet.getStore().getLocation());
@@ -64,6 +67,14 @@ public class RecordSheetViewHolder extends RecyclerView.ViewHolder {
         } else {
             recordSheetCardView.setCardBackgroundColor(ContextCompat.getColor(recordSheetCardView.getContext(), R.color.item_product_normal_background));
             recordSheetSelectionImage.setVisibility(View.GONE);
+        }
+
+        // Affichage conditionnel du prix
+        if (isProductPrice) {
+            productPriceTextView.setVisibility(View.VISIBLE);
+            productPriceTextView.setText(String.format(Locale.FRANCE, "%.2f €", recordSheet.getLastPrice() ));
+        } else {
+            productPriceTextView.setVisibility(View.GONE);
         }
     }
 

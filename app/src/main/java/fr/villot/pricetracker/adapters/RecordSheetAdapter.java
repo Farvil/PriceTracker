@@ -22,6 +22,8 @@ public class RecordSheetAdapter extends RecyclerView.Adapter<RecordSheetViewHold
     private Context context;
     private SelectionTracker<Long> selectionTracker;
 
+    private boolean productPrice = false;
+
     private OnItemClickListener<RecordSheet> onItemClickListener;
 
     public interface OnItemClickListener<RecordSheet> {
@@ -51,7 +53,7 @@ public class RecordSheetAdapter extends RecyclerView.Adapter<RecordSheetViewHold
     @Override
     public void onBindViewHolder(RecordSheetViewHolder holder, int position) {
         RecordSheet recordSheet = recordSheetList.get(position);
-        holder.bind(recordSheet, selectionTracker.isSelected((long) position));
+        holder.bind(recordSheet, selectionTracker.isSelected((long) position), productPrice);
 
         // Ajout d'une marge bottom au dernier élément pour eviter la superposition avec le bouton flottant
         ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) holder.itemView.getLayoutParams();
@@ -101,5 +103,11 @@ public class RecordSheetAdapter extends RecyclerView.Adapter<RecordSheetViewHold
     public SelectionTracker<Long> getSelectionTracker() {
         return selectionTracker;
     }
+
+    public void setProductPrice(boolean productPrice) {
+        this.productPrice = productPrice;
+        notifyDataSetChanged();
+    }
+
 
 }
