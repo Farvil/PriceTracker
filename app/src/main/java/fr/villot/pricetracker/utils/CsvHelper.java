@@ -3,16 +3,21 @@ package fr.villot.pricetracker.utils;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.util.Log;
 
 import androidx.core.content.FileProvider;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 
 import fr.villot.pricetracker.MyApplication;
 import fr.villot.pricetracker.model.Product;
@@ -21,10 +26,10 @@ import fr.villot.pricetracker.model.Store;
 
 public class CsvHelper {
 
-    private String fileName;
-    private Context context;
+    private final String fileName;
+    private final Context context;
     private File csvFile;
-    private DatabaseHelper databaseHelper;
+    private final DatabaseHelper databaseHelper;
 
 //    private final ActivityResultLauncher<Intent> createDocumentLauncher;
 
@@ -35,27 +40,6 @@ public class CsvHelper {
 
         createCsvFile();
 
-//        // On verifie si le contexte est une activité pour utiliser registerForActivityResult
-//        if (context instanceof AppCompatActivity) {
-//            createDocumentLauncher = ((AppCompatActivity) context).registerForActivityResult(
-//                    new ActivityResultContracts.StartActivityForResult(),
-//                    result -> {
-//                        if (result.getResultCode() == Activity.RESULT_OK) {
-//                            Intent data = result.getData();
-//                            if (data != null) {
-//                                Uri uri = data.getData();
-//                                if (uri != null) {
-//                                    // Écrire les données dans le fichier à l'emplacement choisi
-//                                    writeCsvFile(uri);
-//                                }
-//                            }
-//                        }
-//                    });
-//        } else {
-//            // Gérer le cas où le contexte n'est pas une activité
-//            createDocumentLauncher = null;
-//        }
-
     }
 
     private void createCsvFile() {
@@ -64,7 +48,9 @@ public class CsvHelper {
 
         // Créer le répertoire s'il n'existe pas
         if (!exportDir.exists()) {
-            exportDir.mkdirs();
+            if (!exportDir.mkdirs()) {
+                throw new RuntimeException("Échec de la création du répertoire : " + exportDir.getAbsolutePath());
+            }
         }
         csvFile = new File(exportDir, fileName);
     }
@@ -77,9 +63,15 @@ public class CsvHelper {
     }
 
     public void fillCsvFileWithRecordSheets(List<RecordSheet> recordSheetList) {
-        try (FileWriter writer = new FileWriter(csvFile)) {
+
+        try {
+            Writer writer = new OutputStreamWriter(new FileOutputStream(csvFile), StandardCharsets.UTF_8);
+
+            // Ajout du BOM pour l'interpretation des accents par excel
+            writer.write("\uFEFF");
+
             // En-têtes CSV
-            writer.append("Nom du releve de prix;Date;Nom du magasin;Localisation du magasin;Code barre;Nom du produit;Marque;Quantite;Image URL;Prix en Euros\n");
+            writer.append("Nom du relevé de prix;Date;Nom du magasin;Localisation du magasin;Code barre;Nom du produit;Marque;Quantité;Image URL;Prix en Euros\n");
 
             for (RecordSheet recordSheet : recordSheetList) {
 
@@ -102,8 +94,11 @@ public class CsvHelper {
                             product.getPrice()));
                 }
             }
+            writer.close();
+
         } catch (IOException e) {
-            e.printStackTrace();
+            // Gérer l'exception en cas de problème d'écriture
+            System.err.println("Erreur lors de l'écriture du fichier CSV: " + e.getMessage());
         }
     }
 
@@ -119,17 +114,6 @@ public class CsvHelper {
         shareIntent.setType("text/csv");
         shareIntent.putExtra(Intent.EXTRA_STREAM, fileUri);
         context.startActivity(Intent.createChooser(shareIntent, "Partager via"));
-    }
-
-    public void exportCsvFile() {
-//        if (createDocumentLauncher != null) {
-//            Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
-//            intent.addCategory(Intent.CATEGORY_OPENABLE);
-//            intent.setType("text/csv");
-//            intent.putExtra(Intent.EXTRA_TITLE, fileName);
-//
-//            createDocumentLauncher.launch(intent);
-//        }
     }
 
     public boolean writeCsvFileToUri(Uri uri) {
@@ -151,7 +135,7 @@ public class CsvHelper {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e("CsvHelper", "Erreur lors de l'ouverture de l'uri du csv", e);
         }
 
         return result;
