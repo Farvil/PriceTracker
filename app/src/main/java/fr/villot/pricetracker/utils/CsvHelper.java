@@ -31,8 +31,6 @@ public class CsvHelper {
     private File csvFile;
     private final DatabaseHelper databaseHelper;
 
-//    private final ActivityResultLauncher<Intent> createDocumentLauncher;
-
     public CsvHelper(Context context, String fileName) {
         this.context = context;
         this.fileName = fileName;
