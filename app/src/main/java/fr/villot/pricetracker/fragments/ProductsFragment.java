@@ -93,16 +93,7 @@ public class ProductsFragment extends Fragment {
     }
 
     // Gestion du résultat de l'activité de scan
-    private final ActivityResultLauncher<ScanOptions> barcodeScannerLauncher = registerForActivityResult(new ScanContract(),
-            result -> {
-                if(result.getContents() == null) {
-                    Snackbar.make(requireView(),"Scan annulé", Snackbar.LENGTH_SHORT).show();
-
-                } else {
-//                    Toast.makeText(getActivity(), "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
-                    handleBarcodeScanResult(result.getContents());
-                }
-            });
+    private ActivityResultLauncher<ScanOptions> barcodeScannerLauncher;
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -114,6 +105,22 @@ public class ProductsFragment extends Fragment {
         } else {
             throw new RuntimeException(context + " doit implémenter OnSelectionChangedListener");
         }
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Enregistrement du launcher
+        barcodeScannerLauncher = registerForActivityResult(new ScanContract(),
+                result -> {
+                    if(result.getContents() == null) {
+                        Snackbar.make(requireView(),"Scan annulé", Snackbar.LENGTH_SHORT).show();
+
+                    } else {
+                        handleBarcodeScanResult(result.getContents());
+                    }
+                });
     }
 
     @Nullable
@@ -194,11 +201,17 @@ public class ProductsFragment extends Fragment {
             ScanOptions options = new ScanOptions();
             options.setCaptureActivity(BarCodeScannerActivity.class);
             options.setDesiredBarcodeFormats(ScanOptions.ONE_D_CODE_TYPES);
-            options.setPrompt("Scanner un code barre");
+            options.setPrompt("Scannez un code barre");
             options.setOrientationLocked(false);
             options.setBeepEnabled(true);
             options.setBarcodeImageEnabled(false);
-            barcodeScannerLauncher.launch(options);
+
+            // Vérification et lancement
+            if (barcodeScannerLauncher != null) {
+                barcodeScannerLauncher.launch(options);
+            } else {
+                Log.e("ProductsFragment", "barcodeScannerLauncher non enregistré");
+            }
     }
 
     protected void handleClickOnProduct(Product product) {
@@ -532,8 +545,6 @@ public class ProductsFragment extends Fragment {
     }
 
     private boolean isValidBarcode(String barcode) {
-        // Ajoutez votre logique de validation ici, par exemple, utilisez une expression régulière
-        // Retournez true si le code-barres est valide, sinon false
         return barcode.matches("^[0-9]{12,}$");
     }
 
