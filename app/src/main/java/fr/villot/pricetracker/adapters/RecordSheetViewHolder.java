@@ -10,28 +10,25 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.selection.ItemDetailsLookup;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.squareup.picasso.Picasso;
-
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
 import fr.villot.pricetracker.R;
 import fr.villot.pricetracker.model.RecordSheet;
-import fr.villot.pricetracker.model.Store;
 
 public class RecordSheetViewHolder extends RecyclerView.ViewHolder {
 
-    private TextView nameTextView;
-    private TextView dateTextView;
-    private ImageView recordSheetImageView;
+    private final TextView nameTextView;
+    private final TextView dateTextView;
+    private final ImageView recordSheetImageView;
 
-    private CardView recordSheetCardView;
-    private ImageView recordSheetSelectionImage;
+    private final CardView recordSheetCardView;
+    private final ImageView recordSheetSelectionImage;
 
-    private TextView storeNameTextView;
-    private TextView storeLocationTextView;
+    private final TextView storeNameTextView;
+    private final TextView storeLocationTextView;
 
-    private TextView productPriceTextView;
+    private final TextView productPriceTextView;
 
 
     public RecordSheetViewHolder(@NonNull View itemView) {

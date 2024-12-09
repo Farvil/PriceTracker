@@ -4,20 +4,18 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
+
+import androidx.annotation.NonNull;
 import androidx.recyclerview.selection.SelectionTracker;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 import fr.villot.pricetracker.R;
-import fr.villot.pricetracker.fragments.StoresFragment;
-import fr.villot.pricetracker.model.Product;
 import fr.villot.pricetracker.model.Store;
 
 public class StoreAdapter extends RecyclerView.Adapter<StoreViewHolder> {
 
     private List<Store> storeList;
-    private Context context;
+    private final Context context;
     private SelectionTracker<Long> selectionTracker;
 
     private StoreAdapter.OnItemClickListener<Store> onItemClickListener;
@@ -40,8 +38,9 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreViewHolder> {
         this.selectionTracker = selectionTracker;
     }
 
+    @NonNull
     @Override
-    public StoreViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public StoreViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.item_store, parent, false);
         return new StoreViewHolder(view);
     }
@@ -51,7 +50,7 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreViewHolder> {
         Store store = storeList.get(position);
         holder.bind(store, selectionTracker.isSelected((long) position));
 
-        // Ajout d'une marge bottom au dernier élément pour eviter la superposition avec le bouton flottant
+        // Ajout d'une marge bottom au dernier élément pour éviter la superposition avec le bouton flottant
         ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) holder.itemView.getLayoutParams();
         if (position == getItemCount() - 1) {
             layoutParams.bottomMargin = context.getResources().getDimensionPixelSize(R.dimen.margin_bottom_last_item);

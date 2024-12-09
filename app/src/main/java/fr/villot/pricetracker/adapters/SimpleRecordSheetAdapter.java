@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.selection.SelectionTracker;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -16,7 +17,7 @@ import fr.villot.pricetracker.model.RecordSheet;
 public class SimpleRecordSheetAdapter extends RecyclerView.Adapter<SimpleRecordSheetViewHolder> {
 
     private List<RecordSheet> recordSheetList;
-    private Context context;
+    private final Context context;
     private SelectionTracker<Long> selectionTracker;
 
     private OnItemClickListener<RecordSheet> onItemClickListener;
@@ -39,8 +40,9 @@ public class SimpleRecordSheetAdapter extends RecyclerView.Adapter<SimpleRecordS
         this.selectionTracker = selectionTracker;
     }
 
+    @NonNull
     @Override
-    public SimpleRecordSheetViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public SimpleRecordSheetViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.item_simple_record_sheet, parent, false);
         return new SimpleRecordSheetViewHolder(view);
     }
@@ -50,7 +52,7 @@ public class SimpleRecordSheetAdapter extends RecyclerView.Adapter<SimpleRecordS
         RecordSheet recordSheet = recordSheetList.get(position);
         holder.bind(recordSheet, selectionTracker.isSelected((long) position));
 
-        // Ajout d'une marge bottom au dernier élément pour eviter la superposition avec le bouton flottant
+        // Ajout d'une marge bottom au dernier élément pour éviter la superposition avec le bouton flottant
         ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) holder.itemView.getLayoutParams();
         if (position == getItemCount() - 1) {
             layoutParams.bottomMargin = context.getResources().getDimensionPixelSize(R.dimen.margin_bottom_last_item);

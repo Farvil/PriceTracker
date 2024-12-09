@@ -18,11 +18,11 @@ import fr.villot.pricetracker.model.RecordSheet;
 
 public class SimpleRecordSheetViewHolder extends RecyclerView.ViewHolder {
 
-    private TextView nameTextView;
-    private TextView dateTextView;
+    private final TextView nameTextView;
+    private final TextView dateTextView;
 
-    private CardView recordSheetCardView;
-    private ImageView recordSheetSelectionImage;
+    private final CardView recordSheetCardView;
+    private final ImageView recordSheetSelectionImage;
 
 
     public SimpleRecordSheetViewHolder(@NonNull View itemView) {

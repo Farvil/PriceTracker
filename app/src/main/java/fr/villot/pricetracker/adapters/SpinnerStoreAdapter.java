@@ -10,7 +10,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.cardview.widget.CardView;
 
 import java.util.List;
 
@@ -19,8 +18,8 @@ import fr.villot.pricetracker.model.Store;
 
 public class SpinnerStoreAdapter extends ArrayAdapter<Store> {
 
-    private List<Store> storeList;
-    private LayoutInflater inflater;
+    private final List<Store> storeList;
+    private final LayoutInflater inflater;
 
     public SpinnerStoreAdapter(Context context, List<Store> storeList) {
         super(context, R.layout.item_store, storeList);

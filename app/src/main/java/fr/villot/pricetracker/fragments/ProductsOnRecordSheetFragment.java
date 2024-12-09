@@ -2,7 +2,6 @@ package fr.villot.pricetracker.fragments;
 
 import static fr.villot.pricetracker.fragments.ProductsFragment.ProductsFragmentDialogType.DIALOG_TYPE_ALREADY_EXIST;
 
-import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -12,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.selection.Selection;
 
@@ -43,7 +43,7 @@ public class ProductsOnRecordSheetFragment extends ProductsFragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.w("RecordSheetProductsFragment", "onCreateView()");
 
         View view = super.onCreateView(inflater, container, savedInstanceState);
@@ -91,7 +91,7 @@ public class ProductsOnRecordSheetFragment extends ProductsFragment {
 
     private void showPriceInputDialogAndUpdateDatabase(Product product) {
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
         View dialogView = getProductViewForDialog(product, R.layout.dialog_price_record);
         builder.setView(dialogView);
 
@@ -100,46 +100,40 @@ public class ProductsOnRecordSheetFragment extends ProductsFragment {
         builder.setCancelable(false);
         priceEditText.requestFocus();
 
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                String priceStr = priceEditText.getText().toString();
-                if (!TextUtils.isEmpty(priceStr)) {
-                    try {
-                        double price = Double.parseDouble(priceStr);
+        builder.setPositiveButton("OK", (dialog, which) -> {
+            String priceStr = priceEditText.getText().toString();
+            if (!TextUtils.isEmpty(priceStr)) {
+                try {
+                    double price = Double.parseDouble(priceStr);
 
-                        // Mettez à jour l'objet PriceRecord avec le prix saisi
-                        PriceRecord priceRecord = new PriceRecord();
-                        priceRecord.setRecordSheetId(recordSheetId);
-                        priceRecord.setProductBarcode(product.getBarcode());
-                        priceRecord.setPrice(price);
+                    // Mettez à jour l'objet PriceRecord avec le prix saisi
+                    PriceRecord priceRecord = new PriceRecord();
+                    priceRecord.setRecordSheetId(recordSheetId);
+                    priceRecord.setProductBarcode(product.getBarcode());
+                    priceRecord.setPrice(price);
 
-                        // Ajoutez ou mettez à jour le PriceRecord dans la base de données
-                        databaseHelper.addOrUpdatePriceRecord(priceRecord);
+                    // Ajoutez ou mettez à jour le PriceRecord dans la base de données
+                    databaseHelper.addOrUpdatePriceRecord(priceRecord);
 
-                        // Rafraichissement de la recyclerview aves les nouvelles données
-                        updateProductListViewFromDatabase(true);
+                    // Rafraîchissement de la recyclerview aves les nouvelles données
+                    updateProductListViewFromDatabase(true);
 
-                        // Mise à jour des prix Min, Max et Moy dans l'activité RecordSheetOnProductActivity
-                        if (requireActivity() instanceof PriceRecordActivity) {
-                            ((PriceRecordActivity) requireActivity()).notifyProductModifiedFromRecordSheet(product.getBarcode());
-                        }
-
-                        // Mettez à jour la liste des produits ou effectuez d'autres actions si nécessaires
-                        // par exemple, rafraîchir l'interface utilisateur
-                    } catch (NumberFormatException e) {
-                        // La saisie n'est pas un nombre valide, vous pouvez afficher un message d'erreur
-                        // ou prendre d'autres mesures appropriées.
+                    // Mise à jour des prix Min, Max et Moy dans l'activité RecordSheetOnProductActivity
+                    if (requireActivity() instanceof PriceRecordActivity) {
+                        ((PriceRecordActivity) requireActivity()).notifyProductModifiedFromRecordSheet(product.getBarcode());
                     }
+
+                    // Mettez à jour la liste des produits ou effectuez d'autres actions si nécessaires
+                    // par exemple, rafraîchir l'interface utilisateur
+                } catch (NumberFormatException e) {
+                    // La saisie n'est pas un nombre valide, vous pouvez afficher un message d'erreur
+                    // ou prendre d'autres mesures appropriées.
                 }
             }
         });
 
-        builder.setNegativeButton("Annuler", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                // L'utilisateur a annulé la saisie, rien à faire.
-            }
+        builder.setNegativeButton("Annuler", (dialog, which) -> {
+            // L'utilisateur a annulé la saisie, rien à faire.
         });
 
         AlertDialog dialog = builder.create();
@@ -148,39 +142,36 @@ public class ProductsOnRecordSheetFragment extends ProductsFragment {
 
     public void deleteSelectedItems() {
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage("Voulez-vous vraiment retirer les produits selectionnés de ce relevé de prix ?");
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
+        builder.setMessage("Voulez-vous vraiment retirer les produits sélectionnés de ce relevé de prix ?");
         builder.setCancelable(false);
 
-        builder.setPositiveButton("Oui", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
+        builder.setPositiveButton("Oui", (dialog, which) -> {
 
-                if (productAdapter != null && productAdapter.getSelectionTracker() != null) {
+            if (productAdapter != null && productAdapter.getSelectionTracker() != null) {
 
-                    Selection<Long> selection = productAdapter.getSelectionTracker().getSelection();
+                Selection<Long> selection = productAdapter.getSelectionTracker().getSelection();
 
-                    for (Long selectedItem : selection) {
-                        Product product = productList.get(selectedItem.intValue());
-                        try {
-                            databaseHelper.deleteProductOnRecordSheet(product.getBarcode(), recordSheetId);
+                for (Long selectedItem : selection) {
+                    Product product = productList.get(selectedItem.intValue());
+                    try {
+                        databaseHelper.deleteProductOnRecordSheet(product.getBarcode(), recordSheetId);
 
-                            // On notifie l'activité parente (uniquement PriceRecordActivity) de la suppression du produit du relevé
-                            if (requireActivity() instanceof PriceRecordActivity) {
-                                ((PriceRecordActivity) requireActivity()).notifyProductModifiedFromRecordSheet(product.getBarcode());
-                            }
-                        } catch (Exception e) {
-                            Snackbar.make(getView(),"Erreur de suppression du produits dans le relevé " + recordSheetId + " !", Snackbar.LENGTH_SHORT).show();
-                            break; // Ne tente pas d'autres suppressions en cas d'erreur
+                        // On notifie l'activité parente (uniquement PriceRecordActivity) de la suppression du produit du relevé
+                        if (requireActivity() instanceof PriceRecordActivity) {
+                            ((PriceRecordActivity) requireActivity()).notifyProductModifiedFromRecordSheet(product.getBarcode());
                         }
+                    } catch (Exception e) {
+                        Snackbar.make(requireView(),"Erreur de suppression du produits dans le relevé " + recordSheetId + " !", Snackbar.LENGTH_SHORT).show();
+                        break; // Ne tente pas d'autres suppressions en cas d'erreur
                     }
-
-                    // Mettre à jour la liste après la suppression
-                    updateProductListViewFromDatabase(false);
-                    clearSelection();
                 }
 
+                // Mettre à jour la liste après la suppression
+                updateProductListViewFromDatabase(false);
+                clearSelection();
             }
+
         });
 
         builder.setNegativeButton("Non", null);

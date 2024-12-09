@@ -22,6 +22,7 @@ public class PageAdapter extends FragmentPagerAdapter {
         return(3);
     }
 
+    @NonNull
     @Override
     public Fragment getItem(int position) {
         switch (position){
@@ -32,7 +33,7 @@ public class PageAdapter extends FragmentPagerAdapter {
             case 2:
                 return RecordSheetsFragment.getInstance();
             default:
-                return null;
+                throw new IllegalArgumentException("Invalid position: " + position);
         }
     }
 
@@ -61,7 +62,4 @@ public class PageAdapter extends FragmentPagerAdapter {
             return -1;
     }
 
-    @Override
-    public int getItemPosition(@NonNull Object object) {
-        return POSITION_UNCHANGED;    }
 }

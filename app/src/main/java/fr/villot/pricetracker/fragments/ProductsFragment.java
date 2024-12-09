@@ -1,17 +1,13 @@
 package fr.villot.pricetracker.fragments;
 
-import static android.app.ProgressDialog.show;
-
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -24,10 +20,8 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.selection.Selection;
 import androidx.recyclerview.selection.SelectionTracker;
 import androidx.recyclerview.selection.StableIdKeyProvider;
@@ -48,15 +42,10 @@ import java.util.Queue;
 
 import fr.villot.pricetracker.MyApplication;
 import fr.villot.pricetracker.activities.BarCodeScannerActivity;
-import fr.villot.pricetracker.activities.MainActivity;
-import fr.villot.pricetracker.activities.PriceRecordActivity;
 import fr.villot.pricetracker.activities.RecordSheetOnProductActivity;
-import fr.villot.pricetracker.activities.RecordSheetOnStoreActivity;
 import fr.villot.pricetracker.adapters.MyDetailsLookup;
 import fr.villot.pricetracker.adapters.ProductAdapter;
-import fr.villot.pricetracker.adapters.StoreAdapter;
 import fr.villot.pricetracker.interfaces.OnSelectionChangedListener;
-import fr.villot.pricetracker.model.Store;
 import fr.villot.pricetracker.utils.DatabaseHelper;
 import fr.villot.pricetracker.utils.OpenFoodFactsAPIManager;
 import fr.villot.pricetracker.R;
@@ -103,11 +92,11 @@ public class ProductsFragment extends Fragment {
         return instance;
     }
 
-    // Gestion du resultat de l'activité de scan
+    // Gestion du résultat de l'activité de scan
     private final ActivityResultLauncher<ScanOptions> barcodeScannerLauncher = registerForActivityResult(new ScanContract(),
             result -> {
                 if(result.getContents() == null) {
-                    Snackbar.make(getView(),"Scan annulé", Snackbar.LENGTH_SHORT).show();
+                    Snackbar.make(requireView(),"Scan annulé", Snackbar.LENGTH_SHORT).show();
 
                 } else {
 //                    Toast.makeText(getActivity(), "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
@@ -123,7 +112,7 @@ public class ProductsFragment extends Fragment {
         if (context instanceof OnSelectionChangedListener) {
             mOnSelectionChangedListener = (OnSelectionChangedListener) context;
         } else {
-            throw new RuntimeException(context.toString() + " doit implémenter OnSelectionChangedListener");
+            throw new RuntimeException(context + " doit implémenter OnSelectionChangedListener");
         }
     }
 
@@ -178,7 +167,7 @@ public class ProductsFragment extends Fragment {
                     mOnSelectionChangedListener.onSelectionChanged(getInstance(), numSelected);
                 }
 
-                // On masque l'icone flottant si une selection est en cours.
+                // On masque l'icône flottant si une selection est en cours.
                 if (numSelected == 0)
                     fabAdd.setVisibility(View.VISIBLE);
                 else
@@ -188,34 +177,20 @@ public class ProductsFragment extends Fragment {
         });
 
         // Gestion du click sur un produit
-        productAdapter.setOnItemClickListener(new ProductAdapter.OnItemClickListener<Product>() {
-            @Override
-            public void onItemClick(Product product) {
-                handleClickOnProduct(product);
-            }
-        });
+        productAdapter.setOnItemClickListener(this::handleClickOnProduct);
 
         // Click bouton flottant
-        fabAdd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                launchScanActivity();
-            }
-        });
+        fabAdd.setOnClickListener(v -> launchScanActivity());
 
         // Long Click bouton flottant
-        fabAdd.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                showFabAddContextMenu(view);
-                return true;
-            }
+        fabAdd.setOnLongClickListener(view1 -> {
+            showFabAddContextMenu(view1);
+            return true;
         });
 
     }
 
     private void launchScanActivity() {
-        if (barcodeScannerLauncher != null && barcodeScannerLauncher.getContract() != null) {
             ScanOptions options = new ScanOptions();
             options.setCaptureActivity(BarCodeScannerActivity.class);
             options.setDesiredBarcodeFormats(ScanOptions.ONE_D_CODE_TYPES);
@@ -224,7 +199,6 @@ public class ProductsFragment extends Fragment {
             options.setBeepEnabled(true);
             options.setBarcodeImageEnabled(false);
             barcodeScannerLauncher.launch(options);
-        }
     }
 
     protected void handleClickOnProduct(Product product) {
@@ -273,18 +247,15 @@ public class ProductsFragment extends Fragment {
             @Override
             public void onProductDataReceived(Product product) {
 
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        // Handle the received product data
-                        if (product != null) {
-                            progressDialog.dismiss();
-                            if (productAlreadyExist)
-                                showUserQueryDialogBox(product, ProductsFragmentDialogType.DIALOG_TYPE_UPDATE);
-                            else
-                                showUserQueryDialogBox(product, ProductsFragmentDialogType.DIALOG_TYPE_ADD);
+                getActivity().runOnUiThread(() -> {
+                    // Handle the received product data
+                    if (product != null) {
+                        progressDialog.dismiss();
+                        if (productAlreadyExist)
+                            showUserQueryDialogBox(product, ProductsFragmentDialogType.DIALOG_TYPE_UPDATE);
+                        else
+                            showUserQueryDialogBox(product, ProductsFragmentDialogType.DIALOG_TYPE_ADD);
 
-                        }
                     }
                 });
             }
@@ -293,15 +264,12 @@ public class ProductsFragment extends Fragment {
             public void onProductDataError(String error) {
                 final String finalError = error;
 
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        progressDialog.dismiss();
+                getActivity().runOnUiThread(() -> {
+                    progressDialog.dismiss();
 
-                        // Handle the received product data
-                        if (finalError != null) {
-                            Toast.makeText(getActivity(), finalError, Toast.LENGTH_SHORT).show();
-                        }
+                    // Handle the received product data
+                    if (finalError != null) {
+                        Toast.makeText(getActivity(), finalError, Toast.LENGTH_SHORT).show();
                     }
                 });
             }
@@ -375,7 +343,7 @@ public class ProductsFragment extends Fragment {
 
     protected void showUserQueryDialogBox(Product product, ProductsFragmentDialogType productsFragmentDialogType) {
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
         builder.setView(getProductViewForDialog(product, R.layout.item_product));
 
         String title = null;
@@ -402,40 +370,37 @@ public class ProductsFragment extends Fragment {
         builder.setCancelable(false);
 
 
-        builder.setPositiveButton("Oui", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
+        builder.setPositiveButton("Oui", (dialog, which) -> {
 
-                switch (productsFragmentDialogType) {
-                    case DIALOG_TYPE_ADD:
-                        // Ajouter le produit à la base de données et à la ListView
-                        addOrUpdateProduct(product);
+            switch (productsFragmentDialogType) {
+                case DIALOG_TYPE_ADD:
+                    // Ajouter le produit à la base de données et à la ListView
+                    addOrUpdateProduct(product);
 
-                        // Afficher la nouvelle liste avec ce produit en fin de liste.
-                        updateProductListViewFromDatabase(true);
-                        break;
-                    case DIALOG_TYPE_UPDATE:
-                        // Ajouter le produit à la base de données et à la ListView
-                        databaseHelper.updateProduct(product);
+                    // Afficher la nouvelle liste avec ce produit en fin de liste.
+                    updateProductListViewFromDatabase(true);
+                    break;
+                case DIALOG_TYPE_UPDATE:
+                    // Ajouter le produit à la base de données et à la ListView
+                    databaseHelper.updateProduct(product);
 
-                        // Afficher la nouvelle liste avec ce produit en fin de liste.
-                        updateProductListViewFromDatabase(false);
-                        break;
-                    case DIALOG_TYPE_INFO:
-                        String barcode = product.getBarcode();
-                        String url = "https://world.openfoodfacts.org/product/" + barcode;
+                    // Afficher la nouvelle liste avec ce produit en fin de liste.
+                    updateProductListViewFromDatabase(false);
+                    break;
+                case DIALOG_TYPE_INFO:
+                    String barcode = product.getBarcode();
+                    String url = "https://world.openfoodfacts.org/product/" + barcode;
 
-                        // Lancer le navigateur
-                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                        startActivity(intent);
-                        break;
-                    case DIALOG_TYPE_ALREADY_EXIST:
-                        getProductDataFromOpenFoodFacts(product.getBarcode(), true);
-                        break;
-
-                }
+                    // Lancer le navigateur
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    startActivity(intent);
+                    break;
+                case DIALOG_TYPE_ALREADY_EXIST:
+                    getProductDataFromOpenFoodFacts(product.getBarcode(), true);
+                    break;
 
             }
+
         });
 
         builder.setNegativeButton("Non", null);
@@ -488,32 +453,27 @@ public class ProductsFragment extends Fragment {
         if (!productsToDelete.isEmpty()) {
             Product product = productsToDelete.poll();
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
+            assert product != null;
             builder.setMessage("Voulez-vous vraiment supprimer le produit " + product.getName() + " ?");
             builder.setCancelable(false);
 
-            builder.setPositiveButton("Oui", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    // Suppression uniquement si pas de dépendances avec des priceRecords.
-                    if (!databaseHelper.hasPriceRecordsOnProduct(product.getBarcode())) {
-                        databaseHelper.deleteProduct(product.getBarcode());
-                        updateProductListViewFromDatabase(false);
-                    } else {
-                        Snackbar.make(getView(), "Suppression impossible car au moins un relevé de prix associée au produit", Snackbar.LENGTH_SHORT).show();
-                    }
-
-                    // Appeler la suppression des magasins restants dans la file d'attente
-                    deleteProductsInQueue(productsToDelete);
+            builder.setPositiveButton("Oui", (dialog, which) -> {
+                // Suppression uniquement si pas de dépendances avec des priceRecords.
+                if (!databaseHelper.hasPriceRecordsOnProduct(product.getBarcode())) {
+                    databaseHelper.deleteProduct(product.getBarcode());
+                    updateProductListViewFromDatabase(false);
+                } else {
+                    Snackbar.make(requireView(), "Suppression impossible car au moins un relevé de prix associée au produit", Snackbar.LENGTH_SHORT).show();
                 }
+
+                // Appeler la suppression des magasins restants dans la file d'attente
+                deleteProductsInQueue(productsToDelete);
             });
 
-            builder.setNegativeButton("Non", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    // Si l'utilisateur clique sur "Non", passage au magasin suivant dans la file d'attente
-                    deleteProductsInQueue(productsToDelete);
-                }
+            builder.setNegativeButton("Non", (dialog, which) -> {
+                // Si l'utilisateur clique sur "Non", passage au magasin suivant dans la file d'attente
+                deleteProductsInQueue(productsToDelete);
             });
 
             AlertDialog dialog = builder.create();
@@ -526,19 +486,16 @@ public class ProductsFragment extends Fragment {
         PopupMenu popupMenu = new PopupMenu(requireContext(), view);
         popupMenu.getMenuInflater().inflate(R.menu.fab_add_context_menu, popupMenu.getMenu());
 
-        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.menu_scan_barcode:
-                        launchScanActivity();
-                        return true;
-                    case R.id.menu_manual_entry:
-                        showManualBarcodeInputDialog();
-                        return true;
-                    default:
-                        return false;
-                }
+        popupMenu.setOnMenuItemClickListener(item -> {
+            switch (item.getItemId()) {
+                case R.id.menu_scan_barcode:
+                    launchScanActivity();
+                    return true;
+                case R.id.menu_manual_entry:
+                    showManualBarcodeInputDialog();
+                    return true;
+                default:
+                    return false;
             }
         });
 
@@ -547,7 +504,7 @@ public class ProductsFragment extends Fragment {
 
     private void showManualBarcodeInputDialog() {
         // Création boite de dialogue
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
         builder.setTitle("Saisir un code-barres");
 
         // Ajout d'un un champ de texte pour la saisie manuelle
@@ -556,27 +513,19 @@ public class ProductsFragment extends Fragment {
         builder.setView(input);
 
         // Configuration des boutons de la boîte de dialogue
-        builder.setPositiveButton("Valider", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                String barcode = input.getText().toString().trim();
+        builder.setPositiveButton("Valider", (dialog, which) -> {
+            String barcode = input.getText().toString().trim();
 
-                // Vérification de la validité du code barre et ajout du produit
-                if (isValidBarcode(barcode)) {
-                    handleBarcodeScanResult(barcode);
-                } else {
-                    // Affiche un message d'erreur si le code-barres n'est pas valide
-                    Toast.makeText(getActivity(), "Code-barres non valide", Toast.LENGTH_SHORT).show();
-                }
+            // Vérification de la validité du code barre et ajout du produit
+            if (isValidBarcode(barcode)) {
+                handleBarcodeScanResult(barcode);
+            } else {
+                // Affiche un message d'erreur si le code-barres n'est pas valide
+                Toast.makeText(getActivity(), "Code-barres non valide", Toast.LENGTH_SHORT).show();
             }
         });
 
-        builder.setNegativeButton("Annuler", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
+        builder.setNegativeButton("Annuler", (dialog, which) -> dialog.cancel());
 
         // Affiche la boîte de dialogue
         builder.show();

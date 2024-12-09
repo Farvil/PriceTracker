@@ -3,10 +3,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.selection.OnContextClickListener;
-import androidx.recyclerview.selection.OnItemActivatedListener;
 import androidx.recyclerview.selection.Selection;
-import androidx.recyclerview.selection.SelectionPredicates;
 import androidx.recyclerview.selection.SelectionTracker;
 import androidx.recyclerview.selection.StableIdKeyProvider;
 import androidx.recyclerview.selection.StorageStrategy;
@@ -15,19 +12,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
-import android.view.View;
 import android.widget.Button;
-
-import com.google.android.material.snackbar.Snackbar;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
@@ -35,20 +26,15 @@ import fr.villot.pricetracker.MyApplication;
 import fr.villot.pricetracker.R;
 import fr.villot.pricetracker.adapters.MyDetailsLookup;
 import fr.villot.pricetracker.adapters.ProductAdapter;
-import fr.villot.pricetracker.fragments.ProductsOnRecordSheetFragment;
 import fr.villot.pricetracker.model.Product;
 import fr.villot.pricetracker.utils.DatabaseHelper;
 
 public class SelectProductsActivity extends AppCompatActivity {
 
-    private DatabaseHelper databaseHelper;
-    private RecyclerView productRecyclerView;
     private ProductAdapter productAdapter;
     private List<Product> productList;
-    private Button confirmButton;
     SelectionTracker<Long> selectionTracker;
     private static final String PRODUCT_ACTIVITY_SELECTION_KEY = "product_activity_selection";
-    private int recordSheetId;
     boolean isSelectionModeActive = false;
 
 
@@ -58,18 +44,18 @@ public class SelectProductsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_select_products);
 
         // Récupération des vues
-        productRecyclerView = findViewById(R.id.productRecyclerView);
-        confirmButton = findViewById(R.id.confirmButton);
+        RecyclerView productRecyclerView = findViewById(R.id.productRecyclerView);
+        Button confirmButton = findViewById(R.id.confirmButton);
         Toolbar toolbar = findViewById(R.id.toolbar);
 
 
         // Initialisation du DatabaseHelper
-        databaseHelper = MyApplication.getDatabaseHelper();
+        DatabaseHelper databaseHelper = MyApplication.getDatabaseHelper();
 
         productRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         // Recupération du recordsheetId
-        recordSheetId = getIntent().getIntExtra("record_sheet_id", -1);
+        int recordSheetId = getIntent().getIntExtra("record_sheet_id", -1);
 
         // Récupération des produits dans la base de données.
         productList = databaseHelper.getProductsNotInRecordSheet(recordSheetId);
@@ -118,13 +104,16 @@ public class SelectProductsActivity extends AppCompatActivity {
                     setSelectionMode(true);
 
                     // Modification du titre de la toolbar pour indiquer le nombre d'éléments sélectionnés.
-                    String selectionCount = String.valueOf(numSelectedItems) + " produit";
+                    String selectionCount = numSelectedItems + " produit";
 
                     // Mise au pluriel de "relevé" si plusieurs elements sélectionnés
                     if (numSelectedItems > 1)
                         selectionCount += "s";
 
-                    getSupportActionBar().setTitle(selectionCount);
+                    ActionBar actionBar = getSupportActionBar();
+                    if (actionBar != null) {
+                        getSupportActionBar().setTitle(selectionCount);
+                    }
                 }
 
             }
@@ -132,51 +121,50 @@ public class SelectProductsActivity extends AppCompatActivity {
         });
 
         // Gestion du click sur un produit
-        productAdapter.setOnItemClickListener(new ProductAdapter.OnItemClickListener<Product>() {
-            @Override
-            public void onItemClick(Product product) {
-                if (!selectionTracker.hasSelection()) {
-                    Long position = productAdapter.getPosition(product);
-                    if (position.intValue() != RecyclerView.NO_POSITION) {
-                        selectionTracker.select(position);
-                    }
+        productAdapter.setOnItemClickListener(product -> {
+            if (!selectionTracker.hasSelection()) {
+                Long position = productAdapter.getPosition(product);
+                if (position.intValue() != RecyclerView.NO_POSITION) {
+                    selectionTracker.select(position);
                 }
             }
         });
 
-        confirmButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (selectionTracker != null) {
-                    // Récupérer les éléments sélectionnés
-                    Selection<Long> selection = selectionTracker.getSelection();
+        confirmButton.setOnClickListener(view -> {
+            if (selectionTracker != null) {
+                // Récupérer les éléments sélectionnés
+                List<Product> selectedProducts = getSelectedProducts();
 
-                    // Créer une liste pour stocker les produits sélectionnés
-                    List<Product> selectedProducts = new ArrayList<>();
+                // Retourner la liste des produits à l'activité appelante
+                Intent resultIntent = new Intent();
+                resultIntent.putExtra("selected_products", (Serializable) selectedProducts);
+                setResult(RESULT_OK, resultIntent);
 
-                    // Parcourir la sélection et ajouter les produits correspondants à la liste
-                    for (Long selectedItem : selection) {
-                        Product selectedProduct = productList.get(selectedItem.intValue());
-                        selectedProducts.add(0, selectedProduct);
-                    }
-
-                    // Retourner la liste des produits à l'activité appelante
-                    Intent resultIntent = new Intent();
-                    resultIntent.putExtra("selected_products", (Serializable) selectedProducts);
-                    setResult(RESULT_OK, resultIntent);
-
-                    // Fermer l'activité
-                    finish();
-                }
+                // Fermer l'activité
+                finish();
             }
         });
 
 
     }
 
+    private @NonNull List<Product> getSelectedProducts() {
+        Selection<Long> selection = selectionTracker.getSelection();
+
+        // Créer une liste pour stocker les produits sélectionnés
+        List<Product> selectedProducts = new ArrayList<>();
+
+        // Parcourir la sélection et ajouter les produits correspondants à la liste
+        for (Long selectedItem : selection) {
+            Product selectedProduct = productList.get(selectedItem.intValue());
+            selectedProducts.add(0, selectedProduct);
+        }
+        return selectedProducts;
+    }
+
     public void setSelectionMode(boolean isSelectionModeActive) {
 
-        // Rafraichissement de la toolbar si nécessaire
+        // Rafraîchissement de la toolbar si nécessaire
         if (this.isSelectionModeActive != isSelectionModeActive) {
             this.isSelectionModeActive = isSelectionModeActive;
             if (!isSelectionModeActive) {
@@ -185,7 +173,7 @@ public class SelectProductsActivity extends AppCompatActivity {
             } else {
                 Objects.requireNonNull(getSupportActionBar()).setHomeAsUpIndicator(R.drawable.ic_cancel);
             }
-            invalidateOptionsMenu(); // Rafraichissement du menu de la toolbar
+            invalidateOptionsMenu(); // Rafraîchissement du menu de la toolbar
         }
     }
     @Override

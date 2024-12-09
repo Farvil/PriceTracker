@@ -144,7 +144,7 @@ public class StoresFragment extends Fragment {
                     mOnSelectionChangedListener.onSelectionChanged(getInstance(), numSelected);
                 }
 
-                // On masque l'icone flottant si une selection est en cours.
+                // On masque l'icône flottant si une selection est en cours.
                 if (numSelected == 0)
                     fabAdd.setVisibility(View.VISIBLE);
                 else

@@ -4,7 +4,6 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
-import androidx.core.content.FileProvider;
 import androidx.recyclerview.selection.Selection;
 import androidx.recyclerview.selection.SelectionTracker;
 import androidx.recyclerview.selection.StableIdKeyProvider;
@@ -13,7 +12,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -21,18 +19,13 @@ import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import fr.villot.pricetracker.MyApplication;
 import fr.villot.pricetracker.R;
 import fr.villot.pricetracker.adapters.MyDetailsLookup;
 import fr.villot.pricetracker.adapters.SimpleRecordSheetAdapter;
-import fr.villot.pricetracker.model.Product;
 import fr.villot.pricetracker.model.RecordSheet;
 import fr.villot.pricetracker.model.Store;
 import fr.villot.pricetracker.utils.CsvHelper;
@@ -40,9 +33,6 @@ import fr.villot.pricetracker.utils.DatabaseHelper;
 
 public class RecordSheetOnStoreActivity extends AppCompatActivity {
 
-    private int storeId;
-    private DatabaseHelper databaseHelper;
-    private RecyclerView recordSheetRecyclerView;
     private SimpleRecordSheetAdapter simpleRecordSheetAdapter;
     private List<RecordSheet> recordSheetList;
     private static final String RECORDSHEET_ON_STORE_ACTIVITY_SELECTION_KEY = "recordsheet_on_store_activity_selection";
@@ -62,10 +52,10 @@ public class RecordSheetOnStoreActivity extends AppCompatActivity {
         TextView storeNameTextView = findViewById(R.id.storeNameTextView);
         TextView storeLocationTextView = findViewById(R.id.storeLocationTextView);
         ImageView storeImageView = findViewById(R.id.storeImageView);
-        recordSheetRecyclerView = findViewById(R.id.recordSheetRecyclerView);
+        RecyclerView recordSheetRecyclerView = findViewById(R.id.recordSheetRecyclerView);
 
         // Initialisation du DatabaseHelper
-        databaseHelper = MyApplication.getDatabaseHelper();
+        DatabaseHelper databaseHelper = MyApplication.getDatabaseHelper();
 
         // Bouton de retour à l'activité principale
         setSupportActionBar(toolbar);
@@ -76,7 +66,7 @@ public class RecordSheetOnStoreActivity extends AppCompatActivity {
         }
 
         // Récupération du magasin en fonction de l'identifiant passé en paramètre de l'activité
-        storeId = getIntent().getIntExtra("store_id", -1);
+        int storeId = getIntent().getIntExtra("store_id", -1);
         Store store = databaseHelper.getStoreById(storeId);
         if (store != null) {
             storeNameTextView.setText(store.getName());
@@ -118,27 +108,27 @@ public class RecordSheetOnStoreActivity extends AppCompatActivity {
                     setSelectionMode(true);
 
                     // Modification du titre de la toolbar pour indiquer le nombre d'éléments sélectionnés.
-                    String selectionCount = String.valueOf(numSelectedItems) + " relevé";
+                    String selectionCount = numSelectedItems + " relevé";
 
                     // Mise au pluriel si plusieurs elements sélectionnés
                     if (numSelectedItems > 1)
                         selectionCount += "s";
 
-                    getSupportActionBar().setTitle(selectionCount);
+                    ActionBar actionBar = getSupportActionBar();
+                    if (actionBar != null) {
+                        actionBar.setTitle(selectionCount);
+                    }
                 }
             }
         });
 
 
         //Lancement de l'activité PriceRecordActivity sur click d'un relevé de prix
-        simpleRecordSheetAdapter.setOnItemClickListener(new SimpleRecordSheetAdapter.OnItemClickListener<RecordSheet>() {
-            @Override
-            public void onItemClick(RecordSheet recordSheet) {
-                Intent intent = new Intent(RecordSheetOnStoreActivity.this,  PriceRecordActivity.class);
-                intent.putExtra("record_sheet_name", recordSheet.getName());
-                intent.putExtra("record_sheet_id", recordSheet.getId());
-                startActivity(intent);
-            }
+        simpleRecordSheetAdapter.setOnItemClickListener(recordSheet -> {
+            Intent intent = new Intent(RecordSheetOnStoreActivity.this,  PriceRecordActivity.class);
+            intent.putExtra("record_sheet_name", recordSheet.getName());
+            intent.putExtra("record_sheet_id", recordSheet.getId());
+            startActivity(intent);
         });
 
     }
@@ -176,17 +166,22 @@ public class RecordSheetOnStoreActivity extends AppCompatActivity {
 
     public void setSelectionMode(boolean isSelectionModeActive) {
 
-        // Rafraichissement de la toolbar en cas de changement de mode
+        ActionBar actionBar = getSupportActionBar();
+        // Rafraîchissement de la toolbar en cas de changement de mode
         if (this.isSelectionModeActive != isSelectionModeActive) {
             this.isSelectionModeActive = isSelectionModeActive;
             if (!isSelectionModeActive) {
-                getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_back);
-                getSupportActionBar().setTitle(R.string.activity_record_sheet_on_store_title);
+                if (actionBar != null) {
+                    actionBar.setHomeAsUpIndicator(R.drawable.ic_back);
+                    actionBar.setTitle(R.string.activity_record_sheet_on_store_title);
+                }
 
             } else {
-                getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_cancel);
+                if (actionBar != null) {
+                    actionBar.setHomeAsUpIndicator(R.drawable.ic_cancel);
+                }
             }
-            invalidateOptionsMenu(); // Rafraichissement du menu de la toolbar
+            invalidateOptionsMenu(); // Rafraîchissement du menu de la toolbar
         }
     }
 

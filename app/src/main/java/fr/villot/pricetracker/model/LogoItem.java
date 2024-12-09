@@ -1,7 +1,7 @@
 package fr.villot.pricetracker.model;
 
 public class LogoItem {
-    private String imageName;
+    private final String imageName;
 
     public LogoItem(String imageName) {
         this.imageName = imageName;

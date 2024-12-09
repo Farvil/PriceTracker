@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import fr.villot.pricetracker.MyApplication;
-import fr.villot.pricetracker.utils.DatabaseHelper;
-
 public class RecordSheet {
 
     private int id = -1;

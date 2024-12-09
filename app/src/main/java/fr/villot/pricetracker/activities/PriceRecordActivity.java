@@ -77,7 +77,7 @@ public class PriceRecordActivity extends AppCompatActivity implements OnSelectio
             });
 
     /**
-     * Callback pour le resultat correspondant aux produits sélectionnés depuis la bibliothèque de produits
+     * Callback pour le résultat correspondant aux produits sélectionnés depuis la bibliothèque de produits
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -245,7 +245,7 @@ public class PriceRecordActivity extends AppCompatActivity implements OnSelectio
 
     public void setSelectionMode(boolean isSelectionModeActive) {
 
-        // Rafraichissement de la toolbar si nécessaire
+        // Rafraîchissement de la toolbar si nécessaire
         if (this.isSelectionModeActive != isSelectionModeActive) {
             this.isSelectionModeActive = isSelectionModeActive;
             if (!isSelectionModeActive) {
@@ -254,7 +254,7 @@ public class PriceRecordActivity extends AppCompatActivity implements OnSelectio
             } else {
                 Objects.requireNonNull(getSupportActionBar()).setHomeAsUpIndicator(R.drawable.ic_cancel);
             }
-            invalidateOptionsMenu(); // Rafraichissement du menu de la toolbar
+            invalidateOptionsMenu(); // Rafraîchissement du menu de la toolbar
         }
     }
 

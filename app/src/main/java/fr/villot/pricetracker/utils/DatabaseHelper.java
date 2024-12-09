@@ -707,7 +707,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(BRAND_NAME, "mousquetaires");
         db.insert(TABLE_BRANDS, null, values);
 
-        // Marque Systeme U
+        // Marque Système U
         values.clear();
         values.put(BRAND_NAME, "systeme_u");
         db.insert(TABLE_BRANDS, null, values);

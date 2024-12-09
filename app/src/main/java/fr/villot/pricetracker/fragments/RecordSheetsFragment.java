@@ -139,7 +139,7 @@ public class RecordSheetsFragment extends Fragment {
                     mOnSelectionChangedListener.onSelectionChanged(getInstance(), numSelected);
                 }
 
-                // On masque l'icone flottant si une selection est en cours.
+                // On masque l'icône flottant si une selection est en cours.
                 if (numSelected == 0)
                     fabAdd.setVisibility(View.VISIBLE);
                 else
@@ -157,7 +157,7 @@ public class RecordSheetsFragment extends Fragment {
 
         // Action du bouton flottant
         fabAdd.setOnClickListener(v -> {
-            if (databaseHelper.getAllStores().stream().count() != 0) {
+            if ((long) databaseHelper.getAllStores().size() != 0) {
                 showUserQueryDialogBox(new RecordSheet(), RecordSheetsFragmentDialogType.DIALOG_TYPE_ADD);
             }
             else {
@@ -252,7 +252,7 @@ public class RecordSheetsFragment extends Fragment {
                         break;
                 }
 
-                // Rafraichissement de la liste de recordsheets
+                // Rafraîchissement de la liste de recordsheets
                 updateRecordSheetListViewFromDatabase(true);
             }
 
@@ -320,7 +320,7 @@ public class RecordSheetsFragment extends Fragment {
 
 
     /**
-     * Recupère la liste des relevés de prix sélectionnés
+     * Récupère la liste des relevés de prix sélectionnés
      *
      * @return La liste des relevés sélectionnés
      */

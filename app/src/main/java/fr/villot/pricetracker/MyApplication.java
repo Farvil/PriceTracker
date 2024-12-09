@@ -1,7 +1,6 @@
 package fr.villot.pricetracker;
 
 import android.app.Application;
-import android.content.Context;
 
 import fr.villot.pricetracker.utils.DatabaseHelper;
 

@@ -1,7 +1,6 @@
 package fr.villot.pricetracker.activities;
 
 import android.app.Activity;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -118,7 +117,7 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
 
         if (product != null) {
 
-            // Affochage du barcode
+            // Affichage du barcode
             productBarcodeTextView.setText(product.getBarcode());
 
             // Affichage du nom du produit s'il existe
@@ -202,35 +201,30 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
                     setSelectionMode(true);
 
                     // Modification du titre de la toolbar pour indiquer le nombre d'éléments sélectionnés.
-                    String selectionCount = String.valueOf(numSelectedItems) + " relevé";
+                    String selectionCount = numSelectedItems + " relevé";
 
                     // Mise au pluriel si plusieurs elements sélectionnés
                     if (numSelectedItems > 1)
                         selectionCount += "s";
 
-                    getSupportActionBar().setTitle(selectionCount);
+                    ActionBar actionBar = getSupportActionBar();
+                    if (actionBar != null) {
+                        actionBar.setTitle(selectionCount);
+                    }
                 }
             }
         });
 
 
         //Lancement de l'activité PriceRecordActivity sur click d'un relevé de prix
-        recordSheetAdapter.setOnItemClickListener(new RecordSheetAdapter.OnItemClickListener<RecordSheet>() {
-            @Override
-            public void onItemClick(RecordSheet recordSheet) {
-                Intent intent = new Intent(RecordSheetOnProductActivity.this,  PriceRecordActivity.class);
-                intent.putExtra("record_sheet_name", recordSheet.getName());
-                intent.putExtra("record_sheet_id", recordSheet.getId());
-                priceRecordLauncher.launch(intent);
-            }
+        recordSheetAdapter.setOnItemClickListener(recordSheet -> {
+            Intent intent = new Intent(RecordSheetOnProductActivity.this,  PriceRecordActivity.class);
+            intent.putExtra("record_sheet_name", recordSheet.getName());
+            intent.putExtra("record_sheet_id", recordSheet.getId());
+            priceRecordLauncher.launch(intent);
         });
 
-        productCardView.setOnClickListener(new View.OnClickListener() {
-               @Override
-               public void onClick(View view) {
-                   showUserQueryDialogBox(product);
-               }
-           }
+        productCardView.setOnClickListener(view -> showUserQueryDialogBox(product)
         );
 
     }
@@ -267,17 +261,23 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
 
     public void setSelectionMode(boolean isSelectionModeActive) {
 
-        // Rafraichissement de la toolbar en cas de changement de mode
+        ActionBar actionBar = getSupportActionBar();
+
+        // Rafraîchissement de la toolbar en cas de changement de mode
         if (this.isSelectionModeActive != isSelectionModeActive) {
             this.isSelectionModeActive = isSelectionModeActive;
             if (!isSelectionModeActive) {
-                getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_back);
-                getSupportActionBar().setTitle(R.string.activity_record_sheet_on_product_title);
+                if (actionBar != null) {
+                    actionBar.setHomeAsUpIndicator(R.drawable.ic_back);
+                    actionBar.setTitle(R.string.activity_record_sheet_on_product_title);
+                }
 
             } else {
-                getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_cancel);
+                if (actionBar != null) {
+                    actionBar.setHomeAsUpIndicator(R.drawable.ic_cancel);
+                }
             }
-            invalidateOptionsMenu(); // Rafraichissement du menu de la toolbar
+            invalidateOptionsMenu(); // Rafraîchissement du menu de la toolbar
         }
     }
 
@@ -310,9 +310,9 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
     }
 
 
-    View getProductViewForDialog(Product product, final int layoutResource) {
+    View getProductViewForDialog(Product product) {
         LayoutInflater inflater = LayoutInflater.from(this);
-        View dialogView = inflater.inflate(layoutResource, null);
+        View dialogView = inflater.inflate(R.layout.item_product, null);
 
         // Références des vues dans le layout de la boîte de dialogue
         TextView productBarcodeTextView = dialogView.findViewById(R.id.productBarcodeTextView);
@@ -343,23 +343,20 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
     protected void showUserQueryDialogBox(Product product) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setView(getProductViewForDialog(product, R.layout.item_product));
+        builder.setView(getProductViewForDialog(product));
         builder.setTitle( "Lancer un navigateur ?");
         builder.setMessage("Souhaitez vous visualiser les détails de ce produit sur le site OpenFoodFacts ?");
         builder.setCancelable(false);
 
 
-        builder.setPositiveButton("Oui", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
+        builder.setPositiveButton("Oui", (dialog, which) -> {
 
-                String barcode = product.getBarcode();
-                String url = "https://world.openfoodfacts.org/product/" + barcode;
+            String barcode = product.getBarcode();
+            String url = "https://world.openfoodfacts.org/product/" + barcode;
 
-                // Lancer le navigateur
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                startActivity(intent);
-            }
+            // Lancer le navigateur
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            startActivity(intent);
         });
 
         builder.setNegativeButton("Non", null);
@@ -375,7 +372,7 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
     }
 
     public void updateRecordSheetListViewFromDatabase(boolean lastItemDisplayed) {
-        // Liste des recordsheets accociées au produit
+        // Liste des recordsheets associées au produit
         recordSheetList = databaseHelper.getRecordSheetsOnProduct(barcode);
         setPriceForRecordSheets(recordSheetList);
 

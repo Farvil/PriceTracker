@@ -16,13 +16,14 @@ import fr.villot.pricetracker.model.Product;
 public class ProductAdapter extends RecyclerView.Adapter<ProductViewHolder> {
 
     private List<Product> productList;
-    private Context context;
+    private final Context context;
     private SelectionTracker<Long> selectionTracker;
 
     private ProductAdapter.OnItemClickListener<Product> onItemClickListener;
 
     public Long getPosition(Product product) {
-        return new Long (productList.indexOf(product));
+        int index = productList.indexOf(product);
+        return (long) index;
     }
 
     public interface OnItemClickListener<Product> {
@@ -45,8 +46,9 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductViewHolder> {
     }
 
 
+    @NonNull
     @Override
-    public ProductViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ProductViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.item_product, parent, false);
         return new ProductViewHolder(view);
     }
@@ -56,7 +58,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductViewHolder> {
         Product product = productList.get(position);
         holder.bind(product, selectionTracker.isSelected((long) position));
 
-        // Ajout d'une marge bottom au dernier élément pour eviter la superposition avec le bouton flottant
+        // Ajout d'une marge bottom au dernier élément pour éviter la superposition avec le bouton flottant
         ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) holder.itemView.getLayoutParams();
         if (position == getItemCount() - 1) {
             layoutParams.bottomMargin = context.getResources().getDimensionPixelSize(R.dimen.margin_bottom_last_item);

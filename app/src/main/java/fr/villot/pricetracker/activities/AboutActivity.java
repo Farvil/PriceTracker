@@ -3,6 +3,7 @@ package fr.villot.pricetracker.activities;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,7 +24,7 @@ public class AboutActivity extends AppCompatActivity {
             String versionName = packageInfo.versionName;
             versionNameTextView.setText(getString(R.string.app_version, versionName));
         } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
+            Log.e("AboutActivity", "Erreur de recuperation des infos du package", e);
         }
     }
 }

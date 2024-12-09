@@ -2,6 +2,8 @@ package fr.villot.pricetracker.utils;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -34,17 +36,7 @@ public class OpenFoodFactsAPIManager {
 
                 int responseCode = connection.getResponseCode();
                 if (responseCode == HttpURLConnection.HTTP_OK) {
-                    InputStream inputStream = connection.getInputStream();
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-                    StringBuilder response = new StringBuilder();
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        response.append(line);
-                    }
-                    reader.close();
-
-                    // Parse the JSON response
-                    JSONObject jsonResponse = new JSONObject(response.toString());
+                    JSONObject jsonResponse = getJsonResponse(connection);
                     if (jsonResponse.has("product")) {
                         JSONObject jsonProduct = jsonResponse.getJSONObject("product");
 
@@ -68,6 +60,20 @@ public class OpenFoodFactsAPIManager {
                 listener.onProductDataError("Error retrieving product data: " + e.getMessage());
             }
         }).start();
+    }
+
+    private static @NonNull JSONObject getJsonResponse(HttpURLConnection connection) throws IOException, JSONException {
+        InputStream inputStream = connection.getInputStream();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        StringBuilder response = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            response.append(line);
+        }
+        reader.close();
+
+        // Parse the JSON response
+        return new JSONObject(response.toString());
     }
 
     private static Product parseProductData(String barcode, JSONObject jsonProduct) throws JSONException {

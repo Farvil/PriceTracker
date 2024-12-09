@@ -1,5 +1,7 @@
 package fr.villot.pricetracker.model;
 
+import java.util.Locale;
+
 // Modifiez cette classe en conséquence
 public class PriceStats {
     private final double minPrice;
@@ -17,7 +19,7 @@ public class PriceStats {
     }
 
     public String getMinPriceFormated() {
-        return "Min : " + String.format("%.2f", minPrice) + " €";
+        return "Min : " + String.format(Locale.FRANCE,"%.2f", minPrice) + " €";
     }
 
     public double getMaxPrice() {
@@ -25,7 +27,7 @@ public class PriceStats {
     }
 
     public String getMaxPriceFormated() {
-        return "Max : " + String.format("%.2f", maxPrice) + " €";
+        return "Max : " + String.format(Locale.FRANCE,"%.2f", maxPrice) + " €";
     }
 
     public double getAvgPrice() {
@@ -33,6 +35,6 @@ public class PriceStats {
     }
 
     public String getAvgPriceFormated() {
-        return "Moy : " + String.format("%.2f", avgPrice) + " €";
+        return "Moy : " + String.format(Locale.FRANCE,"%.2f", avgPrice) + " €";
     }
 }

@@ -65,7 +65,7 @@ public class CsvHelper {
         try {
             Writer writer = new OutputStreamWriter(new FileOutputStream(csvFile), StandardCharsets.UTF_8);
 
-            // Ajout du BOM pour l'interpretation des accents par excel
+            // Ajout du BOM pour l'interprétation des accents par excel
             writer.write("\uFEFF");
 
             // En-têtes CSV
@@ -103,7 +103,7 @@ public class CsvHelper {
 
     public void shareCsvFile() {
 
-        // Uri du fichier à partager via le FileProvider defini dans le manifest.
+        // Uri du fichier à partager via le FileProvider défini dans le manifest.
         Uri fileUri = FileProvider.getUriForFile(context, context.getPackageName() + ".provider", csvFile);
 
         // Intent de partage en ajoutant les droits temporaires d'accès au fichier

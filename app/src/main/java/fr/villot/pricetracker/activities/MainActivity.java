@@ -120,7 +120,7 @@ public class MainActivity extends AppCompatActivity implements OnStoreChangedLis
         if (isSelectionModeActive) {
             inflater.inflate(R.menu.toolbar_selection_menu, menu);
 
-            // Icone de partage dans le fragment des Recordsheets
+            // Icône de partage dans le fragment des Recordsheets
             if (currentFragment instanceof RecordSheetsFragment) {
                 MenuItem itemShare = menu.findItem(R.id.action_share);
                 itemShare.setVisible(true);
@@ -128,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements OnStoreChangedLis
                 itemExport.setVisible(true);
             }
 
-            // Icone d'edition pour modifier un magasin ou un relevé de prix
+            // Icône d'édition pour modifier un magasin ou un relevé de prix
             if (showEditIcon) {
                 if (currentFragment instanceof StoresFragment
                         || currentFragment instanceof RecordSheetsFragment) {
@@ -225,7 +225,7 @@ public class MainActivity extends AppCompatActivity implements OnStoreChangedLis
     // Gestion du mode de sélection
     public void setSelectionMode(boolean isSelectionModeActive) {
 
-        // Rafraichissement de la toolbar si nécessaire
+        // Rafraîchissement de la toolbar si nécessaire
         if (this.isSelectionModeActive != isSelectionModeActive) {
             this.isSelectionModeActive = isSelectionModeActive;
             if (!isSelectionModeActive) {
@@ -237,7 +237,7 @@ public class MainActivity extends AppCompatActivity implements OnStoreChangedLis
                 Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
                 getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_cancel);
             }
-            invalidateOptionsMenu(); // Rafraichissement du menu de la toolbar
+            invalidateOptionsMenu(); // Rafraîchissement du menu de la toolbar
         }
     }
 
@@ -307,7 +307,7 @@ public class MainActivity extends AppCompatActivity implements OnStoreChangedLis
         }
         else {
 
-            // Icone d'édition (pour modifier un magasin ou un relevé de prix) si uniquement un seul element sélectionné
+            // Icône d'édition (pour modifier un magasin ou un relevé de prix) si uniquement un seul element sélectionné
             if (numSelectedItems == 1)
                 showEditIcon();
             else

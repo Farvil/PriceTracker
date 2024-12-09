@@ -1,7 +1,6 @@
 package fr.villot.pricetracker.adapters;
 
 import android.view.View;
-import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -13,31 +12,27 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.squareup.picasso.Picasso;
 
+import java.util.Locale;
+
 import fr.villot.pricetracker.R;
 import fr.villot.pricetracker.model.Product;
 
 public class ProductViewHolder extends RecyclerView.ViewHolder {
 
-    private TextView productBarcodeTextView;
-    private CardView productCardView;
-    private TextView productNameTextView;
-    private LinearLayout productBrandZone;
-    private TextView productBrandTextView;
-    private LinearLayout productQuantityZone;
-    private TextView productQuantityTextView;
-    private LinearLayout productOriginZone;
+    private final TextView productBarcodeTextView;
+    private final CardView productCardView;
+    private final TextView productNameTextView;
+    private final LinearLayout productBrandZone;
+    private final TextView productBrandTextView;
+    private final LinearLayout productQuantityZone;
+    private final TextView productQuantityTextView;
+    private final LinearLayout productOriginZone;
 
-    private TextView productOriginTextView;
-    private TextView productPriceTextView;
-    private LinearLayout productPriceZone;
-    private ImageView productImageView;
-    public CheckBox productCheckBox;
-
-    private ImageView productSelectionImage;
-
-    public interface CheckBoxListener {
-        void onCheckBoxClick(int position, boolean isChecked);
-    }
+    private final TextView productOriginTextView;
+    private final TextView productPriceTextView;
+    private final LinearLayout productPriceZone;
+    private final ImageView productImageView;
+    private final ImageView productSelectionImage;
 
     public ProductViewHolder(View itemView) {
         super(itemView);
@@ -99,7 +94,7 @@ public class ProductViewHolder extends RecyclerView.ViewHolder {
         Double price = product.getPrice();
         if (price != null) {
             productPriceZone.setVisibility(View.VISIBLE);
-            productPriceTextView.setText(String.format("%.2f", price));
+            productPriceTextView.setText(String.format(Locale.FRANCE, "%.2f", price));
         }
         else {
             productPriceZone.setVisibility(View.GONE);

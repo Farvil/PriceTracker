@@ -1,8 +1,5 @@
 package fr.villot.pricetracker.model;
 
-import fr.villot.pricetracker.MyApplication;
-import fr.villot.pricetracker.utils.DatabaseHelper;
-
 public class Store {
     private int id;
 
