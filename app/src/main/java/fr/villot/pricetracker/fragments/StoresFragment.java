@@ -209,7 +209,7 @@ public class StoresFragment extends Fragment {
         String title = null;
         switch (storesFragmentDialogType) {
             case DIALOG_TYPE_ADD:
-                title = "Ajouter un nouveau magasin";
+                title = "Ajouter un magasin";
                 break;
             case DIALOG_TYPE_UPDATE:
                 title = "Modifier le magasin";

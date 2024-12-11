@@ -15,12 +15,14 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:textAppearance="?android:textAppearanceMedium"
-            android:text="Enseigne :" />
+            android:text="Enseigne : " />
 
         <Spinner
             android:id="@+id/storeLogoSpinner"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="64dp"
+            android:minWidth="64dp"
+            android:layout_gravity="center_vertical" />
     </LinearLayout>
 
     <EditText
@@ -28,14 +30,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Nom du magasin"
-        android:inputType="text" />
+        android:inputType="text"
+        android:minHeight="48dp"
+        android:maxWidth="488dp" />
 
     <EditText
         android:id="@+id/storeLocationEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Localisation du magain"
-        android:inputType="text" />
-
+        android:inputType="text"
+        android:minHeight="48dp"
+        android:maxWidth="488dp"/>
 
 </LinearLayout>

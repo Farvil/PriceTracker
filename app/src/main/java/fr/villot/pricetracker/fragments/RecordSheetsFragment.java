@@ -217,7 +217,7 @@ public class RecordSheetsFragment extends Fragment {
         String title = null;
         switch (recordSheetsFragmentDialogType) {
             case DIALOG_TYPE_ADD:
-                title = "Créer un nouveau relevé de prix";
+                title = "Créer un relevé de prix";
                 break;
             case DIALOG_TYPE_UPDATE:
                 title = "Modifier le relevé de prix";

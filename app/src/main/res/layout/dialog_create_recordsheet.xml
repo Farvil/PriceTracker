@@ -10,7 +10,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Nom du relevé de prix"
-        android:inputType="text" />
+        android:inputType="text"
+        android:minHeight="48dp"
+        android:maxWidth="488dp"/>
 
     <TextView
         android:id="@+id/selectStoreLabel"
@@ -22,7 +24,9 @@
     <Spinner
         android:id="@+id/storeSpinner"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp" />
+        android:layout_marginTop="16dp"
+        android:layout_height="64dp"
+        android:minWidth="64dp"
+        android:layout_gravity="center_vertical" />
 
 </LinearLayout>

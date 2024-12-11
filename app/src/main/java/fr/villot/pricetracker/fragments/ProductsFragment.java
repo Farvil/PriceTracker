@@ -518,16 +518,15 @@ public class ProductsFragment extends Fragment {
     private void showManualBarcodeInputDialog() {
         // Création boite de dialogue
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
-        builder.setTitle("Saisir un code-barres");
+        View dialogView = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_create_product, null);
+        builder.setView(dialogView);
 
-        // Ajout d'un un champ de texte pour la saisie manuelle
-        final EditText input = new EditText(getActivity());
-        input.setInputType(InputType.TYPE_CLASS_TEXT);
-        builder.setView(input);
+        builder.setTitle("Ajouter un produit");
+        EditText barcodeEditText = dialogView.findViewById(R.id.productBarcodeEditText);
 
         // Configuration des boutons de la boîte de dialogue
         builder.setPositiveButton("Valider", (dialog, which) -> {
-            String barcode = input.getText().toString().trim();
+            String barcode = barcodeEditText.getText().toString().trim();
 
             // Vérification de la validité du code barre et ajout du produit
             if (isValidBarcode(barcode)) {

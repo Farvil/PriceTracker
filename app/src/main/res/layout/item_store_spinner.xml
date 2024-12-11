@@ -14,8 +14,8 @@
 
             <ImageView
                 android:id="@+id/storeImageView"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:scaleType="centerInside"
                 android:src="@android:drawable/ic_menu_help" />
 
@@ -23,7 +23,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingStart="8dp">
+                android:paddingStart="16dp">
 
                 <TextView
                     android:id="@+id/storeNameTextView"

@@ -21,6 +21,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:layout_margin="@dimen/fab_margin"
+        android:contentDescription="Cliquez pour scanner un produit et faites un appui long pour ouvrir le menu contextuel"
         app:srcCompat="@drawable/ic_add_product" />
 
 </RelativeLayout>

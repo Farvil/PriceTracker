@@ -23,6 +23,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:layout_margin="@dimen/fab_margin"
+        android:contentDescription="Cliquez pour ajouter un relevé de prix"
         app:srcCompat="@drawable/ic_add_recordsheet" />
 
 </RelativeLayout>
