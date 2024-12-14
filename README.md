@@ -4,7 +4,7 @@ PriceTracker est une application permettant d'effectuer des relevés de prix dan
 
 L'application est disponible sur le Google Play Store à l'adresse [https://play.google.com/store/apps/details?id=fr.villot.pricetracker](https://play.google.com/store/apps/details?id=fr.villot.pricetracker).
 
-Si vous n'avez pas accès au Play Store de Google, vous pouvez installer le fichier apk disponible sur [la page des releases](https://github.com/Farvil/PriceTracker/releases) en privilégiant la plus récente.
+Si vous n'avez pas accès au Play Store de Google, vous pouvez installer le fichier apk disponible sur [la page de la dernière release](https://github.com/Farvil/PriceTracker/releases/latest).
 
 ## Captures d'écran
 
