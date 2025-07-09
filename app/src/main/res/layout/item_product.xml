@@ -163,14 +163,15 @@
                             android:orientation="horizontal"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content">
+
                             <ImageView
                                 android:id="@+id/productOriginIcon"
-                                android:scaleType="centerInside"
-                                android:layout_height="16dp"
-                                android:layout_width="16dp"
+                                android:layout_width="13dp"
+                                android:layout_height="13dp"
+                                android:layout_gravity="center_vertical"
                                 android:layout_marginLeft="10dp"
                                 android:layout_marginRight="5dp"
-                                android:layout_gravity="center_vertical"
+                                android:scaleType="centerInside"
                                 android:src="@drawable/ic_origin" />
 
                             <TextView

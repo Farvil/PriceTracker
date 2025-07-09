@@ -26,7 +26,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private Context context;
 
     private static final String DATABASE_NAME = "database";
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 4;
 
     // Table des produits
     private static final String TABLE_PRODUCTS = "products";
@@ -35,6 +35,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String KEY_PRODUCT_BRAND = "product_brand";
     private static final String KEY_PRODUCT_QUANTITY = "product_quantity";
     private static final String KEY_PRODUCT_ORIGIN = "product_origin";
+    private static final String KEY_PRODUCT_ORIGIN_VERIFIED = "product_origin_verified"; // NEW
+
     private static final String KEY_PRODUCT_IMAGE_URL = "product_image_url";
 
     // Table des magasins
@@ -88,6 +90,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + KEY_PRODUCT_BRAND + " TEXT,"
                 + KEY_PRODUCT_QUANTITY + " TEXT,"
                 + KEY_PRODUCT_ORIGIN + " TEXT,"
+                + KEY_PRODUCT_ORIGIN_VERIFIED + " INTEGER DEFAULT 0,"
                 + KEY_PRODUCT_IMAGE_URL + " TEXT" + ")";
         db.execSQL(createProductsTableQuery);
 
@@ -131,13 +134,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // Suppression et recréation de la table lors d'une mise à jour de la base de données
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_PRODUCTS);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_STORES);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_RECORD_SHEETS);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_PRICE_RECORDS);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_BRANDS);
-        onCreate(db);
+//        // Suppression et recréation de la table lors d'une mise à jour de la base de données
+//        db.execSQL("DROP TABLE IF EXISTS " + TABLE_PRODUCTS);
+//        db.execSQL("DROP TABLE IF EXISTS " + TABLE_STORES);
+//        db.execSQL("DROP TABLE IF EXISTS " + TABLE_RECORD_SHEETS);
+//        db.execSQL("DROP TABLE IF EXISTS " + TABLE_PRICE_RECORDS);
+//        db.execSQL("DROP TABLE IF EXISTS " + TABLE_BRANDS);
+//        onCreate(db);
+
+        // Ajout de la colonne KEY_PRODUCT_ORIGIN_VERIFIED
+        if (oldVersion < 4) {
+            try {
+                db.execSQL("ALTER TABLE " + TABLE_PRODUCTS + " ADD COLUMN " + KEY_PRODUCT_ORIGIN_VERIFIED + " INTEGER DEFAULT 0");
+            } catch (SQLiteException e) {
+                Log.w("DatabaseHelper", "Colonne déjà existante ou autre : " + e.getMessage());
+            }
+//            oldVersion = 4;
+        }
+
+        // Futures migrations ici : if (oldVersion < 5) { ... }
+
     }
 
     // -1 si update ou le row id sinon
@@ -151,6 +167,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(KEY_PRODUCT_BRAND, product.getBrand());
         values.put(KEY_PRODUCT_QUANTITY, product.getQuantity());
         values.put(KEY_PRODUCT_ORIGIN, product.getOrigin());
+        values.put(KEY_PRODUCT_ORIGIN_VERIFIED, (product.getOriginVerified() != null && product.getOriginVerified()) ? 1 : 0);
         values.put(KEY_PRODUCT_IMAGE_URL, product.getImageUrl());
 
         // Ajoute ou et a jour le produit s'il existe déjà.
@@ -168,6 +185,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(KEY_PRODUCT_BRAND, product.getBrand());
         values.put(KEY_PRODUCT_QUANTITY, product.getQuantity());
         values.put(KEY_PRODUCT_ORIGIN, product.getOrigin());
+        values.put(KEY_PRODUCT_ORIGIN_VERIFIED, (product.getOriginVerified() != null && product.getOriginVerified()) ? 1 : 0);
         values.put(KEY_PRODUCT_IMAGE_URL, product.getImageUrl());
 
         // Clause WHERE pour spécifier quel produit mettre à jour en fonction du code-barres
@@ -250,6 +268,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 product.setBrand(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_BRAND)));
                 product.setQuantity(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_QUANTITY)));
                 product.setOrigin(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_ORIGIN)));
+                int verifiedInt = cursor.getInt(cursor.getColumnIndex(KEY_PRODUCT_ORIGIN_VERIFIED));
+                product.setOriginVerified(verifiedInt == 1);
                 product.setImageUrl(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_IMAGE_URL)));
                 productList.add(product);
             } while (cursor.moveToNext());
@@ -284,6 +304,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 product.setBrand(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_BRAND)));
                 product.setQuantity(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_QUANTITY)));
                 product.setOrigin(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_ORIGIN)));
+                int verifiedInt = cursor.getInt(cursor.getColumnIndex(KEY_PRODUCT_ORIGIN_VERIFIED));
+                product.setOriginVerified(verifiedInt == 1);
                 product.setImageUrl(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_IMAGE_URL)));
                 productList.add(product);
             } while (cursor.moveToNext());
@@ -374,6 +396,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 product.setBrand(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_BRAND)));
                 product.setQuantity(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_QUANTITY)));
                 product.setOrigin(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_ORIGIN)));
+                int verifiedInt = cursor.getInt(cursor.getColumnIndex(KEY_PRODUCT_ORIGIN_VERIFIED));
+                product.setOriginVerified(verifiedInt == 1);
                 product.setImageUrl(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_IMAGE_URL)));
                 product.setPrice(cursor.getDouble(cursor.getColumnIndex(KEY_PRICE_RECORD_PRICE)));
                 products.add(product);
@@ -585,6 +609,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             product.setBrand(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_BRAND)));
             product.setQuantity(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_QUANTITY)));
             product.setOrigin(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_ORIGIN)));
+            int verifiedInt = cursor.getInt(cursor.getColumnIndex(KEY_PRODUCT_ORIGIN_VERIFIED));
+            product.setOriginVerified(verifiedInt == 1);
             product.setImageUrl(cursor.getString(cursor.getColumnIndex(KEY_PRODUCT_IMAGE_URL)));
         }
 

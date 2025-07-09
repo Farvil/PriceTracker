@@ -1,5 +1,6 @@
 package fr.villot.pricetracker.adapters;
 
+import android.graphics.Color;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -52,6 +53,7 @@ public class ProductViewHolder extends RecyclerView.ViewHolder {
         productImageView = itemView.findViewById(R.id.productImageView);
         productSelectionImage = itemView.findViewById(R.id.productSelectionImage);
 
+
     }
 
     public void bind(Product product, boolean isSelected) {
@@ -67,34 +69,47 @@ public class ProductViewHolder extends RecyclerView.ViewHolder {
         // Affichage de la marque du produit si elle existe
         String productBrand = product.getBrand();
         if (productBrand != null && !(productBrand.isEmpty())) {
+            productBrandZone.setVisibility(View.VISIBLE);
             productBrandTextView.setText(product.getBrand());
         }
         else {
             productBrandZone.setVisibility(View.GONE);
+            productBrandTextView.setText(product.getBrand());
         }
 
         // Affichage de la quantité du produit si elle existe
         String productQuantity = product.getQuantity();
         if (productQuantity != null && !(productQuantity.isEmpty())) {
+            productQuantityZone.setVisibility(View.VISIBLE);
             productQuantityTextView.setText(product.getQuantity());
         }
         else {
             productQuantityZone.setVisibility(View.GONE);
+            productQuantityTextView.setText("");
         }
 
         // Affichage de l'origine du produit si elle existe
         String productOrigin = product.getOrigin();
         if (productOrigin != null && !(productOrigin.isEmpty())) {
+            productOriginZone.setVisibility(View.VISIBLE);
             productOriginTextView.setText(product.getOrigin());
+
+            if (product.getOriginVerified() != null && product.getOriginVerified()) {
+                productOriginTextView.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.green_verified));
+           }
+            else {
+                productOriginTextView.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.darker_gray));
+            }
         } else {
             productOriginZone.setVisibility(View.GONE);
+            productOriginTextView.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.darker_gray));
         }
 
         // Gestion de la zone de prix
         Double price = product.getPrice();
         if (price != null) {
             productPriceZone.setVisibility(View.VISIBLE);
-            productPriceTextView.setText(String.format(Locale.FRANCE, "%.2f", price));
+            productPriceTextView.setText(product.getFormattedPrice());
         }
         else {
             productPriceZone.setVisibility(View.GONE);
@@ -104,6 +119,9 @@ public class ProductViewHolder extends RecyclerView.ViewHolder {
         String imageUrl = product.getImageUrl();
         if (imageUrl != null && !(imageUrl.isEmpty())) {
             Picasso.get().load(imageUrl).into(productImageView);
+        }
+        else {
+            productImageView.setImageDrawable(null); // pour éviter l’ancienne image
         }
 
         // Gestion de la selection

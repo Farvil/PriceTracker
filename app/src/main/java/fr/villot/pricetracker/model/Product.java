@@ -1,6 +1,9 @@
 package fr.villot.pricetracker.model;
 
 import java.io.Serializable;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 
 public class Product implements Serializable {
     private String barcode;
@@ -10,6 +13,7 @@ public class Product implements Serializable {
     private String origin;
     private String imageUrl;
     private Double price;
+    private Boolean originVerified;   // null = pas encore vérifié
 
     public Product(String barcode, String name, String brand, String quantity, String origin, String imageUrl) {
         this.barcode = barcode;
@@ -72,5 +76,13 @@ public class Product implements Serializable {
     }
 
     public Double getPrice() { return price; }
+
+    public String getFormattedPrice() {
+        return price == null ? "" : String.format(Locale.FRANCE, "%.2f", price);
+    }
     public void setPrice(Double price) { this.price = price; }
+
+    public Boolean getOriginVerified() { return originVerified; }
+    public void setOriginVerified(Boolean verified) { this.originVerified = verified; }
+
 }

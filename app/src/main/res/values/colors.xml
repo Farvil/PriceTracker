@@ -11,4 +11,7 @@
     <color name="item_product_pressed_background">#FFCFCFCF</color>
     <color name="item_product_normal_background">#FFFFFFFF</color>
     <color name="grey_black">#555555</color>
+    <color name="darker_gray">#AAAAAA</color>
+    <color name="green_verified">#ff669900</color>
+
 </resources>

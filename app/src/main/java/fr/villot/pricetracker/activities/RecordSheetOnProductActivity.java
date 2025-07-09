@@ -2,6 +2,7 @@ package fr.villot.pricetracker.activities;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -20,6 +21,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.selection.Selection;
 import androidx.recyclerview.selection.SelectionTracker;
 import androidx.recyclerview.selection.StableIdKeyProvider;
@@ -147,9 +149,18 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
             // Affichage de l'origine du produit si elle existe
             String productOrigin = product.getOrigin();
             if (productOrigin != null && !(productOrigin.isEmpty())) {
+                productOriginZone.setVisibility(View.VISIBLE);
                 productOriginTextView.setText(product.getOrigin());
+
+                if (product.getOriginVerified() != null && product.getOriginVerified()) {
+                    productOriginTextView.setTextColor(ContextCompat.getColor(this, R.color.green_verified));
+                }
+                else {
+                    productOriginTextView.setTextColor(ContextCompat.getColor(this, R.color.darker_gray));
+                }
             } else {
                 productOriginZone.setVisibility(View.GONE);
+                productOriginTextView.setTextColor(ContextCompat.getColor(this, R.color.darker_gray));
             }
 
             // On masque le prix

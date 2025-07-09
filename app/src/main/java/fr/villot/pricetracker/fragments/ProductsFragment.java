@@ -81,7 +81,8 @@ public class ProductsFragment extends Fragment {
         DIALOG_TYPE_ADD,
         DIALOG_TYPE_UPDATE,
         DIALOG_TYPE_ALREADY_EXIST,
-        DIALOG_TYPE_INFO
+        DIALOG_TYPE_INFO,
+        DIALOG_TYPE_ORIGIN
     }
 
 
@@ -357,7 +358,22 @@ public class ProductsFragment extends Fragment {
     protected void showUserQueryDialogBox(Product product, ProductsFragmentDialogType productsFragmentDialogType) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
-        builder.setView(getProductViewForDialog(product, R.layout.item_product));
+
+        // Contenu de la boite de dialogue.
+        if (productsFragmentDialogType == ProductsFragmentDialogType.DIALOG_TYPE_ORIGIN) {
+            String origin = product.getOrigin();
+
+            TextView originView = new TextView(requireContext());
+            originView.setText(origin);
+            originView.setPadding(72, 48, 72, 48);      // marges internes
+            originView.setTextAppearance(android.R.style.TextAppearance_Medium);
+
+            builder.setView(originView);
+
+        }
+        else {
+            builder.setView(getProductViewForDialog(product, R.layout.item_product));
+        }
 
         String title = null;
         String message = null;
@@ -376,6 +392,9 @@ public class ProductsFragment extends Fragment {
                 title = "Produit déjà existant";
                 message = "Souhaitez-vous effectuer une mise à jour des données de ce produit ?";
                 break;
+            case DIALOG_TYPE_ORIGIN:
+                title = "Validez vous l'origine du produit ?";
+                break;
         }
 
         builder.setTitle(title);
@@ -387,17 +406,17 @@ public class ProductsFragment extends Fragment {
 
             switch (productsFragmentDialogType) {
                 case DIALOG_TYPE_ADD:
-                    // Ajouter le produit à la base de données et à la ListView
+                    // Ajouter le produit à la base de données
                     addOrUpdateProduct(product);
 
                     // Afficher la nouvelle liste avec ce produit en fin de liste.
                     updateProductListViewFromDatabase(true);
                     break;
                 case DIALOG_TYPE_UPDATE:
-                    // Ajouter le produit à la base de données et à la ListView
-                    databaseHelper.updateProduct(product);
+                    // Mettre à jour le produit dans la base de données
+                    updateProduct(product);
 
-                    // Afficher la nouvelle liste avec ce produit en fin de liste.
+                    // Afficher la nouvelle liste sans se remettre en fin de liste.
                     updateProductListViewFromDatabase(false);
                     break;
                 case DIALOG_TYPE_INFO:
@@ -411,12 +430,42 @@ public class ProductsFragment extends Fragment {
                 case DIALOG_TYPE_ALREADY_EXIST:
                     getProductDataFromOpenFoodFacts(product.getBarcode(), true);
                     break;
+                case DIALOG_TYPE_ORIGIN:
+                    // Mettre à jour le champ de l'origine vérifiée dans la base de données
+                    product.setOriginVerified(true);
+                    databaseHelper.updateProduct(product);
+
+                    // Afficher la nouvelle liste
+                    updateProductListViewFromDatabase(false);
+                    break;
 
             }
 
         });
 
-        builder.setNegativeButton("Non", null);
+        builder.setNegativeButton("Non", (dialog, which) -> {
+
+            switch (productsFragmentDialogType) {
+                case DIALOG_TYPE_ADD:
+                    break;
+                case DIALOG_TYPE_UPDATE:
+                    break;
+                case DIALOG_TYPE_INFO:
+                    break;
+                case DIALOG_TYPE_ALREADY_EXIST:
+                    break;
+                case DIALOG_TYPE_ORIGIN:
+                    // Mettre à jour le champ de l'origine vérifiée dans la base de données
+                    product.setOriginVerified(false);
+                    databaseHelper.updateProduct(product);
+
+                    // Afficher la nouvelle liste
+                    updateProductListViewFromDatabase(false);
+                    break;
+
+            }
+
+        });
 
         AlertDialog dialog = builder.create();
         dialog.show();
@@ -426,6 +475,16 @@ public class ProductsFragment extends Fragment {
 
     protected void addOrUpdateProduct(Product product) {
         databaseHelper.addOrUpdateProduct(product);
+
+        // Verification de l'origine du produit
+        showUserQueryDialogBox(product, ProductsFragmentDialogType.DIALOG_TYPE_ORIGIN);
+    }
+
+    protected void updateProduct(Product product) {
+        databaseHelper.updateProduct(product);
+
+        // Verification de l'origine du produit
+        showUserQueryDialogBox(product, ProductsFragmentDialogType.DIALOG_TYPE_ORIGIN);
     }
 
     private void showProgressDialog(String message) {
