@@ -13,6 +13,8 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -355,28 +357,59 @@ public class ProductsFragment extends Fragment {
         return dialogView;
     }
 
+    View getOriginViewForDialog(Product product, final int layoutResource) {
+
+        LayoutInflater inflater = LayoutInflater.from(getActivity());
+        View originDialogView = inflater.inflate(layoutResource, null);
+
+        RadioGroup radioGroup = originDialogView.findViewById(R.id.radioGroupOrigin);
+        RadioButton radioOpenFood = originDialogView.findViewById(R.id.radioOpenFoodOrigin);
+        RadioButton radioManual = originDialogView.findViewById(R.id.radioManualOrigin);
+        EditText editManual = originDialogView.findViewById(R.id.editManualOrigin);
+
+        // Met à jour le texte avec l'origine détectée
+        String origin = product.getOrigin();
+        if (origin != null && !origin.isEmpty()) {
+            radioOpenFood.setText("Origine (OpenFoodFacts) : " + origin);
+        }
+        else {
+//            radioOpenFood.setText("Pas d'origine trouvée (OpenFoodFacts)");
+            radioManual.setChecked(true);
+            radioManual.setText("Saisie manuelle (Pas d'origine renseignée sur OpenFoodFacts)");
+            radioOpenFood.setVisibility(View.GONE);
+            editManual.setVisibility(View.VISIBLE);
+        }
+
+        // Afficher le champ texte si la saisie manuelle est cochée
+        radioGroup.setOnCheckedChangeListener((group, checkedId) -> {
+            if (checkedId == R.id.radioManualOrigin) {
+                editManual.setVisibility(View.VISIBLE);
+            } else {
+                editManual.setVisibility(View.GONE);
+            }
+        });
+
+        return originDialogView;
+    }
+
     protected void showUserQueryDialogBox(Product product, ProductsFragmentDialogType productsFragmentDialogType) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
 
         // Contenu de la boite de dialogue.
+        View dialogView;
         if (productsFragmentDialogType == ProductsFragmentDialogType.DIALOG_TYPE_ORIGIN) {
-            String origin = product.getOrigin();
-
-            TextView originView = new TextView(requireContext());
-            originView.setText(origin);
-            originView.setPadding(72, 48, 72, 48);      // marges internes
-            originView.setTextAppearance(android.R.style.TextAppearance_Medium);
-
-            builder.setView(originView);
-
+            dialogView = getOriginViewForDialog(product, R.layout.dialog_origin_verify);
         }
         else {
-            builder.setView(getProductViewForDialog(product, R.layout.item_product));
+            dialogView = getProductViewForDialog(product, R.layout.item_product);
         }
+        builder.setView(dialogView);
 
         String title = null;
         String message = null;
+        String positiveButtonText = "Oui";
+        String negativeButtonText = "Non";
         switch (productsFragmentDialogType) {
             case DIALOG_TYPE_ADD:
                 title = "Ajouter le produit ?";
@@ -393,7 +426,16 @@ public class ProductsFragment extends Fragment {
                 message = "Souhaitez-vous effectuer une mise à jour des données de ce produit ?";
                 break;
             case DIALOG_TYPE_ORIGIN:
-                title = "Validez vous l'origine du produit ?";
+                title = "Veuillez valider l'origine du produit";
+                positiveButtonText = "Valider";
+                negativeButtonText = "Plus tard";
+
+                builder.setNegativeButton("Vérifier plus tard", (dialog, which) -> {
+                    product.setOriginVerified(false);
+                    databaseHelper.updateProduct(product);
+                    updateProductListViewFromDatabase(false);
+                });
+
                 break;
         }
 
@@ -402,7 +444,7 @@ public class ProductsFragment extends Fragment {
         builder.setCancelable(false);
 
 
-        builder.setPositiveButton("Oui", (dialog, which) -> {
+        builder.setPositiveButton(positiveButtonText, (dialog, which) -> {
 
             switch (productsFragmentDialogType) {
                 case DIALOG_TYPE_ADD:
@@ -431,19 +473,30 @@ public class ProductsFragment extends Fragment {
                     getProductDataFromOpenFoodFacts(product.getBarcode(), true);
                     break;
                 case DIALOG_TYPE_ORIGIN:
-                    // Mettre à jour le champ de l'origine vérifiée dans la base de données
-                    product.setOriginVerified(true);
-                    databaseHelper.updateProduct(product);
+                    String selectedOrigin;
+                    RadioButton radioManual = dialogView.findViewById(R.id.radioManualOrigin);
+                    EditText editManual = dialogView.findViewById(R.id.editManualOrigin);
 
-                    // Afficher la nouvelle liste
-                    updateProductListViewFromDatabase(false);
+                    if (radioManual.isChecked()) {
+                        selectedOrigin = editManual.getText().toString().trim();
+                    } else {
+                        selectedOrigin = product.getOrigin();
+                    }
+
+                    if (selectedOrigin != null && !selectedOrigin.isEmpty()) {
+                        product.setOrigin(selectedOrigin);
+                        product.setOriginVerified(true);
+                        databaseHelper.updateProduct(product);
+                        updateProductListViewFromDatabase(false);
+                    }
+
                     break;
 
             }
 
         });
 
-        builder.setNegativeButton("Non", (dialog, which) -> {
+        builder.setNegativeButton(negativeButtonText, (dialog, which) -> {
 
             switch (productsFragmentDialogType) {
                 case DIALOG_TYPE_ADD:
@@ -455,7 +508,7 @@ public class ProductsFragment extends Fragment {
                 case DIALOG_TYPE_ALREADY_EXIST:
                     break;
                 case DIALOG_TYPE_ORIGIN:
-                    // Mettre à jour le champ de l'origine vérifiée dans la base de données
+                    // Mise à jour du champ de l'origine vérifiée dans la base de données
                     product.setOriginVerified(false);
                     databaseHelper.updateProduct(product);
 

@@ -329,15 +329,48 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
         TextView productBarcodeTextView = dialogView.findViewById(R.id.productBarcodeTextView);
         ImageView productImageView = dialogView.findViewById(R.id.productImageView);
         TextView productNameTextView = dialogView.findViewById(R.id.productNameTextView);
+        LinearLayout productBrandZone = dialogView.findViewById(R.id.productBrandZone);
         TextView productBrandTextView = dialogView.findViewById(R.id.productBrandTextView);
+        LinearLayout productQuantityZone = dialogView.findViewById(R.id.productQuantityZone);
         TextView productQuantityTextView = dialogView.findViewById(R.id.productQuantityTextView);
+        LinearLayout productOriginZone = dialogView.findViewById(R.id.productOriginZone);
+        TextView productOriginTextView = dialogView.findViewById(R.id.productOriginTextView);
         LinearLayout productPriceZone = dialogView.findViewById(R.id.productPriceZone);
 
         // On affiche les détails du produit dans les vues
         productBarcodeTextView.setText(product.getBarcode());
-        productNameTextView.setText(product.getName());
-        productBrandTextView.setText(product.getBrand());
-        productQuantityTextView.setText(product.getQuantity());
+
+        // Affichage du nom du produit s'il existe
+        String productName = product.getName();
+        if (productName != null && !(productName.isEmpty())) {
+            productNameTextView.setText(product.getName());
+        }
+
+        // Affichage de la marque du produit si elle existe
+        String productBrand = product.getBrand();
+        if (productBrand != null && !(productBrand.isEmpty())) {
+            productBrandTextView.setText(product.getBrand());
+        }
+        else {
+            productBrandZone.setVisibility(View.GONE);
+        }
+
+        // Affichage de la quantité du produit si elle existe
+        String productQuantity = product.getQuantity();
+        if (productQuantity != null && !(productQuantity.isEmpty())) {
+            productQuantityTextView.setText(product.getQuantity());
+        }
+        else {
+            productQuantityZone.setVisibility(View.GONE);
+        }
+
+        // Affichage de l'origine du produit si elle existe
+        String productOrigin = product.getOrigin();
+        if (productOrigin != null && !(productOrigin.isEmpty())) {
+            productOriginTextView.setText(product.getOrigin());
+        } else {
+            productOriginZone.setVisibility(View.GONE);
+        }
 
         // On masque le prix
         productPriceZone.setVisibility(View.GONE);
