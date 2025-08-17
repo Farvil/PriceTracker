@@ -191,8 +191,13 @@ public class SelectProductsActivity extends AppCompatActivity {
         MenuInflater inflater = getMenuInflater();
         if (!isSelectionModeActive)
             inflater.inflate(R.menu.menu_select_products_activity, menu);
-        else
+        else {
             inflater.inflate(R.menu.toolbar_selection_menu, menu);
+
+            // Icone de suppression affiché par défaut à ne pas afficher
+            MenuItem itemDelete = menu.findItem(R.id.action_delete);
+            itemDelete.setVisible(false);
+        }
 
         return true;
     }

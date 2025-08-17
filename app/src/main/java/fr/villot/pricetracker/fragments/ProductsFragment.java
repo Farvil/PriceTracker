@@ -1,5 +1,8 @@
 package fr.villot.pricetracker.fragments;
 
+import static fr.villot.pricetracker.fragments.ProductsFragment.ProductsFragmentDialogType.DIALOG_TYPE_ORIGIN;
+import static fr.villot.pricetracker.fragments.StoresFragment.StoresFragmentDialogType.DIALOG_TYPE_UPDATE;
+
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -48,6 +51,7 @@ import fr.villot.pricetracker.activities.RecordSheetOnProductActivity;
 import fr.villot.pricetracker.adapters.MyDetailsLookup;
 import fr.villot.pricetracker.adapters.ProductAdapter;
 import fr.villot.pricetracker.interfaces.OnSelectionChangedListener;
+import fr.villot.pricetracker.model.Store;
 import fr.villot.pricetracker.utils.DatabaseHelper;
 import fr.villot.pricetracker.utils.OpenFoodFactsAPIManager;
 import fr.villot.pricetracker.R;
@@ -76,7 +80,6 @@ public class ProductsFragment extends Fragment {
             productAdapter.getSelectionTracker().setItemsSelected(selectedItems, true);
         }
     }
-
 
     // Type de boite de dialogue
     public enum ProductsFragmentDialogType {
@@ -370,7 +373,7 @@ public class ProductsFragment extends Fragment {
         // Met à jour le texte avec l'origine détectée
         String origin = product.getOrigin();
         if (origin != null && !origin.isEmpty()) {
-            radioOpenFood.setText("Origine (OpenFoodFacts) : " + origin);
+            radioOpenFood.setText(origin);
         }
         else {
 //            radioOpenFood.setText("Pas d'origine trouvée (OpenFoodFacts)");
@@ -529,15 +532,21 @@ public class ProductsFragment extends Fragment {
     protected void addOrUpdateProduct(Product product) {
         databaseHelper.addOrUpdateProduct(product);
 
-        // Verification de l'origine du produit
-        showUserQueryDialogBox(product, ProductsFragmentDialogType.DIALOG_TYPE_ORIGIN);
+        // Si l'origine du produit n'est pas vérifiée alors on demande une vérification
+        if(!product.getOriginVerified()) {
+            // Verification de l'origine du produit
+            showUserQueryDialogBox(product, ProductsFragmentDialogType.DIALOG_TYPE_ORIGIN);
+        }
+
     }
 
     protected void updateProduct(Product product) {
         databaseHelper.updateProduct(product);
 
-        // Verification de l'origine du produit
-        showUserQueryDialogBox(product, ProductsFragmentDialogType.DIALOG_TYPE_ORIGIN);
+        if(!product.getOriginVerified()) {
+            // Verification de l'origine du produit
+            showUserQueryDialogBox(product, ProductsFragmentDialogType.DIALOG_TYPE_ORIGIN);
+        }
     }
 
     private void showProgressDialog(String message) {
@@ -657,6 +666,24 @@ public class ProductsFragment extends Fragment {
 
     private boolean isValidBarcode(String barcode) {
         return barcode.matches("^[0-9]{12,}$");
+    }
+
+    public void editProduct() {
+
+        if (productAdapter != null && productAdapter.getSelectionTracker() != null) {
+            Selection<Long> selection = productAdapter.getSelectionTracker().getSelection();
+
+            // Récupération de l'élément sélectionné
+            Product product = null;
+            for (Long selectedItem : selection) {
+                product = productList.get(selectedItem.intValue());
+                break;
+            }
+
+            showUserQueryDialogBox(product,ProductsFragmentDialogType.DIALOG_TYPE_ORIGIN);
+            clearSelection();
+
+        }
     }
 
 }

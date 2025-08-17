@@ -1,6 +1,7 @@
 package fr.villot.pricetracker.fragments;
 
 import static fr.villot.pricetracker.fragments.ProductsFragment.ProductsFragmentDialogType.DIALOG_TYPE_ALREADY_EXIST;
+import static fr.villot.pricetracker.fragments.ProductsFragment.ProductsFragmentDialogType.DIALOG_TYPE_ORIGIN;
 
 import android.net.Uri;
 import android.os.Bundle;
@@ -69,6 +70,12 @@ public class ProductsOnRecordSheetFragment extends ProductsFragment {
 
     @Override
     protected void handleClickOnProduct(Product product) {
+
+        // Si l'origine du produit n'est pas vérifiée alors on demande une vérification
+        if(!product.getOriginVerified()) {
+            super.showUserQueryDialogBox(product, DIALOG_TYPE_ORIGIN);
+        }
+
         showPriceInputDialogAndUpdateDatabase(product);
     }
 
@@ -84,6 +91,12 @@ public class ProductsOnRecordSheetFragment extends ProductsFragment {
         if (productsFragmentDialogType != DIALOG_TYPE_ALREADY_EXIST)
             super.showUserQueryDialogBox(product, productsFragmentDialogType);
         else {
+            // Si l'origine du produit n'est pas vérifiée alors on demande une vérification
+            if(!product.getOriginVerified()) {
+                super.showUserQueryDialogBox(product, DIALOG_TYPE_ORIGIN);
+            }
+
+            // On demande le prix
             showPriceInputDialogAndUpdateDatabase(product);
         }
 
