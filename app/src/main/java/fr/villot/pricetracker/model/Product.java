@@ -83,6 +83,14 @@ public class Product implements Serializable {
     public void setPrice(Double price) { this.price = price; }
 
     public Boolean getOriginVerified() { return originVerified; }
+
+    public String getFormattedOriginVerified() {
+        String formatedOriginValue = "Non";
+        if (originVerified != null && originVerified) {
+            formatedOriginValue = "Oui";
+        }
+        return formatedOriginValue ;
+    }
     public void setOriginVerified(Boolean verified) { this.originVerified = verified; }
 
 }

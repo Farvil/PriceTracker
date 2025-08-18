@@ -92,7 +92,7 @@ public class CsvHelper {
                             product.getImageUrl(),
                             product.getFormattedPrice(),
                             product.getOrigin(),
-                            product.getOriginVerified()));
+                            product.getFormattedOriginVerified()));
                 }
             }
             writer.close();

@@ -49,6 +49,8 @@ public class PriceRecordActivity extends AppCompatActivity implements OnSelectio
     Toolbar toolbar;
     private boolean isSelectionModeActive = false;
 
+    private boolean readOnlyMode =false;
+
 //    private OnProductDeletedFromRecordSheetListener onProductDeletedFromRecordSheetListener = null;
 
     private final ActivityResultLauncher<Intent> createDocumentLauncher = registerForActivityResult(
@@ -155,13 +157,15 @@ public class PriceRecordActivity extends AppCompatActivity implements OnSelectio
             storeImageView.setImageResource(imageResource);
         }
 
+        // Determine si l'activité est lancée en lecture seule puis lancement du fragment en conséquence
+        readOnlyMode = getIntent().getBooleanExtra("read_only", false);
+
         // Fragment qui gere la liste des produits de la recordsheet
-        ProductsOnRecordSheetFragment productsOnRecordSheetFragment = ProductsOnRecordSheetFragment.newInstance(recordSheetId);
+        ProductsOnRecordSheetFragment productsOnRecordSheetFragment = ProductsOnRecordSheetFragment.newInstance(recordSheetId, readOnlyMode);
         getSupportFragmentManager()
                 .beginTransaction()
                 .add(R.id.fragmentContainer, productsOnRecordSheetFragment)
                 .commit();
-
 
         // Récupération de la référence de l'interface depuis les extras de l'intent
 //        onProductDeletedFromRecordSheetListener = (OnProductDeletedFromRecordSheetListener) getIntent().getSerializableExtra("listener");
@@ -176,6 +180,12 @@ public class PriceRecordActivity extends AppCompatActivity implements OnSelectio
         else
             inflater.inflate(R.menu.toolbar_selection_menu, menu);
 
+        // Mode lecture seule : on cache les actions de modification
+        if (readOnlyMode) {
+            menu.findItem(R.id.action_add_from_database).setVisible(false);
+            menu.findItem(R.id.menu_select_all).setVisible(false);
+            menu.findItem(R.id.action_export).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+        }
 
         return true;
     }
@@ -197,7 +207,6 @@ public class PriceRecordActivity extends AppCompatActivity implements OnSelectio
             return true;
         }
         else if (itemId == R.id.action_delete) {
-            // Obtenez une référence au fragment
             ProductsOnRecordSheetFragment productsOnRecordSheetFragment = (ProductsOnRecordSheetFragment) getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
             if (productsOnRecordSheetFragment != null) {
                 productsOnRecordSheetFragment.deleteSelectedItems();

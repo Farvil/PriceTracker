@@ -2,7 +2,6 @@ package fr.villot.pricetracker.activities;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -29,6 +28,7 @@ import androidx.recyclerview.selection.StorageStrategy;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -61,6 +61,8 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
     TextView productMaxPrice;
     TextView productMoyPrice;
 
+    List<RecordSheet> recordSheetsToExport;
+
     private final ActivityResultLauncher<Intent> priceRecordLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
@@ -76,6 +78,26 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
                 }
             }
     );
+
+    private final ActivityResultLauncher<Intent> createDocumentLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    Intent data = result.getData();
+                    if (data != null) {
+                        Uri uri = data.getData();
+                        if (uri != null) {
+                            if (exportRecordSheets(uri)) {
+                                Snackbar.make(recordSheetRecyclerView, "Le fichier CSV est enregistré.", Snackbar.LENGTH_SHORT).show();
+                            } else {
+                                Snackbar.make(recordSheetRecyclerView, "Erreur d'enregistrement du fichier CSV !", Snackbar.LENGTH_SHORT).show();
+                            }
+
+
+                        }
+                    }
+                }
+            });
 
 
     @Override
@@ -232,6 +254,7 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
             Intent intent = new Intent(RecordSheetOnProductActivity.this,  PriceRecordActivity.class);
             intent.putExtra("record_sheet_name", recordSheet.getName());
             intent.putExtra("record_sheet_id", recordSheet.getId());
+            intent.putExtra("read_only",true);
             priceRecordLauncher.launch(intent);
         });
 
@@ -244,8 +267,10 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-//        inflater.inflate(R.menu.main_menu, menu);
-        if (isSelectionModeActive) {
+        if (!isSelectionModeActive) {
+            inflater.inflate(R.menu.main_menu, menu);
+            menu.findItem(R.id.menu_about).setVisible(false);
+        } else {
             inflater.inflate(R.menu.toolbar_simple_selection_menu, menu);
         }
 
@@ -263,8 +288,14 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
             }
             return true;
         } else if (itemId == R.id.action_share) {
-            shareRecordSheet();
+            shareRecordSheets();
             return true;
+        } else if (itemId == R.id.action_export) {
+            exportRecordSheets();
+            return true;
+        } else if (itemId == R.id.menu_select_all) {
+            selectAllItems();
+           return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -301,7 +332,7 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
     }
 
 
-    public void shareRecordSheet() {
+    public void shareRecordSheets() {
         if (recordSheetAdapter != null && recordSheetAdapter.getSelectionTracker() != null) {
             Selection<Long> selection = recordSheetAdapter.getSelectionTracker().getSelection();
 
@@ -318,6 +349,40 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
                 csvHelper.shareCsvFile();
             }
         }
+    }
+
+    public void exportRecordSheets() {
+        if (recordSheetAdapter != null && recordSheetAdapter.getSelectionTracker() != null) {
+            Selection<Long> selection = recordSheetAdapter.getSelectionTracker().getSelection();
+
+            // Vérifier s'il y a des éléments sélectionnés
+            if (!selection.isEmpty()) {
+                // Création de la liste des recordsheets à partager
+                recordSheetsToExport = new ArrayList<>();
+                for (Long selectedItem : selection) {
+                    recordSheetsToExport.add(0, recordSheetList.get(selectedItem.intValue())); // Ajout en première position pour inverser l'ordre
+                }
+
+                // Demande le nom du fichier à l'utilisateur
+                Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("text/csv");
+                intent.putExtra(Intent.EXTRA_TITLE, "export_releves_de_prix.csv");
+
+                createDocumentLauncher.launch(intent);
+            }
+        }
+    }
+
+    public boolean exportRecordSheets(Uri uri) {
+        if (recordSheetsToExport != null) {
+            // Initialisation du csvHelper
+            CsvHelper csvHelper = new CsvHelper(this, "export_releves_de_prix.csv");
+            csvHelper.fillCsvFileWithRecordSheets(recordSheetsToExport);
+            return csvHelper.writeCsvFileToUri(uri);
+        }
+
+        return false;
     }
 
 
@@ -453,6 +518,16 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
             productMinPrice.setText(priceStats.getMinPriceFormated());
             productMaxPrice.setText(priceStats.getMaxPriceFormated());
             productMoyPrice.setText(priceStats.getAvgPriceFormated());
+        }
+    }
+
+    public void selectAllItems() {
+        if (recordSheetAdapter != null && recordSheetAdapter.getSelectionTracker() != null) {
+            List<Long> selectedItems = new ArrayList<>();
+            for (int i = 0 ; i < recordSheetAdapter.getItemCount() ; i++) {
+                selectedItems.add((long) i);
+            }
+            recordSheetAdapter.getSelectionTracker().setItemsSelected(selectedItems, true);
         }
     }
 

@@ -1,5 +1,6 @@
 package fr.villot.pricetracker.fragments;
 
+import static android.view.View.GONE;
 import static fr.villot.pricetracker.fragments.ProductsFragment.ProductsFragmentDialogType.DIALOG_TYPE_ORIGIN;
 import static fr.villot.pricetracker.fragments.StoresFragment.StoresFragmentDialogType.DIALOG_TYPE_UPDATE;
 
@@ -68,6 +69,9 @@ public class ProductsFragment extends Fragment {
 
     private FloatingActionButton fabAdd;
     private static final String PRODUCT_SELECTION_KEY = "product_selection";
+
+    protected boolean readOnlyMode = false;
+
 
     private OnSelectionChangedListener mOnSelectionChangedListener;
 
@@ -158,49 +162,55 @@ public class ProductsFragment extends Fragment {
         productAdapter = new ProductAdapter(getActivity(), productList);
         productRecyclerView.setAdapter(productAdapter);
 
-        // Gestion de la selection d'items
-        SelectionTracker<Long> selectionTracker = new SelectionTracker.Builder<>(
-                PRODUCT_SELECTION_KEY,
-                productRecyclerView,
-                new StableIdKeyProvider(productRecyclerView),
-                new MyDetailsLookup(productRecyclerView),
-                StorageStrategy.createLongStorage()
-        ).build();
-        productAdapter.setSelectionTracker(selectionTracker);
+        // Selon si on est en lecture seule ou pas
+        if (!readOnlyMode) {
 
-        selectionTracker.addObserver(new SelectionTracker.SelectionObserver<Long>() {
-            @Override
-            public void onSelectionChanged() {
-                super.onSelectionChanged();
+            // Gestion de la selection d'items
+            SelectionTracker<Long> selectionTracker = new SelectionTracker.Builder<>(
+                    PRODUCT_SELECTION_KEY,
+                    productRecyclerView,
+                    new StableIdKeyProvider(productRecyclerView),
+                    new MyDetailsLookup(productRecyclerView),
+                    StorageStrategy.createLongStorage()
+            ).build();
+            productAdapter.setSelectionTracker(selectionTracker);
 
-                int numSelected = selectionTracker.getSelection().size();
+            selectionTracker.addObserver(new SelectionTracker.SelectionObserver<Long>() {
+                @Override
+                public void onSelectionChanged() {
+                    super.onSelectionChanged();
 
-                // On informe l'activité parente (MainActivity ou PriceRecordActivity) du changement de sélection
-                if (mOnSelectionChangedListener != null) {
-                    mOnSelectionChangedListener.onSelectionChanged(getInstance(), numSelected);
+                    int numSelected = selectionTracker.getSelection().size();
+
+                    // On informe l'activité parente (MainActivity ou PriceRecordActivity) du changement de sélection
+                    if (mOnSelectionChangedListener != null) {
+                        mOnSelectionChangedListener.onSelectionChanged(getInstance(), numSelected);
+                    }
+
+                    // On masque l'icône flottant si une selection est en cours.
+                    if (numSelected == 0)
+                        fabAdd.setVisibility(View.VISIBLE);
+                    else
+                        fabAdd.setVisibility(View.INVISIBLE);
                 }
 
-                // On masque l'icône flottant si une selection est en cours.
-                if (numSelected == 0)
-                    fabAdd.setVisibility(View.VISIBLE);
-                else
-                    fabAdd.setVisibility(View.INVISIBLE);
-            }
+            });
 
-        });
+            // Click bouton flottant
+            fabAdd.setOnClickListener(v -> launchScanActivity());
 
-        // Gestion du click sur un produit
-        productAdapter.setOnItemClickListener(this::handleClickOnProduct);
+            // Long Click bouton flottant
+            fabAdd.setOnLongClickListener(view1 -> {
+                showFabAddContextMenu(view1);
+                return true;
+            });
 
-        // Click bouton flottant
-        fabAdd.setOnClickListener(v -> launchScanActivity());
-
-        // Long Click bouton flottant
-        fabAdd.setOnLongClickListener(view1 -> {
-            showFabAddContextMenu(view1);
-            return true;
-        });
-
+            // Gestion du click sur un produit
+            productAdapter.setOnItemClickListener(this::handleClickOnProduct);
+        }
+        else {
+            fabAdd.setVisibility(GONE);
+        }
     }
 
     private void launchScanActivity() {
@@ -328,7 +338,7 @@ public class ProductsFragment extends Fragment {
             productBrandTextView.setText(product.getBrand());
         }
         else {
-            productBrandZone.setVisibility(View.GONE);
+            productBrandZone.setVisibility(GONE);
         }
 
         // Affichage de la quantité du produit si elle existe
@@ -337,7 +347,7 @@ public class ProductsFragment extends Fragment {
             productQuantityTextView.setText(product.getQuantity());
         }
         else {
-            productQuantityZone.setVisibility(View.GONE);
+            productQuantityZone.setVisibility(GONE);
         }
 
         // Affichage de l'origine du produit si elle existe
@@ -345,11 +355,11 @@ public class ProductsFragment extends Fragment {
         if (productOrigin != null && !(productOrigin.isEmpty())) {
             productOriginTextView.setText(product.getOrigin());
         } else {
-            productOriginZone.setVisibility(View.GONE);
+            productOriginZone.setVisibility(GONE);
         }
 
         // Masquage du prix
-        productPriceZone.setVisibility(View.GONE);
+        productPriceZone.setVisibility(GONE);
 
         // Afficher l'image
         String imageUrl = product.getImageUrl();
@@ -379,7 +389,7 @@ public class ProductsFragment extends Fragment {
 //            radioOpenFood.setText("Pas d'origine trouvée (OpenFoodFacts)");
             radioManual.setChecked(true);
             radioManual.setText("Saisie manuelle (Pas d'origine renseignée sur OpenFoodFacts)");
-            radioOpenFood.setVisibility(View.GONE);
+            radioOpenFood.setVisibility(GONE);
             editManual.setVisibility(View.VISIBLE);
         }
 
@@ -388,7 +398,7 @@ public class ProductsFragment extends Fragment {
             if (checkedId == R.id.radioManualOrigin) {
                 editManual.setVisibility(View.VISIBLE);
             } else {
-                editManual.setVisibility(View.GONE);
+                editManual.setVisibility(GONE);
             }
         });
 

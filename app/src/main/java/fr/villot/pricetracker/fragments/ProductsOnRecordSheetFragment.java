@@ -33,12 +33,13 @@ public class ProductsOnRecordSheetFragment extends ProductsFragment {
 
     private CsvHelper csvHelper;
 
-    public static ProductsOnRecordSheetFragment newInstance(int recordSheetId) {
+    public static ProductsOnRecordSheetFragment newInstance(int recordSheetId, boolean readOnly) {
         Log.w("RecordSheetProductsFragment", "newInstance()");
 
         ProductsOnRecordSheetFragment fragment = new ProductsOnRecordSheetFragment();
         Bundle args = new Bundle();
         args.putInt("record_sheet_id", recordSheetId);
+        args.putBoolean("read_only", readOnly);
         fragment.setArguments(args);
         return fragment;
     }
@@ -56,6 +57,7 @@ public class ProductsOnRecordSheetFragment extends ProductsFragment {
         Bundle bundle = getArguments();
         if (bundle != null) {
             recordSheetId = bundle.getInt("record_sheet_id",-1);
+            readOnlyMode = bundle.getBoolean("read_only", false);
         }
         return view;
     }
@@ -212,7 +214,5 @@ public class ProductsOnRecordSheetFragment extends ProductsFragment {
         return csvHelper.writeCsvFileToUri(uri);
 
     }
-
-
 
 }

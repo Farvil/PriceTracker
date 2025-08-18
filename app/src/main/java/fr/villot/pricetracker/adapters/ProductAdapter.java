@@ -56,7 +56,12 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductViewHolder> {
     @Override
     public void onBindViewHolder(ProductViewHolder holder, int position) {
         Product product = productList.get(position);
-        holder.bind(product, selectionTracker.isSelected((long) position));
+        boolean isSelected = false;
+        if (selectionTracker != null) {
+            isSelected = selectionTracker.isSelected((long) position);
+        }
+
+        holder.bind(product,isSelected);
 
         // Ajout d'une marge bottom au dernier élément pour éviter la superposition avec le bouton flottant
         ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) holder.itemView.getLayoutParams();

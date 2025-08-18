@@ -7,4 +7,9 @@
         android:title="Partager"
         android:visible="true"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_export"
+        android:icon="@drawable/ic_export"
+        android:title="Enregistrer sous"
+        app:showAsAction="ifRoom" />
 </menu>
