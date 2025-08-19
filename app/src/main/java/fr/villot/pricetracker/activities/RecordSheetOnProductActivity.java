@@ -432,9 +432,18 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
         // Affichage de l'origine du produit si elle existe
         String productOrigin = product.getOrigin();
         if (productOrigin != null && !(productOrigin.isEmpty())) {
+            productOriginZone.setVisibility(View.VISIBLE);
             productOriginTextView.setText(product.getOrigin());
+
+            if (product.getOriginVerified() != null && product.getOriginVerified()) {
+                productOriginTextView.setTextColor(ContextCompat.getColor(this, R.color.green_verified));
+            }
+            else {
+                productOriginTextView.setTextColor(ContextCompat.getColor(this, R.color.darker_gray));
+            }
         } else {
             productOriginZone.setVisibility(View.GONE);
+            productOriginTextView.setTextColor(ContextCompat.getColor(this, R.color.darker_gray));
         }
 
         // On masque le prix

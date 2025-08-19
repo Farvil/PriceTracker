@@ -13,19 +13,20 @@ public class Product implements Serializable {
     private String origin;
     private String imageUrl;
     private Double price;
-    private Boolean originVerified;   // null = pas encore vérifié
+    private Boolean originVerified;
 
-    public Product(String barcode, String name, String brand, String quantity, String origin, String imageUrl) {
+    public Product(String barcode, String name, String brand, String quantity, String origin, String imageUrl, Boolean originVerified) {
         this.barcode = barcode;
         this.name = name;
         this.brand = brand;
         this.quantity = quantity;
         this.origin = origin;
         this.imageUrl = imageUrl;
+        this.originVerified = originVerified;
     }
 
     public Product() {
-
+        this.originVerified = Boolean.FALSE;
     }
 
     public String getBarcode() {

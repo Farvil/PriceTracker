@@ -27,6 +27,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.PopupMenu;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.selection.Selection;
 import androidx.recyclerview.selection.SelectionTracker;
@@ -353,9 +354,18 @@ public class ProductsFragment extends Fragment {
         // Affichage de l'origine du produit si elle existe
         String productOrigin = product.getOrigin();
         if (productOrigin != null && !(productOrigin.isEmpty())) {
+            productOriginZone.setVisibility(View.VISIBLE);
             productOriginTextView.setText(product.getOrigin());
+
+            if (product.getOriginVerified() != null && product.getOriginVerified()) {
+                productOriginTextView.setTextColor(ContextCompat.getColor(requireContext(), R.color.green_verified));
+            }
+            else {
+                productOriginTextView.setTextColor(ContextCompat.getColor(requireContext(), R.color.darker_gray));
+            }
         } else {
-            productOriginZone.setVisibility(GONE);
+            productOriginZone.setVisibility(View.GONE);
+            productOriginTextView.setTextColor(ContextCompat.getColor(requireContext(), R.color.darker_gray));
         }
 
         // Masquage du prix
@@ -540,10 +550,11 @@ public class ProductsFragment extends Fragment {
 
 
     protected void addOrUpdateProduct(Product product) {
+
         databaseHelper.addOrUpdateProduct(product);
 
         // Si l'origine du produit n'est pas vérifiée alors on demande une vérification
-        if(!product.getOriginVerified()) {
+        if (!product.getOriginVerified()) {
             // Verification de l'origine du produit
             showUserQueryDialogBox(product, ProductsFragmentDialogType.DIALOG_TYPE_ORIGIN);
         }

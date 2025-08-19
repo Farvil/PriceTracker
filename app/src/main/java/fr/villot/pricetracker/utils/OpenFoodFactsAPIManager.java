@@ -83,8 +83,9 @@ public class OpenFoodFactsAPIManager {
         String quantity = jsonProduct.optString("quantity", "");
         String origin = jsonProduct.optString("origins", "");
         String imageUrl = jsonProduct.optString("image_url", "");
+        Boolean originVerified = Boolean.FALSE;
 
         // Create and return the Product object
-        return new Product(barcode, name, brand, quantity, origin, imageUrl);
+        return new Product(barcode, name, brand, quantity, origin, imageUrl, originVerified);
     }
 }
