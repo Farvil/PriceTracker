@@ -1,8 +1,6 @@
 package fr.villot.pricetracker.model;
 
 import java.io.Serializable;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
 public class Product implements Serializable {

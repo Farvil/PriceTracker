@@ -284,7 +284,7 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
             if (isSelectionModeActive) {
                 clearSelection();
             } else {
-                onBackPressed(); // Retour à l'activité principale
+                getOnBackPressedDispatcher().onBackPressed(); // Retour à l'activité principale
             }
             return true;
         } else if (itemId == R.id.action_share) {

@@ -1,6 +1,5 @@
 package fr.villot.pricetracker.adapters;
 
-import android.graphics.Color;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -12,8 +11,6 @@ import androidx.recyclerview.selection.ItemDetailsLookup;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.squareup.picasso.Picasso;
-
-import java.util.Locale;
 
 import fr.villot.pricetracker.R;
 import fr.villot.pricetracker.model.Product;
@@ -139,12 +136,12 @@ public class ProductViewHolder extends RecyclerView.ViewHolder {
         return new ItemDetailsLookup.ItemDetails<Long>() {
             @Override
             public int getPosition() {
-                return getAdapterPosition();
+                return getBindingAdapterPosition();
             }
 
             @Override
             public Long getSelectionKey() {
-                return (long) getAdapterPosition();
+                return (long) getBindingAdapterPosition();
             }
         };
     }

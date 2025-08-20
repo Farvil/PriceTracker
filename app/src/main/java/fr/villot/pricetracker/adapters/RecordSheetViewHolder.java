@@ -79,12 +79,12 @@ public class RecordSheetViewHolder extends RecyclerView.ViewHolder {
         return new ItemDetailsLookup.ItemDetails<Long>() {
             @Override
             public int getPosition() {
-                return getAdapterPosition();
+                return getBindingAdapterPosition();
             }
 
             @Override
             public Long getSelectionKey() {
-                return (long) getAdapterPosition();
+                return (long) getBindingAdapterPosition();
             }
         };
     }

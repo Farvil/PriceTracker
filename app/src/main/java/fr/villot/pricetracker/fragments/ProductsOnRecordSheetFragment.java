@@ -1,6 +1,7 @@
 package fr.villot.pricetracker.fragments;
 
 import static fr.villot.pricetracker.fragments.ProductsFragment.ProductsFragmentDialogType.DIALOG_TYPE_ALREADY_EXIST;
+import static fr.villot.pricetracker.fragments.ProductsFragment.ProductsFragmentDialogType.DIALOG_TYPE_INFO;
 import static fr.villot.pricetracker.fragments.ProductsFragment.ProductsFragmentDialogType.DIALOG_TYPE_ORIGIN;
 
 import android.net.Uri;
@@ -107,7 +108,7 @@ public class ProductsOnRecordSheetFragment extends ProductsFragment {
     private void showPriceInputDialogAndUpdateDatabase(Product product) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
-        View dialogView = getProductViewForDialog(product, R.layout.dialog_price_record);
+        View dialogView = getProductViewForDialog(product, R.layout.dialog_price_record, DIALOG_TYPE_INFO);
         builder.setView(dialogView);
 
         EditText priceEditText = dialogView.findViewById(R.id.priceEditText);

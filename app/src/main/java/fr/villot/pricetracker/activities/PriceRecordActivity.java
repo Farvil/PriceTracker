@@ -14,7 +14,6 @@ import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -40,8 +39,7 @@ import fr.villot.pricetracker.utils.DatabaseHelper;
 
 public class PriceRecordActivity extends AppCompatActivity implements OnSelectionChangedListener {
 
-    private static final int SELECT_PRODUCTS_REQUEST_CODE = 1;
-//    private List<Product> productList;
+    //    private List<Product> productList;
     private int recordSheetId;
     RecordSheet recordSheet;
 
@@ -53,6 +51,9 @@ public class PriceRecordActivity extends AppCompatActivity implements OnSelectio
 
 //    private OnProductDeletedFromRecordSheetListener onProductDeletedFromRecordSheetListener = null;
 
+    /**
+     * Gestion du résultat de la boite de dialogue pour enregistrer sous.
+     */
     private final ActivityResultLauncher<Intent> createDocumentLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
@@ -79,42 +80,44 @@ public class PriceRecordActivity extends AppCompatActivity implements OnSelectio
             });
 
     /**
-     * Callback pour le résultat correspondant aux produits sélectionnés depuis la bibliothèque de produits
+     * Gestion du résultat des produits sélectionnés depuis la bibliothèque de produits
      */
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+    private final ActivityResultLauncher<Intent> selectProductsLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    Intent data = result.getData();
 
-        if (requestCode == SELECT_PRODUCTS_REQUEST_CODE && resultCode == RESULT_OK) {
-            assert data != null;
+                    List<Product> selectedProducts = new ArrayList<>();
 
-            List<Product> selectedProducts = new ArrayList<>();
+                    // On récupère la liste des produits sérialisés
+                    Serializable serializableData = data.getSerializableExtra("selected_products");
+                    if (serializableData instanceof List<?>) {
+                        List<?> rawList = (List<?>) serializableData;
 
-            // On récupère la liste des produits sérialisés
-            Serializable serializableData = data.getSerializableExtra("selected_products");
-            if (serializableData instanceof List<?>) {
-                List<?> rawList = (List<?>) serializableData;
-
-                // On vérifie individuellement que chaque élément soit de type Product
-                for (Object item : rawList) {
-                    if (item instanceof Product) {
-                        selectedProducts.add((Product) item);
+                        // Vérification du type
+                        for (Object item : rawList) {
+                            if (item instanceof Product) {
+                                selectedProducts.add((Product) item);
+                            }
+                        }
                     }
-                }
-            }
 
-            // Ajout ou mise à jour du produit depuis depuis le fragment
-            ProductsOnRecordSheetFragment fragment = (ProductsOnRecordSheetFragment) getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
-            if (fragment != null) {
-                for (Product selectedProduct : selectedProducts) {
-                    fragment.addOrUpdateProduct(selectedProduct);
-                }
-            }
+                    // Ajout ou mise à jour du produit depuis le fragment
+                    ProductsOnRecordSheetFragment fragment =
+                            (ProductsOnRecordSheetFragment) getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
 
-        } else if (requestCode == SELECT_PRODUCTS_REQUEST_CODE && resultCode == RESULT_CANCELED) {
-            Snackbar.make(storeNameTextView, "Aucun produit supplémentaire disponible dans la bibliothèque", Snackbar.LENGTH_SHORT).show();
-        }
-    }
+                    if (fragment != null) {
+                        for (Product selectedProduct : selectedProducts) {
+                            fragment.addOrUpdateProduct(selectedProduct);
+                        }
+                    }
+
+                } else if (result.getResultCode() == RESULT_CANCELED) {
+                    Snackbar.make(storeNameTextView,
+                            "Aucun produit supplémentaire disponible dans la bibliothèque",
+                            Snackbar.LENGTH_SHORT).show();
+                }
+            });
 
 
     @Override
@@ -195,7 +198,7 @@ public class PriceRecordActivity extends AppCompatActivity implements OnSelectio
         int itemId = item.getItemId();
         if (itemId == android.R.id.home) {
             if (!isSelectionModeActive) {
-                onBackPressed(); // Retour à l'activité principale
+                getOnBackPressedDispatcher().onBackPressed(); // Retour à l'activité principale
             }
             else {
                 clearSelection();
@@ -247,9 +250,10 @@ public class PriceRecordActivity extends AppCompatActivity implements OnSelectio
     }
 
     private void addProductsFromDatabase() {
+        // Lancement de l'activité de selection des produits de la bibliothèque
         Intent intent = new Intent(this, SelectProductsActivity.class);
         intent.putExtra("record_sheet_id", recordSheetId);
-        startActivityForResult(intent, SELECT_PRODUCTS_REQUEST_CODE);
+        selectProductsLauncher.launch(intent);
     }
 
     public void setSelectionMode(boolean isSelectionModeActive) {

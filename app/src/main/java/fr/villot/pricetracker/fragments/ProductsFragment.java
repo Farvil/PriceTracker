@@ -1,22 +1,20 @@
 package fr.villot.pricetracker.fragments;
 
 import static android.view.View.GONE;
-import static fr.villot.pricetracker.fragments.ProductsFragment.ProductsFragmentDialogType.DIALOG_TYPE_ORIGIN;
-import static fr.villot.pricetracker.fragments.StoresFragment.StoresFragmentDialogType.DIALOG_TYPE_UPDATE;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.InputType;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -53,7 +51,6 @@ import fr.villot.pricetracker.activities.RecordSheetOnProductActivity;
 import fr.villot.pricetracker.adapters.MyDetailsLookup;
 import fr.villot.pricetracker.adapters.ProductAdapter;
 import fr.villot.pricetracker.interfaces.OnSelectionChangedListener;
-import fr.villot.pricetracker.model.Store;
 import fr.villot.pricetracker.utils.DatabaseHelper;
 import fr.villot.pricetracker.utils.OpenFoodFactsAPIManager;
 import fr.villot.pricetracker.R;
@@ -66,7 +63,7 @@ public class ProductsFragment extends Fragment {
     protected ProductAdapter productAdapter;
     protected List<Product> productList;
 
-    private ProgressDialog progressDialog;
+    private AlertDialog progressDialog;
 
     private FloatingActionButton fabAdd;
     private static final String PRODUCT_SELECTION_KEY = "product_selection";
@@ -272,15 +269,15 @@ public class ProductsFragment extends Fragment {
 
     protected void getProductDataFromOpenFoodFacts(String barcode, boolean productAlreadyExist) {
 
-        showProgressDialog("Merci de patienter...");
+        showProgressDialog();
         OpenFoodFactsAPIManager.getAsyncProductData(barcode, new OpenFoodFactsAPIManager.OnProductDataReceivedListener() {
             @Override
             public void onProductDataReceived(Product product) {
 
-                getActivity().runOnUiThread(() -> {
+                requireActivity().runOnUiThread(() -> {
                     // Handle the received product data
                     if (product != null) {
-                        progressDialog.dismiss();
+                        hideProgressDialog();
                         if (productAlreadyExist)
                             showUserQueryDialogBox(product, ProductsFragmentDialogType.DIALOG_TYPE_UPDATE);
                         else
@@ -294,8 +291,8 @@ public class ProductsFragment extends Fragment {
             public void onProductDataError(String error) {
                 final String finalError = error;
 
-                getActivity().runOnUiThread(() -> {
-                    progressDialog.dismiss();
+                requireActivity().runOnUiThread(() -> {
+                    hideProgressDialog();
 
                     // Handle the received product data
                     if (finalError != null) {
@@ -307,7 +304,7 @@ public class ProductsFragment extends Fragment {
 
     }
 
-    View getProductViewForDialog(Product product, final int layoutResource) {
+    View getProductViewForDialog(Product product, final int layoutResource, ProductsFragmentDialogType productsFragmentDialogType) {
         LayoutInflater inflater = LayoutInflater.from(getActivity());
         View dialogView = inflater.inflate(layoutResource, null);
 
@@ -322,7 +319,6 @@ public class ProductsFragment extends Fragment {
         LinearLayout productOriginZone = dialogView.findViewById(R.id.productOriginZone);
         TextView productOriginTextView = dialogView.findViewById(R.id.productOriginTextView);
         LinearLayout productPriceZone = dialogView.findViewById(R.id.productPriceZone);
-
 
         // Affichage du barcode
         productBarcodeTextView.setText(product.getBarcode());
@@ -377,56 +373,52 @@ public class ProductsFragment extends Fragment {
             Picasso.get().load(imageUrl).into(productImageView);
         }
 
-        return dialogView;
-    }
+        if (productsFragmentDialogType == ProductsFragmentDialogType.DIALOG_TYPE_ORIGIN)
+        {
+            RadioGroup radioGroup = dialogView.findViewById(R.id.radioGroupOrigin);
+            RadioButton radioOpenFood = dialogView.findViewById(R.id.radioOpenFoodOrigin);
+            RadioButton radioManual = dialogView.findViewById(R.id.radioManualOrigin);
+            EditText editManual = dialogView.findViewById(R.id.editManualOrigin);
 
-    View getOriginViewForDialog(Product product, final int layoutResource) {
-
-        LayoutInflater inflater = LayoutInflater.from(getActivity());
-        View originDialogView = inflater.inflate(layoutResource, null);
-
-        RadioGroup radioGroup = originDialogView.findViewById(R.id.radioGroupOrigin);
-        RadioButton radioOpenFood = originDialogView.findViewById(R.id.radioOpenFoodOrigin);
-        RadioButton radioManual = originDialogView.findViewById(R.id.radioManualOrigin);
-        EditText editManual = originDialogView.findViewById(R.id.editManualOrigin);
-
-        // Met à jour le texte avec l'origine détectée
-        String origin = product.getOrigin();
-        if (origin != null && !origin.isEmpty()) {
-            radioOpenFood.setText(origin);
-        }
-        else {
-//            radioOpenFood.setText("Pas d'origine trouvée (OpenFoodFacts)");
-            radioManual.setChecked(true);
-            radioManual.setText("Saisie manuelle (Pas d'origine renseignée sur OpenFoodFacts)");
-            radioOpenFood.setVisibility(GONE);
-            editManual.setVisibility(View.VISIBLE);
-        }
-
-        // Afficher le champ texte si la saisie manuelle est cochée
-        radioGroup.setOnCheckedChangeListener((group, checkedId) -> {
-            if (checkedId == R.id.radioManualOrigin) {
-                editManual.setVisibility(View.VISIBLE);
-            } else {
-                editManual.setVisibility(GONE);
+            // Met à jour le texte avec l'origine détectée
+            String origin = product.getOrigin();
+            if (origin != null && !origin.isEmpty()) {
+                radioOpenFood.setText(origin);
             }
-        });
+            else {
+//                radioOpenFood.setText("Pas d'origine trouvée (OpenFoodFacts)");
+                radioManual.setChecked(true);
+                radioManual.setText(R.string.manual_entry);
+                radioOpenFood.setVisibility(GONE);
+                editManual.setVisibility(View.VISIBLE);
+            }
 
-        return originDialogView;
+            // Afficher le champ texte si la saisie manuelle est cochée
+            radioGroup.setOnCheckedChangeListener((group, checkedId) -> {
+                if (checkedId == R.id.radioManualOrigin) {
+                    editManual.setVisibility(View.VISIBLE);
+                } else {
+                    editManual.setVisibility(GONE);
+                }
+            });
+        }
+
+        return dialogView;
     }
 
     protected void showUserQueryDialogBox(Product product, ProductsFragmentDialogType productsFragmentDialogType) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
 
-        // Contenu de la boite de dialogue.
-        View dialogView;
+        // Contenu de la boite de dialogue avec une difference pour l'origine du produit
+        final int layout;
         if (productsFragmentDialogType == ProductsFragmentDialogType.DIALOG_TYPE_ORIGIN) {
-            dialogView = getOriginViewForDialog(product, R.layout.dialog_origin_verify);
+            layout = R.layout.dialog_origin_verify;
         }
         else {
-            dialogView = getProductViewForDialog(product, R.layout.item_product);
+            layout = R.layout.item_product;
         }
+        View dialogView = getProductViewForDialog(product, layout, productsFragmentDialogType);
         builder.setView(dialogView);
 
         String title = null;
@@ -523,11 +515,8 @@ public class ProductsFragment extends Fragment {
 
             switch (productsFragmentDialogType) {
                 case DIALOG_TYPE_ADD:
-                    break;
                 case DIALOG_TYPE_UPDATE:
-                    break;
                 case DIALOG_TYPE_INFO:
-                    break;
                 case DIALOG_TYPE_ALREADY_EXIST:
                     break;
                 case DIALOG_TYPE_ORIGIN:
@@ -570,11 +559,39 @@ public class ProductsFragment extends Fragment {
         }
     }
 
-    private void showProgressDialog(String message) {
-        progressDialog = new ProgressDialog(getActivity());
-        progressDialog.setMessage(message);
-        progressDialog.setCancelable(false); // Empêche l'utilisateur de fermer la boîte de dialogue en cliquant en dehors
+    private void showProgressDialog() {
+        if (progressDialog == null) {
+            // Layout conteneur
+            LinearLayout layout = new LinearLayout(getActivity());
+            layout.setOrientation(LinearLayout.HORIZONTAL);
+            layout.setPadding(50, 50, 50, 50);
+            layout.setGravity(Gravity.CENTER);
+
+            // Spinner
+            ProgressBar progressBar = new ProgressBar(getActivity());
+            progressBar.setIndeterminate(true);
+            layout.addView(progressBar);
+
+            // Texte
+            TextView message = new TextView(getActivity());
+            message.setText(R.string.waiting_message);
+            message.setTextSize(16);
+            message.setPadding(50, 0, 0, 0); // espace entre spinner et texte
+            layout.addView(message);
+
+            // Création du dialog
+            AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
+            builder.setView(layout);
+            builder.setCancelable(false);
+            progressDialog = builder.create();
+        }
         progressDialog.show();
+    }
+
+    private void hideProgressDialog() {
+        if (progressDialog != null && progressDialog.isShowing()) {
+            progressDialog.dismiss();
+        }
     }
 
     public void clearSelection() {
@@ -642,16 +659,14 @@ public class ProductsFragment extends Fragment {
         popupMenu.getMenuInflater().inflate(R.menu.fab_add_context_menu, popupMenu.getMenu());
 
         popupMenu.setOnMenuItemClickListener(item -> {
-            switch (item.getItemId()) {
-                case R.id.menu_scan_barcode:
-                    launchScanActivity();
-                    return true;
-                case R.id.menu_manual_entry:
-                    showManualBarcodeInputDialog();
-                    return true;
-                default:
-                    return false;
+            if (item.getItemId() == R.id.menu_scan_barcode) {
+                launchScanActivity();
+                return true;
+            } else if (item.getItemId() == R.id.menu_manual_entry) {
+                showManualBarcodeInputDialog();
+                return true;
             }
+            return false;
         });
 
         popupMenu.show();

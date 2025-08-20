@@ -209,7 +209,7 @@ public class SelectProductsActivity extends AppCompatActivity {
 
         if (itemId == android.R.id.home) {
             if (!isSelectionModeActive) {
-                onBackPressed(); // Retour à l'activité parente
+                getOnBackPressedDispatcher().onBackPressed(); // Retour à l'activité principale
             }
             else {
                 selectionTracker.clearSelection();

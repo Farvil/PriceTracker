@@ -5,6 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
+
+    <include
+        layout="@layout/item_product"
+        android:id="@+id/include_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
     <RadioGroup
         android:id="@+id/radioGroupOrigin"
         android:layout_width="match_parent"
