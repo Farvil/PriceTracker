@@ -347,9 +347,9 @@ public class ProductsFragment extends Fragment {
             productQuantityZone.setVisibility(GONE);
         }
 
-        // Affichage de l'origine du produit si elle existe
+        // Affichage de l'origine du produit si elle existe et si ce n'est pas la popup de verification de l'origine
         String productOrigin = product.getOrigin();
-        if (productOrigin != null && !(productOrigin.isEmpty())) {
+        if (productOrigin != null && !(productOrigin.isEmpty()) && productsFragmentDialogType != ProductsFragmentDialogType.DIALOG_TYPE_ORIGIN) {
             productOriginZone.setVisibility(View.VISIBLE);
             productOriginTextView.setText(product.getOrigin());
 
