@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">PriceTracker</string>
+    <string name="app_name">Prix &amp; Origine</string>
     <string name="app_version">Version %1$s</string>
     <string name="choose_store">Selectionner un magasin</string>
     <string name="action_settings">Action</string>
@@ -8,5 +8,5 @@
     <string name="select_products_activity_title">Selectionner des produits</string>
     <string name="code_barres_du_produit">Code-barres du produit</string>
     <string name="manual_entry">Saisie manuelle (Pas d\'origine renseignée sur OpenFoodFacts)</string>
-    <string name="waiting_message">Merci de patienter...</string>
+    <string name="waiting_message">Merci de patienter…</string>
 </resources>
