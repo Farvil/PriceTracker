@@ -1,6 +1,7 @@
 package fr.villot.pricetracker.model;
 
 import java.io.Serializable;
+import java.util.Locale;
 
 public class Product implements Serializable {
     private String barcode;
@@ -10,18 +11,20 @@ public class Product implements Serializable {
     private String origin;
     private String imageUrl;
     private Double price;
+    private Boolean originVerified;
 
-    public Product(String barcode, String name, String brand, String quantity, String origin, String imageUrl) {
+    public Product(String barcode, String name, String brand, String quantity, String origin, String imageUrl, Boolean originVerified) {
         this.barcode = barcode;
         this.name = name;
         this.brand = brand;
         this.quantity = quantity;
         this.origin = origin;
         this.imageUrl = imageUrl;
+        this.originVerified = originVerified;
     }
 
     public Product() {
-
+        this.originVerified = Boolean.FALSE;
     }
 
     public String getBarcode() {
@@ -72,5 +75,21 @@ public class Product implements Serializable {
     }
 
     public Double getPrice() { return price; }
+
+    public String getFormattedPrice() {
+        return price == null ? "" : String.format(Locale.FRANCE, "%.2f", price);
+    }
     public void setPrice(Double price) { this.price = price; }
+
+    public Boolean getOriginVerified() { return originVerified; }
+
+    public String getFormattedOriginVerified() {
+        String formatedOriginValue = "Non";
+        if (originVerified != null && originVerified) {
+            formatedOriginValue = "Oui";
+        }
+        return formatedOriginValue ;
+    }
+    public void setOriginVerified(Boolean verified) { this.originVerified = verified; }
+
 }

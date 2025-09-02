@@ -69,7 +69,7 @@ public class CsvHelper {
             writer.write("\uFEFF");
 
             // En-têtes CSV
-            writer.append("Nom du relevé de prix;Date;Nom du magasin;Localisation du magasin;Code barre;Nom du produit;Marque;Quantité;Image URL;Prix en Euros\n");
+            writer.append("Nom du relevé de prix;Date;Nom du magasin;Localisation du magasin;Code barre;Nom du produit;Marque;Quantité;Image URL;Prix en Euros;Origine de l'ingrédient;Origine vérifiée\n");
 
             for (RecordSheet recordSheet : recordSheetList) {
 
@@ -79,7 +79,8 @@ public class CsvHelper {
 
                 // Remplir le fichier CSV avec les données de chaque produit
                 for (Product product : products) {
-                    writer.append(String.format("%s;%s;%s;%s;%s;%s;%s;%s;%s;%s\n",
+
+                    writer.append(String.format("%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s\n",
                             recordSheet.getName(),
                             recordSheet.getDate(),
                             store.getName(),
@@ -89,7 +90,9 @@ public class CsvHelper {
                             product.getBrand(),
                             product.getQuantity(),
                             product.getImageUrl(),
-                            product.getPrice()));
+                            product.getFormattedPrice(),
+                            product.getOrigin(),
+                            product.getFormattedOriginVerified()));
                 }
             }
             writer.close();

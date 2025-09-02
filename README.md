@@ -1,6 +1,6 @@
-# PriceTracker
+# Prix & Origine
 
-PriceTracker est une application permettant d'effectuer des relevés de prix dans des magasins par un scan de code-barres. Les relevés de prix peuvent être partagés ou exportés au format CSV.
+***Prix & Origine*** est une application permettant d'effectuer des relevés de prix dans des magasins par un scan de code-barres et d'en vérifier l'origine. Les relevés de prix peuvent être partagés ou exportés au format CSV.
 
 L'application est disponible sur le Google Play Store à l'adresse [https://play.google.com/store/apps/details?id=fr.villot.pricetracker](https://play.google.com/store/apps/details?id=fr.villot.pricetracker).
 
@@ -24,6 +24,8 @@ L'onglet ***RELEVES DE PRIX*** permet de visualiser et créer des relevés de pr
 L'écran du ***détail d'un relevé de prix*** permet d'afficher et modifier les prix de produits. Il est possible d'ajouter un produit de la bibliothèque par le menu ou par un scan de code barre. Le scan permet également de créer un nouveau produit si celui-ci n'existe pas. Il est possible de faire un export ou un partage au format CSV depuis cet écran.
 
 Pour visualiser un fichier CSV, vous pouvez utiliser par exemple l'application ***"Microsoft Excel: Spreadsheets"***.
+
+Lorsqu'un produit est créé, il est demandé d'en vérifier ***l'origine*** ou de la saisir manuellement. Une origine vérifiée est affichée en vert dans la vignette du produit. Il est possible d'éditer l'origine d'un produit par un clic long sur le produit et le bouton d'édition.
 
 ## Licence
 

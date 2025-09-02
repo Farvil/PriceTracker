@@ -77,14 +77,19 @@ public class OpenFoodFactsAPIManager {
     }
 
     private static Product parseProductData(String barcode, JSONObject jsonProduct) throws JSONException {
-        // Parse the relevant fields from the JSON data and create a Product object
-        String name = jsonProduct.optString("product_name", "");
+
+        // On essaie d'abord de recupérer la version française du nom si elle existe sinon on prend la version officielle.
+        String name = jsonProduct.optString("product_name_fr", "");
+        if (name.isEmpty()) {
+            name = jsonProduct.optString("product_name", "");
+        }
+
         String brand = jsonProduct.optString("brands", "");
         String quantity = jsonProduct.optString("quantity", "");
         String origin = jsonProduct.optString("origins", "");
         String imageUrl = jsonProduct.optString("image_url", "");
 
         // Create and return the Product object
-        return new Product(barcode, name, brand, quantity, origin, imageUrl);
+        return new Product(barcode, name, brand, quantity, origin, imageUrl, false);
     }
 }

@@ -68,7 +68,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="8dp"
-                android:text="L'onglet PRODUITS permet de visualiser les produits déjà enregistrés et d'en ajouter de nouveaux en scannant un code-barre. Les données sont récupérées depuis le site OpenFoodFacts. Un clic court sur un produit permet de visualiser les relevés de prix associés et de les comparer ainsi que d'accéder directement au site OpenFoodFacts pour plus de détails. Un clic long permet d'entrer dans le mode de sélection pour supprimer des produits."
+                android:text="L'onglet PRODUITS permet de visualiser les produits déjà enregistrés et d'en ajouter de nouveaux en scannant un code-barre. Les données sont récupérées depuis le site OpenFoodFacts. Un clic court sur un produit permet de visualiser les relevés de prix associés et de les comparer ainsi que d'accéder directement au site OpenFoodFacts pour plus de détails. Un clic long permet d'entrer dans le mode de sélection pour supprimer des produits ou modifier une origine."
                 android:textColor="@android:color/black"
                 android:justificationMode="inter_word"
                 android:textSize="18sp" />
@@ -109,6 +109,16 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="8dp"
                 android:text="Pour visualiser un fichier CSV, vous pouvez utiliser par exemple l'applicaion 'Microsoft Excel: Spreadsheets'."
+                android:textColor="@android:color/black"
+                android:justificationMode="inter_word"
+                android:textSize="18sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="8dp"
+                android:text="Lorsqu'un produit est créé, il est demandé d'en vérifier l'origine ou de la saisir manuellement. Une origine vérifiée est affichée en vert dans la vignette du produit. Il est possible d'éditer l'origine d'un produit par un clic long sur le produit et le bouton d'édition."
                 android:textColor="@android:color/black"
                 android:justificationMode="inter_word"
                 android:textSize="18sp" />

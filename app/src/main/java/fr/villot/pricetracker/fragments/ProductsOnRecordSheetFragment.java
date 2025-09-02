@@ -1,6 +1,8 @@
 package fr.villot.pricetracker.fragments;
 
 import static fr.villot.pricetracker.fragments.ProductsFragment.ProductsFragmentDialogType.DIALOG_TYPE_ALREADY_EXIST;
+import static fr.villot.pricetracker.fragments.ProductsFragment.ProductsFragmentDialogType.DIALOG_TYPE_INFO;
+import static fr.villot.pricetracker.fragments.ProductsFragment.ProductsFragmentDialogType.DIALOG_TYPE_ORIGIN;
 
 import android.net.Uri;
 import android.os.Bundle;
@@ -32,12 +34,13 @@ public class ProductsOnRecordSheetFragment extends ProductsFragment {
 
     private CsvHelper csvHelper;
 
-    public static ProductsOnRecordSheetFragment newInstance(int recordSheetId) {
+    public static ProductsOnRecordSheetFragment newInstance(int recordSheetId, boolean readOnly) {
         Log.w("RecordSheetProductsFragment", "newInstance()");
 
         ProductsOnRecordSheetFragment fragment = new ProductsOnRecordSheetFragment();
         Bundle args = new Bundle();
         args.putInt("record_sheet_id", recordSheetId);
+        args.putBoolean("read_only", readOnly);
         fragment.setArguments(args);
         return fragment;
     }
@@ -55,6 +58,7 @@ public class ProductsOnRecordSheetFragment extends ProductsFragment {
         Bundle bundle = getArguments();
         if (bundle != null) {
             recordSheetId = bundle.getInt("record_sheet_id",-1);
+            readOnlyMode = bundle.getBoolean("read_only", false);
         }
         return view;
     }
@@ -69,6 +73,12 @@ public class ProductsOnRecordSheetFragment extends ProductsFragment {
 
     @Override
     protected void handleClickOnProduct(Product product) {
+
+        // Si l'origine du produit n'est pas vérifiée alors on demande une vérification
+        if(!product.getOriginVerified()) {
+            super.showUserQueryDialogBox(product, DIALOG_TYPE_ORIGIN);
+        }
+
         showPriceInputDialogAndUpdateDatabase(product);
     }
 
@@ -84,6 +94,12 @@ public class ProductsOnRecordSheetFragment extends ProductsFragment {
         if (productsFragmentDialogType != DIALOG_TYPE_ALREADY_EXIST)
             super.showUserQueryDialogBox(product, productsFragmentDialogType);
         else {
+            // Si l'origine du produit n'est pas vérifiée alors on demande une vérification
+            if(!product.getOriginVerified()) {
+                super.showUserQueryDialogBox(product, DIALOG_TYPE_ORIGIN);
+            }
+
+            // On demande le prix
             showPriceInputDialogAndUpdateDatabase(product);
         }
 
@@ -92,7 +108,7 @@ public class ProductsOnRecordSheetFragment extends ProductsFragment {
     private void showPriceInputDialogAndUpdateDatabase(Product product) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
-        View dialogView = getProductViewForDialog(product, R.layout.dialog_price_record);
+        View dialogView = getProductViewForDialog(product, R.layout.dialog_price_record, DIALOG_TYPE_INFO);
         builder.setView(dialogView);
 
         EditText priceEditText = dialogView.findViewById(R.id.priceEditText);
@@ -199,7 +215,5 @@ public class ProductsOnRecordSheetFragment extends ProductsFragment {
         return csvHelper.writeCsvFileToUri(uri);
 
     }
-
-
 
 }

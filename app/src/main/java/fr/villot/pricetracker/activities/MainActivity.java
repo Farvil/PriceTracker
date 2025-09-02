@@ -1,5 +1,12 @@
 package fr.villot.pricetracker.activities;
 
+//TODO: Lancer dans un navigateur avec la couleur verte si validée
+//TODO: Possibilité de revalider l'origine d'un produit depuis le relevé de prix
+//TODO: Revoir l'icone d'édition spécifique à l'origine
+//TODO: Ajouter de nouveaux logos de magasins
+//TODO: Améliorer le design de la boite de dialogue de vérification de l'origine
+
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
@@ -130,7 +137,8 @@ public class MainActivity extends AppCompatActivity implements OnStoreChangedLis
 
             // Icône d'édition pour modifier un magasin ou un relevé de prix
             if (showEditIcon) {
-                if (currentFragment instanceof StoresFragment
+                if (currentFragment instanceof ProductsFragment
+                        || currentFragment instanceof StoresFragment
                         || currentFragment instanceof RecordSheetsFragment) {
                     MenuItem itemEdit = menu.findItem(R.id.action_edit);
                     itemEdit.setVisible(true);
@@ -176,8 +184,10 @@ public class MainActivity extends AppCompatActivity implements OnStoreChangedLis
 
             return true;
         } else if (itemId == R.id.action_edit) {
-
-            if (currentFragment instanceof StoresFragment) {
+            if (currentFragment instanceof ProductsFragment) {
+                ProductsFragment productsFragment = (ProductsFragment) currentFragment;
+                productsFragment.editProduct();
+            } else if (currentFragment instanceof StoresFragment) {
                 StoresFragment storesFragment = (StoresFragment) currentFragment;
                 storesFragment.editStore();
             } else if (currentFragment instanceof RecordSheetsFragment) {

@@ -20,6 +20,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.selection.Selection;
 import androidx.recyclerview.selection.SelectionTracker;
 import androidx.recyclerview.selection.StableIdKeyProvider;
@@ -27,6 +28,7 @@ import androidx.recyclerview.selection.StorageStrategy;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -59,6 +61,8 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
     TextView productMaxPrice;
     TextView productMoyPrice;
 
+    List<RecordSheet> recordSheetsToExport;
+
     private final ActivityResultLauncher<Intent> priceRecordLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
@@ -74,6 +78,26 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
                 }
             }
     );
+
+    private final ActivityResultLauncher<Intent> createDocumentLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    Intent data = result.getData();
+                    if (data != null) {
+                        Uri uri = data.getData();
+                        if (uri != null) {
+                            if (exportRecordSheets(uri)) {
+                                Snackbar.make(recordSheetRecyclerView, "Le fichier CSV est enregistré.", Snackbar.LENGTH_SHORT).show();
+                            } else {
+                                Snackbar.make(recordSheetRecyclerView, "Erreur d'enregistrement du fichier CSV !", Snackbar.LENGTH_SHORT).show();
+                            }
+
+
+                        }
+                    }
+                }
+            });
 
 
     @Override
@@ -147,9 +171,18 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
             // Affichage de l'origine du produit si elle existe
             String productOrigin = product.getOrigin();
             if (productOrigin != null && !(productOrigin.isEmpty())) {
+                productOriginZone.setVisibility(View.VISIBLE);
                 productOriginTextView.setText(product.getOrigin());
+
+                if (product.getOriginVerified() != null && product.getOriginVerified()) {
+                    productOriginTextView.setTextColor(ContextCompat.getColor(this, R.color.green_verified));
+                }
+                else {
+                    productOriginTextView.setTextColor(ContextCompat.getColor(this, R.color.darker_gray));
+                }
             } else {
                 productOriginZone.setVisibility(View.GONE);
+                productOriginTextView.setTextColor(ContextCompat.getColor(this, R.color.darker_gray));
             }
 
             // On masque le prix
@@ -221,6 +254,7 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
             Intent intent = new Intent(RecordSheetOnProductActivity.this,  PriceRecordActivity.class);
             intent.putExtra("record_sheet_name", recordSheet.getName());
             intent.putExtra("record_sheet_id", recordSheet.getId());
+            intent.putExtra("read_only",true);
             priceRecordLauncher.launch(intent);
         });
 
@@ -233,8 +267,10 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-//        inflater.inflate(R.menu.main_menu, menu);
-        if (isSelectionModeActive) {
+        if (!isSelectionModeActive) {
+            inflater.inflate(R.menu.main_menu, menu);
+            menu.findItem(R.id.menu_about).setVisible(false);
+        } else {
             inflater.inflate(R.menu.toolbar_simple_selection_menu, menu);
         }
 
@@ -248,12 +284,18 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
             if (isSelectionModeActive) {
                 clearSelection();
             } else {
-                onBackPressed(); // Retour à l'activité principale
+                getOnBackPressedDispatcher().onBackPressed(); // Retour à l'activité principale
             }
             return true;
         } else if (itemId == R.id.action_share) {
-            shareRecordSheet();
+            shareRecordSheets();
             return true;
+        } else if (itemId == R.id.action_export) {
+            exportRecordSheets();
+            return true;
+        } else if (itemId == R.id.menu_select_all) {
+            selectAllItems();
+           return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -290,7 +332,7 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
     }
 
 
-    public void shareRecordSheet() {
+    public void shareRecordSheets() {
         if (recordSheetAdapter != null && recordSheetAdapter.getSelectionTracker() != null) {
             Selection<Long> selection = recordSheetAdapter.getSelectionTracker().getSelection();
 
@@ -309,6 +351,40 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
         }
     }
 
+    public void exportRecordSheets() {
+        if (recordSheetAdapter != null && recordSheetAdapter.getSelectionTracker() != null) {
+            Selection<Long> selection = recordSheetAdapter.getSelectionTracker().getSelection();
+
+            // Vérifier s'il y a des éléments sélectionnés
+            if (!selection.isEmpty()) {
+                // Création de la liste des recordsheets à partager
+                recordSheetsToExport = new ArrayList<>();
+                for (Long selectedItem : selection) {
+                    recordSheetsToExport.add(0, recordSheetList.get(selectedItem.intValue())); // Ajout en première position pour inverser l'ordre
+                }
+
+                // Demande le nom du fichier à l'utilisateur
+                Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("text/csv");
+                intent.putExtra(Intent.EXTRA_TITLE, "export_releves_de_prix.csv");
+
+                createDocumentLauncher.launch(intent);
+            }
+        }
+    }
+
+    public boolean exportRecordSheets(Uri uri) {
+        if (recordSheetsToExport != null) {
+            // Initialisation du csvHelper
+            CsvHelper csvHelper = new CsvHelper(this, "export_releves_de_prix.csv");
+            csvHelper.fillCsvFileWithRecordSheets(recordSheetsToExport);
+            return csvHelper.writeCsvFileToUri(uri);
+        }
+
+        return false;
+    }
+
 
     View getProductViewForDialog(Product product) {
         LayoutInflater inflater = LayoutInflater.from(this);
@@ -318,15 +394,57 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
         TextView productBarcodeTextView = dialogView.findViewById(R.id.productBarcodeTextView);
         ImageView productImageView = dialogView.findViewById(R.id.productImageView);
         TextView productNameTextView = dialogView.findViewById(R.id.productNameTextView);
+        LinearLayout productBrandZone = dialogView.findViewById(R.id.productBrandZone);
         TextView productBrandTextView = dialogView.findViewById(R.id.productBrandTextView);
+        LinearLayout productQuantityZone = dialogView.findViewById(R.id.productQuantityZone);
         TextView productQuantityTextView = dialogView.findViewById(R.id.productQuantityTextView);
+        LinearLayout productOriginZone = dialogView.findViewById(R.id.productOriginZone);
+        TextView productOriginTextView = dialogView.findViewById(R.id.productOriginTextView);
         LinearLayout productPriceZone = dialogView.findViewById(R.id.productPriceZone);
 
         // On affiche les détails du produit dans les vues
         productBarcodeTextView.setText(product.getBarcode());
-        productNameTextView.setText(product.getName());
-        productBrandTextView.setText(product.getBrand());
-        productQuantityTextView.setText(product.getQuantity());
+
+        // Affichage du nom du produit s'il existe
+        String productName = product.getName();
+        if (productName != null && !(productName.isEmpty())) {
+            productNameTextView.setText(product.getName());
+        }
+
+        // Affichage de la marque du produit si elle existe
+        String productBrand = product.getBrand();
+        if (productBrand != null && !(productBrand.isEmpty())) {
+            productBrandTextView.setText(product.getBrand());
+        }
+        else {
+            productBrandZone.setVisibility(View.GONE);
+        }
+
+        // Affichage de la quantité du produit si elle existe
+        String productQuantity = product.getQuantity();
+        if (productQuantity != null && !(productQuantity.isEmpty())) {
+            productQuantityTextView.setText(product.getQuantity());
+        }
+        else {
+            productQuantityZone.setVisibility(View.GONE);
+        }
+
+        // Affichage de l'origine du produit si elle existe
+        String productOrigin = product.getOrigin();
+        if (productOrigin != null && !(productOrigin.isEmpty())) {
+            productOriginZone.setVisibility(View.VISIBLE);
+            productOriginTextView.setText(product.getOrigin());
+
+            if (product.getOriginVerified() != null && product.getOriginVerified()) {
+                productOriginTextView.setTextColor(ContextCompat.getColor(this, R.color.green_verified));
+            }
+            else {
+                productOriginTextView.setTextColor(ContextCompat.getColor(this, R.color.darker_gray));
+            }
+        } else {
+            productOriginZone.setVisibility(View.GONE);
+            productOriginTextView.setTextColor(ContextCompat.getColor(this, R.color.darker_gray));
+        }
 
         // On masque le prix
         productPriceZone.setVisibility(View.GONE);
@@ -409,6 +527,16 @@ public class RecordSheetOnProductActivity extends AppCompatActivity implements O
             productMinPrice.setText(priceStats.getMinPriceFormated());
             productMaxPrice.setText(priceStats.getMaxPriceFormated());
             productMoyPrice.setText(priceStats.getAvgPriceFormated());
+        }
+    }
+
+    public void selectAllItems() {
+        if (recordSheetAdapter != null && recordSheetAdapter.getSelectionTracker() != null) {
+            List<Long> selectedItems = new ArrayList<>();
+            for (int i = 0 ; i < recordSheetAdapter.getItemCount() ; i++) {
+                selectedItems.add((long) i);
+            }
+            recordSheetAdapter.getSelectionTracker().setItemsSelected(selectedItems, true);
         }
     }
 
