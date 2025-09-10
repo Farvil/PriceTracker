@@ -26,7 +26,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private Context context;
 
     private static final String DATABASE_NAME = "database";
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 5;
 
     // Table des produits
     private static final String TABLE_PRODUCTS = "products";
@@ -142,7 +142,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 //        db.execSQL("DROP TABLE IF EXISTS " + TABLE_BRANDS);
 //        onCreate(db);
 
-        // Ajout de la colonne KEY_PRODUCT_ORIGIN_VERIFIED
+        // Version 4 : Ajout de la colonne KEY_PRODUCT_ORIGIN_VERIFIED
         if (oldVersion < 4) {
             try {
                 db.execSQL("ALTER TABLE " + TABLE_PRODUCTS + " ADD COLUMN " + KEY_PRODUCT_ORIGIN_VERIFIED + " INTEGER DEFAULT 0");
@@ -152,7 +152,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 //            oldVersion = 4;
         }
 
-        // Futures migrations ici : if (oldVersion < 5) { ... }
+        // Version 5 : Ajout de la marque franprix
+        if (oldVersion < 5) {
+            db.execSQL("DELETE FROM " + TABLE_BRANDS);
+            insertBrands(db);
+        }
 
     }
 
@@ -706,6 +710,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // Marque Dia
         values.clear();
         values.put(BRAND_NAME, "dia");
+        db.insert(TABLE_BRANDS, null, values);
+
+        // Marque franprix
+        values.clear();
+        values.put(BRAND_NAME, "franprix");
         db.insert(TABLE_BRANDS, null, values);
 
         // Marque G20
