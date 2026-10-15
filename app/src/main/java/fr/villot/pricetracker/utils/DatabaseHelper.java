@@ -26,7 +26,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private Context context;
 
     private static final String DATABASE_NAME = "database";
-    private static final int DATABASE_VERSION = 5;
+    private static final int DATABASE_VERSION = 6;
 
     // Table des produits
     private static final String TABLE_PRODUCTS = "products";
@@ -152,8 +152,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 //            oldVersion = 4;
         }
 
-        // Version 5 : Ajout de la marque franprix
-        if (oldVersion < 5) {
+        // Version 5 et 6 : Ajout des marques franprix et monoprix
+        if (oldVersion < 6) {
             db.execSQL("DELETE FROM " + TABLE_BRANDS);
             insertBrands(db);
         }
@@ -735,6 +735,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // Marque Lidl
         values.clear();
         values.put(BRAND_NAME, "lidl");
+        db.insert(TABLE_BRANDS, null, values);
+
+        // Marque Monoprix
+        values.clear();
+        values.put(BRAND_NAME, "monoprix");
         db.insert(TABLE_BRANDS, null, values);
 
         // Marque Mousquetaires
